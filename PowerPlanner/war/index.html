@@ -1,51 +1,122 @@
-<!Doctype HTML>
-<html>
-	<head>
-		<title>Power Planner</title>
-		<link rel = "stylesheet" type = "text/css" href = "Styles/main.css">
-		<script src = "https://maps.googleapis.com/maps/api/js"></script>
-		<script>
-			function initialize() {
-				var mapCanvas = document.getElementById('rightHalf');
-				var mapOptions = {
-					center: new google.maps.LatLng(48.4647, -123.3085),
-					zoom: 15,
-					mapTypeId: google.maps.MapTypeId.ROADMAP
-				}
-				var map = new google.maps.Map(mapCanvas, mapOptions);	
-			}
-			google.maps.event.addDomListener(window, 'load', initialize);
-		</script>
-	</head>
-	
-	<body>
-		<div id = "wrap">
-			<div id = "leftHalf">
-				<div class = "resourceBox">
-					<h2>Wind</h2>
-					<label><input type="checkbox">Show</label><br>
-				</div>
+<!DOCTYPE html>
+<html class="ui-mobile">
 
-				<div class = "resourceBox">
-					<h2>Sunlight</h2>
-					<label><input type="checkbox">Show</label><br>
-				</div>
+<head>
+<title>Power Planner</title>
+<meta name="viewport"
+	content="width=device-width, height=device-height, initial-scale=1">
+<script src="Scripts/jquery-1.11.1.min.js"></script>
 
-				<div class = "resourceBox">
-					<h2>Streams</h2>
-					<label><input type="checkbox">Show</label><br>
-				</div>
-				<label><input type="checkbox">Properties for Sale</label>
-				<br>
-				<div class = "twoButtons">
-					<button type="button">Normal</button>
-					<button type="button">Heat Map</button>
-				</div>
-			</div>
-			<div id = "rightHalf">
-				
+<script type="text/javascript" src="Scripts/main.js"></script>
+<script src="Scripts/jquery.mobile-1.4.2.min.js"></script>
+<link rel="stylesheet" type="text/css"
+	href="Styles/jquery.mobile.theme-1.4.2.min.css" />
+<link rel="stylesheet" type="text/css"
+	href="Styles/jquery.mobile-1.4.2.min.css" />
+<link rel="stylesheet" type="text/css" href="Styles/main.css">
 
+
+<script src="https://maps.googleapis.com/maps/api/js"></script>
+<script>
+            function initialize() {
+                var mapCanvas = document.getElementById('rightHalf');
+                var mapOptions = {
+                    center: new google.maps.LatLng(48.4647, -123.3085),
+                    zoom: 15,
+                    mapTypeId: google.maps.MapTypeId.ROADMAP
+                }
+                var map = new google.maps.Map(mapCanvas, mapOptions);   
+            }
+            google.maps.event.addDomListener(window, 'load', initialize);
+        </script>
+</head>
+
+<body>
+	<!-- Start of first page -->
+	<div data-role="page" id="home">
+		<div data-role="panel" data-position="left" data-display="overlay"
+			id="menu">
+			<h2>Menu h2</h2>
+			<h3>Menu h3</h3>
+		</div>
+		<div data-role="panel" data-position="right" data-display="overlay"
+			id="menu2">
+			<h2>Menu2 h2</h2>
+			<h3>Menu h3</h3>
+		</div>
+		<div data-role="header" data-theme="a">
+			<a href="#menu"
+				class="jqm-navmenu-link ui-nodisc-icon ui-alt-icon ui-btn-left ui-btn ui-icon-bars ui-btn-icon-notext ui-corner-all"
+				data-icon="bars" data-theme="a">About</a>
+
+			<h1>Power Planner</h1>
+			<a href="#menu2"
+				class="jqm-navmenu-link ui-nodisc-icon ui-alt-icon ui-btn-right ui-btn ui-icon-gear ui-btn-icon-notext ui-corner-all"
+				data-icon="gear" data-theme="a">About</a>
+		</div>
+		<!-- /header -->
+		<div role="main" class="ui-content">
+			<div id="wrap">
+				<div id="leftHalf">
+					<div class="resourceBox">
+						<h2>Wind</h2>
+						<form class="showCheckbox">
+							<input type="checkbox" name="showCheckboxWind"
+								id="showCheckboxWind" data-mini="true"> <label
+								for="showCheckboxWind">Show</label>
+						</form>
+					</div>
+
+					<div class="resourceBox">
+						<h2>Sunlight</h2>
+						<form class="showCheckbox">
+							<input type="checkbox" name="showCheckboxSun"
+								id="showCheckboxSun" data-mini="true"> <label
+								for="showCheckboxSun">Show</label>
+						</form>
+					</div>
+
+					<div class="resourceBox">
+						<h2>Streams</h2>
+						<form class="showCheckbox">
+							<input type="checkbox" name="showCheckboxStream"
+								id="showCheckboxStream" data-mini="true"> <label
+								for="showCheckboxStream">Show</label>
+						</form>
+					</div>
+					<label><input type="checkbox">Properties for Sale</label>
+					<div class="twoButtons">
+						<button class="ui-btn ui-mini">Normal</button>
+						<button class="ui-btn ui-mini">Heat Map</button>
+					</div>
+				</div>
+				<div id="midHalf">
+					<a href="" data-ajax="false"
+						class="ui-btn ui-btn-icon-right ui-icon-carat-r expandOptions"></a>
+				</div>
+				<div id="rightHalf"></div>
 			</div>
 		</div>
-	</body>
+		<!-- /content -->
+	</div>
+	<!-- /page -->
+
+	<!-- Start of second page -->
+	<div data-role="page" id="about">
+
+		<div data-role="header" data-theme="a">
+			<h1>SECOND PAGE</h1>
+		</div>
+		<!-- /header -->
+
+		<div role="main" class="ui-content">
+			<div class="container">
+				<div class="about"></div>
+			</div>
+		</div>
+		<!-- /content -->
+		<div data-role="footer" data-position="fixed" data-theme="b"></div>
+	</div>
+	<!-- /page -->
+</body>
 </html>
