@@ -9,14 +9,17 @@ $(document).ready(
 				$(".settingsWidgets").toggleClass('hide-description');
 				$(".expandSettingButton").toggleClass('ui-icon-arrow-r');
 			});
+			resizeDiv();
 
-			$(".expandOptions").height(
-					$(document).height() - $(".ui-header").outerHeight(true)
-							- $(".ui-footer").outerHeight(true)
-							- $(".ui-content").outerHeight(true));
-			$("#googleMap").height(
-					$(window).height() - $(".ui-header").outerHeight(true)
-							- $(".ui-footer").outerHeight(true)
-							- $(".ui-content").outerHeight(true));
+});
 
-		});
+window.onresize = function(event) {
+	resizeDiv();
+}
+
+function resizeDiv() {
+	//HACK: ui-header height not available during startup. $(".ui-header").outerHeight();
+	vph = $(window).height() - 80; // 80px is ui-header and margins
+	$(".gMap").css({'height': vph + 'px'});
+	$(".expandSettingButton").css({'height': vph + 'px'});
+}
