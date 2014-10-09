@@ -18,17 +18,17 @@
 
 <script src="https://maps.googleapis.com/maps/api/js"></script>
 <script>
-            function initialize() {
-                var mapCanvas = document.getElementById('rightHalf');
-                var mapOptions = {
-                    center: new google.maps.LatLng(48.4647, -123.3085),
-                    zoom: 15,
-                    mapTypeId: google.maps.MapTypeId.ROADMAP
-                }
-                var map = new google.maps.Map(mapCanvas, mapOptions);   
-            }
-            google.maps.event.addDomListener(window, 'load', initialize);
-        </script>
+	function initialize() {
+		var mapCanvas = document.getElementById('googleMap');
+		var mapOptions = {
+			center : new google.maps.LatLng(48.4647, -123.3085),
+			zoom : 15,
+			mapTypeId : google.maps.MapTypeId.ROADMAP
+		}
+		var map = new google.maps.Map(mapCanvas, mapOptions);
+	}
+	google.maps.event.addDomListener(window, 'load', initialize);
+</script>
 </head>
 
 <body>
@@ -36,8 +36,7 @@
 	<div data-role="page" id="home">
 		<div data-role="panel" data-position="left" data-display="overlay"
 			id="menu">
-			<h2>Menu h2</h2>
-			<h3>Menu h3</h3>
+			<h1>MENU PAGE</h1>
 		</div>
 		<div data-role="panel" data-position="right" data-display="overlay"
 			id="menu2">
@@ -56,8 +55,8 @@
 		</div>
 		<!-- /header -->
 		<div role="main" class="ui-content">
-			<div id="wrap">
-				<div id="leftHalf">
+			<div class="ui-grid-a">
+				<div class="ui-block-a settingsWidgets">
 					<div class="resourceBox">
 						<h2>Wind</h2>
 						<form class="showCheckbox">
@@ -84,18 +83,23 @@
 								for="showCheckboxStream">Show</label>
 						</form>
 					</div>
-					<label><input type="checkbox">Properties for Sale</label>
-					<div class="twoButtons">
-						<button class="ui-btn ui-mini">Normal</button>
-						<button class="ui-btn ui-mini">Heat Map</button>
+					<div class="propertyButton">
+						<label><input type="checkbox">Properties for Sale</label>
 					</div>
+					<div class="mapSettings">
+						<button class="ui-btn ui-mini mapSelect">Normal</button>
+						<button class="ui-btn ui-mini mapSelect">Heat Map</button>
+					</div>
+
 				</div>
-				<div id="midHalf">
-					<a href="" data-ajax="false"
-						class="ui-btn ui-btn-icon-right ui-icon-carat-r expandOptions"></a>
+				<div
+					class="ui-block-b ui-btn ui-icon-arrow-l ui-btn-icon-left expandSettingButton">
+					<div class="expandOptions"></div>
 				</div>
-				<div id="rightHalf"></div>
+				<div class="ui-block-c gMap" id="googleMap"></div>
 			</div>
+			<!-- /grid-a -->
+			<div></div>
 		</div>
 		<!-- /content -->
 	</div>
