@@ -15,20 +15,9 @@
 	href="Styles/jquery.mobile-1.4.2.min.css" />
 <link rel="stylesheet" type="text/css" href="Styles/main.css">
 
+<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>
+<script src="Scripts/heatmap.js"></script>
 
-<script src="https://maps.googleapis.com/maps/api/js"></script>
-<script>
-            function initialize() {
-                var mapCanvas = document.getElementById('rightHalf');
-                var mapOptions = {
-                    center: new google.maps.LatLng(48.4647, -123.3085),
-                    zoom: 15,
-                    mapTypeId: google.maps.MapTypeId.ROADMAP
-                }
-                var map = new google.maps.Map(mapCanvas, mapOptions);   
-            }
-            google.maps.event.addDomListener(window, 'load', initialize);
-        </script>
 </head>
 
 <body>
