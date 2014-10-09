@@ -30,19 +30,10 @@ public class WindCalc {
 			
 		}
 		
-		// May change
-		double density = 0.0;
-		if(height == 5)
-			density = 1.226;
-		else if(height == 10)
-			density = 1.225;
-		else
-			density = 1.224;
-		
 		DataTuple[] temp = new DataTuple[windspeed.length];
 		
 		for(int i = 0; i < windspeed.length; i++) {
-			temp[i] = new DataTuple(windspeed[i].getLat(),windspeed[i].getLon(),(0.5*Math.pow(windspeed[i].getData(),3)*efficiency*area*density));
+			temp[i] = new DataTuple(windspeed[i].getLat(),windspeed[i].getLon(),(windspeed[i].getData()*efficiency*area));
 		}
 		
 		return temp;
@@ -55,10 +46,10 @@ public class WindCalc {
 	
 	private  DataTuple[] forTesting(double topleftlat, double topleftlon, double btmrightlat, double btmrightlon) {
 		DataTuple[] temp = new DataTuple[4];
-		temp[0] = new DataTuple(topleftlat,topleftlon,1.0);
-		temp[1] = new DataTuple(topleftlat,btmrightlon,1.0);
-		temp[2] = new DataTuple(btmrightlat,topleftlon,1.0);
-		temp[3] = new DataTuple(btmrightlat,btmrightlon,1.0);
+		temp[0] = new DataTuple(topleftlat,topleftlon,0.5*Math.pow(1.0, 3)*1.24);
+		temp[1] = new DataTuple(topleftlat,btmrightlon,0.5*Math.pow(1.0, 3)*1.24);
+		temp[2] = new DataTuple(btmrightlat,topleftlon,0.5*Math.pow(1.0, 3)*1.24);
+		temp[3] = new DataTuple(btmrightlat,btmrightlon,0.5*Math.pow(1.0, 3)*1.24);
 		return temp;
 	}
 

@@ -1,13 +1,9 @@
 package main.powercalc;
 
 public class HydroCalc {
-	private double density;
-	private double gravity;
 	private DataTuple[] waterflow;
 	
 	public HydroCalc() {
-		this.density = 1000;
-		this.gravity = 9.81;
 		this.waterflow = null;
 	}
 	
@@ -33,7 +29,7 @@ public class HydroCalc {
 		DataTuple[] temp = new DataTuple[waterflow.length];
 		
 		for(int i = 0; i < waterflow.length; i++) {
-			temp[i] = new DataTuple(waterflow[i].getLat(),waterflow[i].getLon(),(waterflow[i].getData()*efficiency*heightdiff*density*gravity));
+			temp[i] = new DataTuple(waterflow[i].getLat(),waterflow[i].getLon(),(waterflow[i].getData()*efficiency*heightdiff));
 		}
 		
 		return temp;
@@ -46,10 +42,10 @@ public class HydroCalc {
 
 	private  DataTuple[] forTesting(double topleftlat, double topleftlon, double btmrightlat, double btmrightlon) {
 		DataTuple[] temp = new DataTuple[4];
-		temp[0] = new DataTuple(topleftlat,topleftlon,1.0);
-		temp[1] = new DataTuple(topleftlat,btmrightlon,1.0);
-		temp[2] = new DataTuple(btmrightlat,topleftlon,1.0);
-		temp[3] = new DataTuple(btmrightlat,btmrightlon,1.0);
+		temp[0] = new DataTuple(topleftlat,topleftlon,1.0*1000.0*9.81);
+		temp[1] = new DataTuple(topleftlat,btmrightlon,1.0*1000.0*9.81);
+		temp[2] = new DataTuple(btmrightlat,topleftlon,1.0*1000.0*9.81);
+		temp[3] = new DataTuple(btmrightlat,btmrightlon,1.0*1000.0*9.81);
 		return temp;
 	}
 }
