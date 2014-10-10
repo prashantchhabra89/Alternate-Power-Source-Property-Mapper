@@ -5,6 +5,7 @@ public class DataTuple {
 	private double lon;
 	private double data;
 	
+	
 	DataTuple() {
 		this.lat = 0.0;
 		this.lon = 0.0;
