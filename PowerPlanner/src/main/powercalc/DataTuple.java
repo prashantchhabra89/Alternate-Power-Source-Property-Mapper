@@ -1,26 +1,48 @@
 package main.powercalc;
 
 public class DataTuple {
+	private int month;
 	private double lat;
 	private double lon;
-	private double data;
+	private double rawdata;
+	private double calcdata;
 	
 	DataTuple() {
+		this.month = 0;
 		this.lat = 0.0;
 		this.lon = 0.0;
-		this.data = 0.0;
+		this.rawdata = 0.0;
+		this.calcdata = 0.0;
 	}
 	
-	DataTuple(double lat, double lon, double data) {
+	DataTuple(int month, double lat, double lon, double rawdata, double calcdata) {
+		this.month = month;
 		this.lat = lat;
 		this.lon = lon;
-		this.data = data;
+		this.rawdata = rawdata;
+		this.calcdata = calcdata;
 	}
 	
 	DataTuple(DataTuple dt) {
+		this.month = dt.getMonth();
 		this.lat = dt.getLat();
 		this.lon = dt.getLon();
-		this.data = dt.getData();
+		this.rawdata = dt.getRawdata();
+		this.calcdata = dt.getCalcdata();
+	}
+
+	/**
+	 * @return the month
+	 */
+	public int getMonth() {
+		return month;
+	}
+
+	/**
+	 * @param month the month to set
+	 */
+	public void setMonth(int month) {
+		this.month = month;
 	}
 
 	/**
@@ -52,16 +74,30 @@ public class DataTuple {
 	}
 
 	/**
-	 * @return the data
+	 * @return the rawdata
 	 */
-	public double getData() {
-		return data;
+	public double getRawdata() {
+		return rawdata;
 	}
 
 	/**
-	 * @param data the data to set
+	 * @param rawdata the rawdata to set
 	 */
-	public void setData(double data) {
-		this.data = data;
+	public void setRawdata(double rawdata) {
+		this.rawdata = rawdata;
+	}
+
+	/**
+	 * @return the calcdata
+	 */
+	public double getCalcdata() {
+		return calcdata;
+	}
+
+	/**
+	 * @param calcdata the calcdata to set
+	 */
+	public void setCalcdata(double calcdata) {
+		this.calcdata = calcdata;
 	}
 }
