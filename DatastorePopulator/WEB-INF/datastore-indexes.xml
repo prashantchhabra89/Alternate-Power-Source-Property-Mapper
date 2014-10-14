@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<datastore-indexes
+  autoGenerate="true">
+    <datastore-index kind="Solar" ancestor="false">
+        <property name="month" direction="asc" />
+        <property name="lat" direction="asc" />
+        <property name="lon" direction="asc" />
+        <property name="deg_0" direction="asc" />
+        <property name="deg_30" direction="asc" />
+        <property name="deg_45" direction="asc" />
+        <property name="deg_60" direction="asc" />
+        <property name="deg_90" direction="asc" />
+        <property name="deg_360" direction="asc" />
+    </datastore-index>
+</datastore-indexes>

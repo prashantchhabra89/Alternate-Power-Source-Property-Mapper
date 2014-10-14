@@ -1,10 +1,23 @@
 package main.powercalc;
 
+import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.FetchOptions;
+import com.google.appengine.api.datastore.PreparedQuery;
+import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.Query.CompositeFilterOperator;
+import com.google.appengine.api.datastore.Query.Filter;
+import com.google.appengine.api.datastore.Query.FilterOperator;
+import com.google.appengine.api.datastore.Query.FilterPredicate;
+
 public class HydroCalc {
 	private DataTuple[] waterflow;
+	private DataTuple[] testUse;
 	
 	public HydroCalc() {
 		this.waterflow = null;
+		this.testUse = null;
 	}
 	
 	/**
@@ -18,34 +31,59 @@ public class HydroCalc {
 	 * @param heightdiff height difference between inlet and outlet
 	 * @return array of DataTuple where the data is the calculated power
 	 */
-	public DataTuple[] powerCalc(double topleftlat, double topleftlon, double btmrightlat, double btmrightlon, double efficiency, double heightdiff) {
+	public DataTuple[] powerCalc(double topleftlat, double topleftlon, double btmrightlat, double btmrightlon,
+			double efficiency, double heightdiff) {
+		DataTuple[] handle = null;
 		if(heightdiff == -1) {
 			heightdiff = 1;
-			waterflow = forTesting(topleftlat,topleftlon,btmrightlat,btmrightlon);
+			forTesting(topleftlat,topleftlon,btmrightlat,btmrightlon);
+			handle = testUse;
 		}
-		else if(waterflow == null)
-			waterflow = fromDatabase(topleftlat,topleftlon,btmrightlat,btmrightlon);
+		else if(this.waterflow == null) {
+			fromDatabase(topleftlat,topleftlon,btmrightlat,btmrightlon);
+			handle = this.waterflow;
+		}
+		else
+			handle = this.waterflow;
 		
-		DataTuple[] temp = new DataTuple[waterflow.length];
+		DataTuple[] temp = new DataTuple[handle.length];
 		
-		for(int i = 0; i < waterflow.length; i++) {
-			temp[i] = new DataTuple(waterflow[i].getLat(),waterflow[i].getLon(),(waterflow[i].getData()*efficiency*heightdiff));
+		for(int i = 0; i < handle.length; i++) {
+			temp[i] = new DataTuple(handle[i].getMonth(),handle[i].getLat(),handle[i].getLon(),
+					handle[i].getRawdata(),(handle[i].getCalcdata()*efficiency*heightdiff));
 		}
 		
 		return temp;
-	}
-	
-	// TODO
-	private DataTuple[] fromDatabase(double topleftlat, double topleftlon, double btmrightlat, double btmrightlon) {
-		return null;
 	}
 
-	private  DataTuple[] forTesting(double topleftlat, double topleftlon, double btmrightlat, double btmrightlon) {
-		DataTuple[] temp = new DataTuple[4];
-		temp[0] = new DataTuple(topleftlat,topleftlon,1.0*1000.0*9.81);
-		temp[1] = new DataTuple(topleftlat,btmrightlon,1.0*1000.0*9.81);
-		temp[2] = new DataTuple(btmrightlat,topleftlon,1.0*1000.0*9.81);
-		temp[3] = new DataTuple(btmrightlat,btmrightlon,1.0*1000.0*9.81);
-		return temp;
+	private void fromDatabase(double topleftlat, double topleftlon, double btmrightlat, double btmrightlon) {
+		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+
+		Filter minLat = new FilterPredicate("lat",FilterOperator.GREATER_THAN_OR_EQUAL,btmrightlat);
+		Filter maxLat = new FilterPredicate("lat",FilterOperator.LESS_THAN_OR_EQUAL,topleftlat);
+		Filter minLon = new FilterPredicate("lon",FilterOperator.GREATER_THAN_OR_EQUAL,btmrightlon);
+		Filter maxLon = new FilterPredicate("lon",FilterOperator.LESS_THAN_OR_EQUAL,topleftlon);
+		Filter boxRange = CompositeFilterOperator.and(minLat,maxLat,minLon,maxLon);
+		
+		Query q = new Query("Hydro").setFilter(boxRange);
+		PreparedQuery pq = datastore.prepare(q);
+		
+		this.waterflow = new DataTuple[pq.countEntities(FetchOptions.Builder.withDefaults())];
+		
+		int i = 0;
+		for (Entity result : pq.asIterable()) {
+			this.waterflow[i] = new DataTuple((Integer)result.getProperty("month"),
+					(Double)result.getProperty("lat"), (Double)result.getProperty("lon"),
+					(Double)result.getProperty("speed"),(Double)result.getProperty("precalc"));
+			i++;
+		}
+	}
+
+	private  void forTesting(double topleftlat, double topleftlon, double btmrightlat, double btmrightlon) {
+		this.testUse = new DataTuple[4];
+		this.testUse[0] = new DataTuple(1,topleftlat,topleftlon,1.0,1.0*1000.0*9.81);
+		this.testUse[1] = new DataTuple(1,topleftlat,btmrightlon,1.0,1.0*1000.0*9.81);
+		this.testUse[2] = new DataTuple(1,btmrightlat,topleftlon,1.0,1.0*1000.0*9.81);
+		this.testUse[3] = new DataTuple(1,btmrightlat,btmrightlon,1.0,1.0*1000.0*9.81);
 	}
 }
