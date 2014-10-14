@@ -14,23 +14,23 @@ $(document).ready(function() {
 	$("#showCheckboxWind").click(function() {
 		toggleHeatmapData(
 				$(this).is(':checked'),
-				$("#showCheckboxSun").is(':checked'),
-				$("#showCheckboxStream").is(':checked')
+				$("#showCheckboxSolar").is(':checked'),
+				$("#showCheckboxHydro").is(':checked')
 				);
 	});
 	
-	$("#showCheckboxSun").click(function() {
+	$("#showCheckboxSolar").click(function() {
 		toggleHeatmapData(
 				$("#showCheckboxWind").is(':checked'),
 				$(this).is(':checked'),
-				$("#showCheckboxStream").is(':checked')
+				$("#showCheckboxHydro").is(':checked')
 				);
 	});
 		
-	$("#showCheckboxStream").click(function() {
+	$("#showCheckboxHydro").click(function() {
 		toggleHeatmapData(
 				$("#showCheckboxWind").is(':checked'),
-				$("#showCheckboxSun").is(':checked'),
+				$("#showCheckboxSolar").is(':checked'),
 				$(this).is(':checked')
 				);
 	});
