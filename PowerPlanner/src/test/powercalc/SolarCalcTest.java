@@ -14,6 +14,6 @@ public class SolarCalcTest {
 		DataTuple[] result = solar.powerCalc(1, 1, 2, 2, 0.5, 1, 0.75, -1);
 		
 		for(int i = 0; i < result.length; i++)
-			assertEquals(0.375,result[i].getData(),0.000001);
+			assertEquals(0.375,result[i].getCalcdata(),0.000001);
 	}
 }
