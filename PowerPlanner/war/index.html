@@ -47,30 +47,49 @@
 			<div class="ui-grid-a">
 				<div class="ui-block-a settingsWidgets">
 					<div class="resourceBox">
-						<h2>Wind</h2>
+						<img src="images/windmill30.png" alt="a picture of a windmill" class="resourceImg">
+						<h4>WIND POWER</h4>
+						<form class="resourceRadioButton"action="">
+								<input type="radio" name="windPower" value="pgv" id="pgv">
+								<label class="radioButtonLabel" for="pgv">Power generation view</label>
+								<input type="radio" name="windPower" value="wsv" id="wsv">
+								<label class="radioButtonLabel" for="wsv">Wind speed view</label>
+						</form>
 						<form class="showCheckbox">
-							<input type="checkbox" name="showCheckboxWind"
-								id="showCheckboxWind" data-mini="true"> <label
-								for="showCheckboxWind">Show</label>
+								<input type="checkbox" name="showCheckboxWind" id="showCheckboxWind" data-mini="true"> 
+								<label class="showAdvancedOptions" for="showCheckboxWind"> Show</label>
+							</form>
+					</div>
+
+					<div class="resourceBox">
+					<img src="images/solar20.png" alt="a picture of a solar panel" class="resourceImg">
+					
+						<h4>SOLAR POWER</h4>
+						<form class="resourceRadioButton"action="">
+								<input type="radio" name="solarPower" value="pgv" id="pgv">
+								<label class="radioButtonLabel" for="pgv">Power generation view</label>
+								<input type="radio" name="solarPower" value="wsv" id="shv">
+								<label class="radioButtonLabel" for="shv">Sunlight hours View</label>
+						</form>
+						<form class="showCheckbox">
+								<input type="checkbox" name="showCheckboxSolar" id="showCheckboxSolar" data-mini="true"> 
+								<label class="showAdvancedOptions" for="showCheckboxSolar"> Show</label>
 						</form>
 					</div>
 
 					<div class="resourceBox">
-						<h2>Sunlight</h2>
-						<form class="showCheckbox">
-							<input type="checkbox" name="showCheckboxSun"
-								id="showCheckboxSun" data-mini="true"> <label
-								for="showCheckboxSun">Show</label>
+						<img src="images/waterfall7.png" alt="a picture of a waterfall" class="resourceImg">
+						<h4>HYDRO POWER</h4>
+						<form class="resourceRadioButton"action="">
+								<input type="radio" name="hydroPower" value="pgv" id="pgv">
+								<label class="radioButtonLabel" for="pgv">Power generation view</label>
+								<input type="radio" name="hydroPower" value="wsv" id="watersv">
+								<label class="radioButtonLabel" for="watersv">Water speed view</label>
 						</form>
-					</div>
-
-					<div class="resourceBox">
-						<h2>Streams</h2>
 						<form class="showCheckbox">
-							<input type="checkbox" name="showCheckboxStream"
-								id="showCheckboxStream" data-mini="true"> <label
-								for="showCheckboxStream">Show</label>
-						</form>
+								<input type="checkbox" name="showCheckboxHydro" id="showCheckboxHydro" data-mini="true"> 
+								<label class="showAdvancedOptions" for="showCheckboxHydro"> Show</label>
+							</form>
 					</div>
 					<div class="propertyButton">
 						<label><input type="checkbox">Properties for Sale</label>
@@ -79,7 +98,6 @@
 						<button class="ui-btn ui-mini mapSelect">Normal</button>
 						<button class="ui-btn ui-mini mapSelect">Heat Map</button>
 					</div>
-
 				</div>
 				<div
 					class="ui-block-b ui-btn ui-icon-arrow-l ui-btn-icon-left expandSettingButton">
