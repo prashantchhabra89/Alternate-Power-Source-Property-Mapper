@@ -14,6 +14,6 @@ public class WindCalcTest {
 		DataTuple[] result = wind.powerCalc(1, 1, 2, 2, 0.5, 1, -1);
 		
 		for(int i = 0; i < result.length; i++)
-			assertEquals(0.31,result[i].getData(),0.000001);
+			assertEquals(0.31,result[i].getCalcdata(),0.000001);
 	}
 }

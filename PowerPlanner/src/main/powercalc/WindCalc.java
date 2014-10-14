@@ -1,12 +1,27 @@
 package main.powercalc;
 
+import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.FetchOptions;
+import com.google.appengine.api.datastore.PreparedQuery;
+import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.Query.CompositeFilterOperator;
+import com.google.appengine.api.datastore.Query.Filter;
+import com.google.appengine.api.datastore.Query.FilterOperator;
+import com.google.appengine.api.datastore.Query.FilterPredicate;
+
 public class WindCalc {
-	private DataTuple[] windspeed;
-	private int height;
+	private DataTuple[] wind_5;
+	private DataTuple[] wind_10;
+	private DataTuple[] wind_15;
+	private DataTuple[] testUse;
 	
 	public WindCalc() {
-		this.windspeed = null;
-		this.height = 0;
+		this.wind_5 = null;
+		this.wind_10 = null;
+		this.wind_15 = null;
+		this.testUse = null;
 	}
 	
 	/**
@@ -21,36 +36,71 @@ public class WindCalc {
 	 * @param height height of the wind turbines
 	 * @return array of DataTuple where the data is the calculated power
 	 */
-	public DataTuple[] powerCalc(double topleftlat, double topleftlon, double btmrightlat, double btmrightlon, double efficiency, double area, int height) {
-		if(height == -1)
-			windspeed = forTesting(topleftlat,topleftlon,btmrightlat,btmrightlon);
-		else if(windspeed == null || this.height != height) {
-			this.height = height;
-			windspeed = fromDatabase(topleftlat,topleftlon,btmrightlat,btmrightlon,height);
-			
+	public DataTuple[] powerCalc(double topleftlat, double topleftlon, double btmrightlat, double btmrightlon,
+			double efficiency, double area, int height) {
+		if(height == -1) {
+			forTesting(topleftlat,topleftlon,btmrightlat,btmrightlon);
+		}
+		else if(this.wind_5 == null) {
+			fromDatabase(topleftlat,topleftlon,btmrightlat,btmrightlon);		
 		}
 		
-		DataTuple[] temp = new DataTuple[windspeed.length];
+		DataTuple[] handle = null;
 		
-		for(int i = 0; i < windspeed.length; i++) {
-			temp[i] = new DataTuple(windspeed[i].getLat(),windspeed[i].getLon(),(windspeed[i].getData()*efficiency*area));
+		switch(height) {
+		case 5: handle = this.wind_5; break;
+		case 10: handle = this.wind_10; break;
+		case 15: handle = this.wind_15; break;
+		default: handle = this.testUse; break;
+		}
+		
+		DataTuple[] temp = new DataTuple[handle.length];
+		
+		for(int i = 0; i < handle.length; i++) {
+			temp[i] = new DataTuple(handle[i].getMonth(),handle[i].getLat(),handle[i].getLon(),
+					handle[i].getRawdata(),(handle[i].getCalcdata()*efficiency*area));
 		}
 		
 		return temp;
 	}
 	
-	// TODO
-	private DataTuple[] fromDatabase(double topleftlat, double topleftlon, double btmrightlat, double btmrightlon, int height) {
-		return null;
+	private void fromDatabase(double topleftlat, double topleftlon, double btmrightlat, double btmrightlon) {
+		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+
+		Filter minLat = new FilterPredicate("lat",FilterOperator.GREATER_THAN_OR_EQUAL,btmrightlat);
+		Filter maxLat = new FilterPredicate("lat",FilterOperator.LESS_THAN_OR_EQUAL,topleftlat);
+		Filter minLon = new FilterPredicate("lon",FilterOperator.GREATER_THAN_OR_EQUAL,btmrightlon);
+		Filter maxLon = new FilterPredicate("lon",FilterOperator.LESS_THAN_OR_EQUAL,topleftlon);
+		Filter boxRange = CompositeFilterOperator.and(minLat,maxLat,minLon,maxLon);
+		
+		Query q = new Query("Wind").setFilter(boxRange);
+		PreparedQuery pq = datastore.prepare(q);
+		
+		this.wind_5 = new DataTuple[pq.countEntities(FetchOptions.Builder.withDefaults())];
+		this.wind_10 = new DataTuple[pq.countEntities(FetchOptions.Builder.withDefaults())];
+		this.wind_15 = new DataTuple[pq.countEntities(FetchOptions.Builder.withDefaults())];
+		
+		int i = 0;
+		for (Entity result : pq.asIterable()) {
+			this.wind_5[i] = new DataTuple((Integer)result.getProperty("month"),
+					(Double)result.getProperty("lat"), (Double)result.getProperty("lon"),
+					(Double)result.getProperty("ws_5"),(Double)result.getProperty("pre_5"));
+			this.wind_10[i] = new DataTuple((Integer)result.getProperty("month"),
+					(Double)result.getProperty("lat"), (Double)result.getProperty("lon"),
+					(Double)result.getProperty("ws_10"),(Double)result.getProperty("pre_10"));
+			this.wind_15[i] = new DataTuple((Integer)result.getProperty("month"),
+					(Double)result.getProperty("lat"), (Double)result.getProperty("lon"),
+					(Double)result.getProperty("ws_15"),(Double)result.getProperty("pre_15"));
+			i++;
+		}
 	}
 	
-	private  DataTuple[] forTesting(double topleftlat, double topleftlon, double btmrightlat, double btmrightlon) {
-		DataTuple[] temp = new DataTuple[4];
-		temp[0] = new DataTuple(topleftlat,topleftlon,0.5*Math.pow(1.0, 3)*1.24);
-		temp[1] = new DataTuple(topleftlat,btmrightlon,0.5*Math.pow(1.0, 3)*1.24);
-		temp[2] = new DataTuple(btmrightlat,topleftlon,0.5*Math.pow(1.0, 3)*1.24);
-		temp[3] = new DataTuple(btmrightlat,btmrightlon,0.5*Math.pow(1.0, 3)*1.24);
-		return temp;
+	private  void forTesting(double topleftlat, double topleftlon, double btmrightlat, double btmrightlon) {
+		testUse = new DataTuple[4];
+		testUse[0] = new DataTuple(1,topleftlat,topleftlon,1.0,0.5*Math.pow(1.0, 3)*1.24);
+		testUse[1] = new DataTuple(1,topleftlat,btmrightlon,1.0,0.5*Math.pow(1.0, 3)*1.24);
+		testUse[2] = new DataTuple(1,btmrightlat,topleftlon,1.0,0.5*Math.pow(1.0, 3)*1.24);
+		testUse[3] = new DataTuple(1,btmrightlat,btmrightlon,1.0,0.5*Math.pow(1.0, 3)*1.24);
 	}
 
 }
