@@ -7,6 +7,7 @@ public class DataTuple {
 	private double rawdata;
 	private double calcdata;
 	
+	
 	DataTuple() {
 		this.month = 0;
 		this.lat = 0.0;
