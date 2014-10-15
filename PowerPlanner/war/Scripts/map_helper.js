@@ -78,9 +78,9 @@ function loadHeatmapData(map) {
 
 /*
  * Map data toggle function. Takes boolean values for turning different energy
- * types on and off.
+ * types on and off. DEPRECATED
  */
-function toggleHeatmapData(showWind, showSolar, showHydro) {
+function __toggleHeatmapData(showWind, showSolar, showHydro) {
 	var hm_data = [];
 
 	if (showWind) {
@@ -95,6 +95,63 @@ function toggleHeatmapData(showWind, showSolar, showHydro) {
 		hm_data = hm_data.concat(hydro_data);
 	}
 	updateHeatmap(g_heatmap, hm_data);
+}
+
+function toggleHeatmapData(showWind, showSolar, showHydro) {
+	wind_data = [];
+	solar_data = [];
+	hydro_data = [];
+	
+	if (showWind) {
+		_getHeatmapData("WIND", getNELatitude(g_map), getNELongitude(g_map),
+				getSWLatitude(g_map), getSWLongitude(g_map));
+	}
+	
+	if (showSolar) {
+		_getHeatmapData("SOLAR", getNELatitude(g_map), getNELongitude(g_map),
+				getSWLatitude(g_map), getSWLongitude(g_map));
+	}
+	
+	if (showHydro) {
+		_getHeatmapData("HYDRO", getNELatitude(g_map), getNELongitude(g_map),
+				getSWLatitude(g_map), getSWLongitude(g_map));
+	}
+	
+	if (!showWind && !showSolar && !showHydro) {
+		_updateHeatmap();
+	}
+}
+
+function _getHeatmapData(type, neLat, neLng, swLat, swLng) {
+	$.ajax({
+		url : '/powerplanner',
+		type : 'POST',
+		data : {
+			type : type,
+			neLat : neLat,
+			neLng : neLng,
+			swLat : swLat,
+			swLng : swLng
+		},
+		dataType : 'json',
+		success : function(data, status) {
+			if (status) {
+				hm_data = [];
+				for (var i = 0; i < data.length; i++) {
+					addHeatmapCoord(hm_data, data[i].lat, data[i].lng,
+							data[i].weight);
+				}
+				if (type == "WIND") {
+					wind_data = hm_data;
+				} else if (type == "SOLAR") {
+					solar_data = hm_data;
+				} else if (type == "HYDRO") {
+					hydro_data = hm_data;
+				}
+				_updateHeatmap();
+			}
+		}
+	});
 }
 
 /*
@@ -119,7 +176,6 @@ function initMap() {
 		} ]
 	};
 	var map = new google.maps.Map(mapCanvas, mapOptions);
-	console.log(map.getCenter().lat());
 
 	return map;
 }
@@ -148,6 +204,14 @@ function initHeatmap(map) {
  */
 function attachHeatmap(heatmap, map) {
 	heatmap.setMap(map);
+}
+
+function _updateHeatmap() {
+	hm_data = wind_data;
+	hm_data = hm_data.concat(solar_data);
+	hm_data = hm_data.concat(hydro_data);
+	
+	updateHeatmap(g_heatmap, hm_data);
 }
 
 /*
