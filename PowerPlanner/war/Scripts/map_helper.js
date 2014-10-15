@@ -6,7 +6,8 @@ var solar_data = []; /* The solar data for the current heatmap view */
 var hydro_data = []; /* The hydro data for the current heatmap view */
 
 /*
- * Initializes a test version of the map and heatmap.
+ * Initializes a test version of the map and heatmap, loading fake data on the
+ * client side.
  */
 function mapTest() {
 	g_map = initMap();
@@ -25,6 +26,20 @@ function mapTest() {
 		}, millis);
 	}
 	sleep(500, loadHeatmapData, g_map);
+}
+
+/*
+ * Initializes the map, heatmap, and important event listeners.
+ */
+function mapLoader() {
+	g_map = initMap();
+	g_heatmap = initHeatmap(g_map);
+
+	attachHeatmap(g_heatmap, g_map);
+
+	google.maps.event.addListener(g_map, 'dragend', _eventHeatmapDataToggler);
+	google.maps.event.addListener(g_map, 'zoom_changed',
+			_eventHeatmapDataToggler)
 }
 
 /*
@@ -77,51 +92,48 @@ function loadHeatmapData(map) {
 }
 
 /*
- * Map data toggle function. Takes boolean values for turning different energy
- * types on and off. DEPRECATED
+ * Reloads toggled map data; for use in event handlers.
  */
-function __toggleHeatmapData(showWind, showSolar, showHydro) {
-	var hm_data = [];
-
-	if (showWind) {
-		hm_data = hm_data.concat(wind_data);
-	}
-
-	if (showSolar) {
-		hm_data = hm_data.concat(solar_data);
-	}
-
-	if (showHydro) {
-		hm_data = hm_data.concat(hydro_data);
-	}
-	updateHeatmap(g_heatmap, hm_data);
+function _eventHeatmapDataToggler() {
+	toggleHeatmapData($("#showCheckboxWind").is(':checked'), $(
+			"#showCheckboxSolar").is(':checked'), $("#showCheckboxHydro").is(
+			':checked'));
 }
 
+/*
+ * Map data toggle function. Takes boolean values for turning different energy
+ * types on and off.
+ */
 function toggleHeatmapData(showWind, showSolar, showHydro) {
 	wind_data = [];
 	solar_data = [];
 	hydro_data = [];
-	
+
 	if (showWind) {
 		_getHeatmapData("WIND", getNELatitude(g_map), getNELongitude(g_map),
 				getSWLatitude(g_map), getSWLongitude(g_map));
 	}
-	
+
 	if (showSolar) {
 		_getHeatmapData("SOLAR", getNELatitude(g_map), getNELongitude(g_map),
 				getSWLatitude(g_map), getSWLongitude(g_map));
 	}
-	
+
 	if (showHydro) {
 		_getHeatmapData("HYDRO", getNELatitude(g_map), getNELongitude(g_map),
 				getSWLatitude(g_map), getSWLongitude(g_map));
 	}
-	
+
 	if (!showWind && !showSolar && !showHydro) {
-		_updateHeatmap();
+		updateHeatmap();
 	}
 }
 
+/*
+ * Sends a POST request to the server for data within the provided latitude and
+ * longitude bounds of a particular type. Acceptable types are WIND, SOLAR, and
+ * HYDRO. Triggers a heatmap update upon successful server response.
+ */
 function _getHeatmapData(type, neLat, neLng, swLat, swLng) {
 	$.ajax({
 		url : '/powerplanner',
@@ -148,7 +160,7 @@ function _getHeatmapData(type, neLat, neLng, swLat, swLng) {
 				} else if (type == "HYDRO") {
 					hydro_data = hm_data;
 				}
-				_updateHeatmap();
+				updateHeatmap();
 			}
 		}
 	});
@@ -206,18 +218,21 @@ function attachHeatmap(heatmap, map) {
 	heatmap.setMap(map);
 }
 
-function _updateHeatmap() {
+/*
+ * Updates the global heatmap with the global data arrays.
+ */
+function updateHeatmap() {
 	hm_data = wind_data;
 	hm_data = hm_data.concat(solar_data);
 	hm_data = hm_data.concat(hydro_data);
-	
-	updateHeatmap(g_heatmap, hm_data);
+
+	_updateHeatmap(g_heatmap, hm_data);
 }
 
 /*
  * Updates the provided heatmap with the provided array of heatmap data points.
  */
-function updateHeatmap(heatmap, hm_data) {
+function _updateHeatmap(heatmap, hm_data) {
 	var datapoints = new google.maps.MVCArray(hm_data);
 	heatmap.setData(datapoints);
 }
@@ -266,4 +281,4 @@ function getNELongitude(map) {
 /*
  * Map setup entry point.
  */
-google.maps.event.addDomListener(window, 'load', mapTest);
+google.maps.event.addDomListener(window, 'load', mapLoader);
