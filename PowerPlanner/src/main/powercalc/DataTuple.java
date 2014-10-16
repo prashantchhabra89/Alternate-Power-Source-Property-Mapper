@@ -8,7 +8,7 @@ public class DataTuple {
 	private double calcdata;
 	
 	
-	DataTuple() {
+	public DataTuple() {
 		this.month = 0;
 		this.lat = 0.0;
 		this.lon = 0.0;
@@ -16,7 +16,7 @@ public class DataTuple {
 		this.calcdata = 0.0;
 	}
 	
-	DataTuple(int month, double lat, double lon, double rawdata, double calcdata) {
+	public DataTuple(int month, double lat, double lon, double rawdata, double calcdata) {
 		this.month = month;
 		this.lat = lat;
 		this.lon = lon;
@@ -24,7 +24,7 @@ public class DataTuple {
 		this.calcdata = calcdata;
 	}
 	
-	DataTuple(DataTuple dt) {
+	public DataTuple(DataTuple dt) {
 		this.month = dt.getMonth();
 		this.lat = dt.getLat();
 		this.lon = dt.getLon();
