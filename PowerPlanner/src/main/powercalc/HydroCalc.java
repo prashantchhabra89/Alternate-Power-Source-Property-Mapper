@@ -1,15 +1,16 @@
 package main.powercalc;
 
-import com.google.appengine.api.datastore.DatastoreService;
-import com.google.appengine.api.datastore.DatastoreServiceFactory;
-import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.FetchOptions;
-import com.google.appengine.api.datastore.PreparedQuery;
-import com.google.appengine.api.datastore.Query;
-import com.google.appengine.api.datastore.Query.CompositeFilterOperator;
-import com.google.appengine.api.datastore.Query.Filter;
-import com.google.appengine.api.datastore.Query.FilterOperator;
-import com.google.appengine.api.datastore.Query.FilterPredicate;
+import java.net.URL;
+import java.util.List;
+
+import com.google.gdata.client.spreadsheet.ListQuery;
+import com.google.gdata.client.spreadsheet.SpreadsheetService;
+import com.google.gdata.data.spreadsheet.ListEntry;
+import com.google.gdata.data.spreadsheet.ListFeed;
+import com.google.gdata.data.spreadsheet.SpreadsheetEntry;
+import com.google.gdata.data.spreadsheet.SpreadsheetFeed;
+import com.google.gdata.data.spreadsheet.WorksheetEntry;
+import com.google.gdata.data.spreadsheet.WorksheetFeed;
 
 public class HydroCalc {
 	private DataTuple[] waterflow;
@@ -57,25 +58,46 @@ public class HydroCalc {
 	}
 
 	private void fromDatabase(double topleftlat, double topleftlon, double btmrightlat, double btmrightlon) {
-		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+		try {
+			SpreadsheetService service =
+					new SpreadsheetService("SolarDatabase");
+			service.setUserCredentials("powerplanner.startup@gmail.com", "startupprogramming");
 
-		Filter minLat = new FilterPredicate("lat",FilterOperator.GREATER_THAN_OR_EQUAL,btmrightlat);
-		Filter maxLat = new FilterPredicate("lat",FilterOperator.LESS_THAN_OR_EQUAL,topleftlat);
-		Filter minLon = new FilterPredicate("lon",FilterOperator.GREATER_THAN_OR_EQUAL,btmrightlon);
-		Filter maxLon = new FilterPredicate("lon",FilterOperator.LESS_THAN_OR_EQUAL,topleftlon);
-		Filter boxRange = CompositeFilterOperator.and(minLat,maxLat,minLon,maxLon);
-		
-		Query q = new Query("Hydro").setFilter(boxRange);
-		PreparedQuery pq = datastore.prepare(q);
-		
-		this.waterflow = new DataTuple[pq.countEntities(FetchOptions.Builder.withDefaults())];
-		
-		int i = 0;
-		for (Entity result : pq.asIterable()) {
-			this.waterflow[i] = new DataTuple((Integer)result.getProperty("month"),
-					(Double)result.getProperty("lat"), (Double)result.getProperty("lon"),
-					(Double)result.getProperty("speed"),(Double)result.getProperty("precalc"));
-			i++;
+			URL SPREADSHEET_FEED_URL = new URL(
+					"https://spreadsheets.google.com/feeds/spreadsheets/private/full");
+
+			// Make a request to the API and get all spreadsheets.
+			SpreadsheetFeed feed = service.getFeed(SPREADSHEET_FEED_URL,
+					SpreadsheetFeed.class);
+			List<SpreadsheetEntry> spreadsheets = feed.getEntries();
+
+			SpreadsheetEntry spreadsheet = spreadsheets.get(0);
+
+			// Get the first worksheet of the first spreadsheet.
+			WorksheetFeed worksheetFeed = service.getFeed(
+					spreadsheet.getWorksheetFeedUrl(), WorksheetFeed.class);
+			List<WorksheetEntry> worksheets = worksheetFeed.getEntries();
+			WorksheetEntry worksheet = worksheets.get(0);
+
+			// Fetch the list feed of the worksheet.
+			URL listFeedUrl = worksheet.getListFeedUrl();
+			ListQuery query = new ListQuery(listFeedUrl);
+			query.setSpreadsheetQuery("lat >= " + btmrightlat + " and lat <= " + topleftlat
+					+ " and lon >= " + btmrightlon + " and lon <= " + topleftlon);
+			ListFeed listFeed = service.query(query, ListFeed.class);
+
+			int i = 0;
+			// Iterate through each row.
+			for (ListEntry row : listFeed.getEntries()) {
+				this.waterflow[i] = new DataTuple(Integer.parseInt(row.getCustomElements().getValue("month")),
+						Double.parseDouble(row.getCustomElements().getValue("lat")), 
+						Double.parseDouble(row.getCustomElements().getValue("lon")),
+						Double.parseDouble(row.getCustomElements().getValue("speed")),
+						Double.parseDouble(row.getCustomElements().getValue("precalc")));
+				i++;
+			}
+		} catch(Exception e) {
+			e.printStackTrace();
 		}
 	}
 
