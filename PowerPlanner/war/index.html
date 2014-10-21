@@ -14,6 +14,7 @@
 <link rel="stylesheet" type="text/css"
 	href="Styles/jquery.mobile-1.4.2.min.css" />
 <link rel="stylesheet" type="text/css" href="Styles/main.css">
+<link href='http://fonts.googleapis.com/css?family=Raleway:800, 200' rel='stylesheet' type='text/css'>
 
 <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=visualization"></script>
 <script src="Scripts/map_helper.js"></script>
@@ -22,7 +23,52 @@
 
 <body>
 	<!-- Start of first page -->
-	<div data-role="page" id="home">
+    <div data-role="page" id="home">
+        <!-- /header -->
+        <div data-role="header" data-theme="a" class="ui-header-intro">
+            <header class="intro">
+                <h1 class="intro-title">Power Planner</h1>
+                <p class="intro-text">This is an intro text W. This is another intro text W</p>
+                <a href="#app" class="ui-btn ui-btn-inline start-button">Start</a>
+            </header>
+        </div>
+        <div role="main" class="ui-content ">
+            <h3 class="intro-header calc-text">Calculations</h3>
+            <p class="intro-text calc-text">
+                The Team: Charlie Guan, Chuan Yun Loe, Daniel Faulkner, Jonathan Lam, Prashant Chhabra
+
+                Description: A web application that puts the power into people's hands for finding sites for sustainable electricity generation. This application is being developed as a project for the Startup Programming class at the University of Victoria.
+
+            </p>
+        </div>
+        <div role="main" class="ui-content about-background">
+            <h3 class="intro-header about-text">About Us</h3>
+            <h4 class="intro-subheading"><strong>Description</strong></h4>
+            <p class="intro-text">
+                A web application that puts the power into people's hands for finding sites for sustainable electricity generation. This application is being developed as a project for the Startup Programming class at the University of Victoria.
+            </p>
+            <h4 class="intro-subheading"><strong>The Team</strong></h4>
+            <p class="intro-text">
+                Charlie Guan, Chuan Yun Loe, Daniel Faulkner, Jonathan Lam, Prashant Chhabra
+            </p>
+            <div class="circular jonathan"></div>
+            <div class="circular"></div>
+            <br>
+            <div class="circular"></div>
+            <div class="circular"></div>
+            <div class="circular"></div>
+            
+
+        </div>
+        <!-- /content -->
+        <div data-role="footer" data-position="fixed" data-theme="b" class="intro-footer">
+            <p>Copyright &copy Power Planner 2014</p>
+        </div>
+    </div>
+
+
+    <!-- Start of app page -->
+    <div data-role="page" id="app">
 		<div data-role="panel" data-position="left" data-display="overlay"
 			id="menu">
 			<h1>MENU PAGE</h1>
@@ -90,13 +136,6 @@
 								<input type="checkbox" name="showCheckboxHydro" id="showCheckboxHydro" data-mini="true"> 
 								<label class="showAdvancedOptions" for="showCheckboxHydro"> Show</label>
 							</form>
-					</div>
-					<div class="propertyButton">
-						<label><input type="checkbox">Properties for Sale</label>
-					</div>
-					<div class="mapSettings">
-						<button class="ui-btn ui-mini mapSelect">Normal</button>
-						<button class="ui-btn ui-mini mapSelect">Heat Map</button>
 					</div>
 				</div>
 				<div
