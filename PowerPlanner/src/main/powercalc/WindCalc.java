@@ -90,8 +90,8 @@ public class WindCalc {
 			// Fetch the list feed of the worksheet.
 			URL listFeedUrl = worksheet.getListFeedUrl();
 			ListQuery query = new ListQuery(listFeedUrl);
-			query.setSpreadsheetQuery("lat >= " + btmrightlat + " and lat <= " + topleftlat
-					+ " and lon >= " + btmrightlon + " and lon <= " + topleftlon);
+			query.setSpreadsheetQuery("lat >= " + String.valueOf(btmrightlat) + " and lat <= " + String.valueOf(topleftlat)
+					+ " and lon >= " + String.valueOf(topleftlon) + " and lon <= " + String.valueOf(btmrightlon));
 			ListFeed listFeed = service.query(query, ListFeed.class);
 
 			int i = 0;
