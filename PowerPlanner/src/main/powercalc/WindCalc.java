@@ -68,7 +68,7 @@ public class WindCalc {
 	private void fromDatabase(double topleftlat, double topleftlon, double btmrightlat, double btmrightlon) {
 		try {
 			SpreadsheetService service =
-					new SpreadsheetService("SolarDatabase");
+					new SpreadsheetService("WindDatabase");
 			service.setUserCredentials("powerplanner.startup@gmail.com", "startupprogramming");
 
 			URL SPREADSHEET_FEED_URL = new URL(
@@ -97,17 +97,17 @@ public class WindCalc {
 			int i = 0;
 			// Iterate through each row.
 			for (ListEntry row : listFeed.getEntries()) {
-				this.wind_5[i] = new DataTuple(Integer.parseInt(row.getCustomElements().getValue("month")),
+				this.wind_5[i] = new DataTuple(Integer.parseInt(row.getCustomElements().getValue("season")),
 						Double.parseDouble(row.getCustomElements().getValue("lat")), 
 						Double.parseDouble(row.getCustomElements().getValue("lon")),
 						Double.parseDouble(row.getCustomElements().getValue("ws5")),
 						Double.parseDouble(row.getCustomElements().getValue("pre5")));
-				this.wind_10[i] = new DataTuple(Integer.parseInt(row.getCustomElements().getValue("month")),
+				this.wind_10[i] = new DataTuple(Integer.parseInt(row.getCustomElements().getValue("season")),
 						Double.parseDouble(row.getCustomElements().getValue("lat")), 
 						Double.parseDouble(row.getCustomElements().getValue("lon")),
 						Double.parseDouble(row.getCustomElements().getValue("ws10")),
 						Double.parseDouble(row.getCustomElements().getValue("pre10")));
-				this.wind_15[i] = new DataTuple(Integer.parseInt(row.getCustomElements().getValue("month")),
+				this.wind_15[i] = new DataTuple(Integer.parseInt(row.getCustomElements().getValue("season")),
 						Double.parseDouble(row.getCustomElements().getValue("lat")), 
 						Double.parseDouble(row.getCustomElements().getValue("lon")),
 						Double.parseDouble(row.getCustomElements().getValue("ws15")),
