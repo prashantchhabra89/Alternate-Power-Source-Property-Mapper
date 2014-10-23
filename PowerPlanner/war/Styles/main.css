@@ -1,40 +1,47 @@
 body {
 	font-family: Helvetica, Arial, sans-serif;
 }
+
 .resourceBox h4 {
 	margin: 0px 0px 4px 0px;
-	height:1%;
-}
-#googleMap {
-	float: right;
-}
-
-.expandSettingButton {
-	width: 34px !important;
-	background-color: #ddd !important;
-}
-
-.expandOptions {
-	width: 1%;
-	opacity: 1;
-	background-size: cover;
-	position: relative;
-	margin: 0px 16px 10px 0px;
-	border-radius: 12px;
+	height: 1%;
 }
 
 .gMap {
-	width: 70% !important;
+	width: 100% !important;
+}
+
+#pac-input, #pac-input-intro {
+	background-color: #fff;
+	padding: 0 11px 0 13px;
+	height: 30px;
+	font-size: 15px;
+	font-weight: 300;
+	text-overflow: ellipsis;
+}
+#pac-input {
+	width: 401px;
+}
+#pac-input:focus, #pac-input-intro:focus {
+	border-color: #4d90fe;
+	margin-left: -1px;
+	padding-left: 14px; /* Regular padding-left + 1. */
+	width: 401px;
+}
+
+.controls {
+	margin-top: 16px;
+	border: 1px solid transparent;
+	border-radius: 2px 0 0 2px;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	height: 32px;
+	outline: none;
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
 }
 
 .settingsWidgets {
 	width: 25% !important;
-}
-
-.propertyButton {
-	width: 50%;
-	float: right;
-	margin: 0px 15px 0px 0px;
 }
 
 .resourceBox {
@@ -47,17 +54,8 @@ body {
 	border: 1px solid #AAA;
 }
 
-.hide-resourcesBox {
-	opacity: 0;
-	display: none;
-}
-
 .showCheckbox {
 	width: 80px;
-}
-
-.expandMap {
-	width: 95% !important;
 }
 
 .mapSettings {
@@ -69,25 +67,29 @@ body {
 	float: left;
 }
 
-.hide-description {
-	width: 0px !important;
-}
-
-.mapSelect {
-	opacity: 1;
-}
 .resourceRadioButton .radioButtonLabel {
-	font-size: 8pt;	
+	font-size: 8pt;
 	width: 44%;
 }
+
 .showCheckbox .showAdvancedOptions {
 	font-size: 6pt;
 	width: 100%;
-
 }
+
 .resourceBox .resourceImg {
-	float: right;
 	margin-top: 8px;
+}
+
+div.ui-input-text{
+	width: 30% !important;
+	display: inline-block !important;
+	font-family: 'Raleway', sans-serif !important;
+}
+
+.placesTextSearch {
+	display: inline-block !important;
+	width: 100% !important;	
 }
 
 .start-button {
@@ -99,6 +101,7 @@ body {
 	font-family: 'Raleway', sans-serif !important;
 	font-weight: lighter !important;
 }
+
 .intro {
 	display: table;
 	width: 100%;
@@ -110,53 +113,63 @@ body {
 	background-size: cover;
 	background-position: center;
 }
+
 .ui-header-intro {
-	height:93vh;
+	height: 93vh;
 }
-h1.intro-title, h2.intro-header{
+
+h1.intro-title, h2.intro-header {
 	font-family: 'Raleway', sans-serif;
-	font-size: 70px;
 	color: #00933B;
 	font-weight: bold;
 	text-shadow: initial;
 	font-variant: small-caps;
+	margin: 100px 0px 37px 0px;
 }
+
 h2.intro-header {
 	margin: 0px;
 	font-size: 65px;
 	text-align: center;
 }
+
 .intro-footer {
 	font-size: 10px;
 	text-align: center;
 }
-p.intro-text, h3.intro-header{
+
+p.intro-text, h3.intro-header {
 	font-family: 'Raleway', sans-serif;
 	font-size: 24px;
 	font-weight: 200;
 	text-shadow: initial;
 }
-p.calc-text, h3.calc-header{
+
+p.calc-text, h3.calc-header {
 	color: #333;
 }
 
-p.about-text, h3.about-header{
+p.about-text, h3.about-header {
 	color: #fff;
 }
+
 h3.intro-header {
 	font-size: 60px;
 	font-weight: bold;
 }
+
 h4.intro-subheading {
 	font-family: 'Raleway', sans-serif;
 	font-size: 30px;
 }
+
 .about-background {
 	text-align: center;
 	color: #fff;
 	background-color: #428bca;
 	margin-bottom: -4px;
 }
+
 .circular {
 	width: 120px;
 	height: 120px;
@@ -165,60 +178,61 @@ h4.intro-subheading {
 	background: url(../images/profilepic.jpg) no-repeat bottom scroll;
 	margin: 0px 80px 17px 80px;
 }
+
 .daniel {
 	background: url(../images/profilepic.jpg) no-repeat bottom scroll;
 }
+
 .chuan {
 	background: url(../images/profilepic.jpg) no-repeat bottom scroll;
 }
+
 .charlie {
 	background: url(../images/profilepic.jpg) no-repeat bottom scroll;
 }
+
 .prashant {
 	background: url(../images/profilepic.jpg) no-repeat bottom scroll;
 }
+
 .jonathan {
 	background: url(../images/profilepic.jpg) no-repeat bottom scroll;
 }
 
 /*FOR RESPONSIVE LAYOUT*/
 /* 0 - 252px */
-@media all and (min-width: 480px){ 
+@media all and (min-width: 480px) {
 	h1.intro-title {
 		font-size: 70px;
 	}
-}      
- 
+}
+
 /* 481px - 768px */
-@media only screen and (min-width: 768px) {    
+@media only screen and (min-width: 768px) {
 	h1.intro-title {
 		font-size: 80px;
 	}
-} 
- 
+}
+
 /* 769px - 1024px */
-@media only screen and (min-width: 1024px) {    
-  	h1.intro-title {
+@media only screen and (min-width: 1024px) {
+	h1.intro-title {
 		font-size: 100px;
 	}
-} 
- 
+}
+
 /* 1025px - 1280px */
-@media only screen and (min-width: 1280px) {    
-	
-} 
- 
+@media only screen and (min-width: 1280px) {
+}
+
 /* 1281px - 1440 */
-@media only screen and (min-width: 1440px) {    
-	
-} 
- 
+@media only screen and (min-width: 1440px) {
+}
+
 /* 1441px - 1600px */
-@media only screen and (min-width: 1600px) {    
-	
-} 
- 
+@media only screen and (min-width: 1600px) {
+}
+
 /* 1601px - 1920px */
-@media only screen and (min-width: 1920px) {    
-	
-} 
+@media only screen and (min-width: 1920px) {
+}
