@@ -23,12 +23,12 @@ public class SolarCalc {
 	private DataTuple[] testUse;
 	
 	public SolarCalc() {
-		this.sunlight_0 = null;
-		this.sunlight_30 = null;
-		this.sunlight_45 = null;
-		this.sunlight_60 = null;
-		this.sunlight_90 = null;
-		this.sunlight_360 = null;
+		this.sunlight_0 = new DataTuple[4746];
+		this.sunlight_30 = new DataTuple[4746];
+		this.sunlight_45 = new DataTuple[4746];
+		this.sunlight_60 = new DataTuple[4746];
+		this.sunlight_90 = new DataTuple[4746];
+		this.sunlight_360 = new DataTuple[4746];
 		this.testUse = null;
 	}
 
@@ -50,7 +50,7 @@ public class SolarCalc {
 		if(tilt == -1) {
 			forTesting(topleftlat,topleftlon,btmrightlat,btmrightlon);
 		}
-		else if(this.sunlight_0 == null) {
+		else {
 			fromDatabase(topleftlat,topleftlon,btmrightlat,btmrightlon);
 		}
 		
