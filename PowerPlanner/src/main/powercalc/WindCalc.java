@@ -55,6 +55,7 @@ public class WindCalc {
 		default: handle = this.testUse; break;
 		}
 		
+		System.out.println("Handle length: " + handle.length);
 		DataTuple[] temp = new DataTuple[handle.length];
 		
 		for(int i = 0; i < handle.length; i++) {
@@ -90,8 +91,10 @@ public class WindCalc {
 			// Fetch the list feed of the worksheet.
 			URL listFeedUrl = worksheet.getListFeedUrl();
 			ListQuery query = new ListQuery(listFeedUrl);
-			query.setSpreadsheetQuery("lat >= " + btmrightlat + " and lat <= " + topleftlat
-					+ " and lon >= " + btmrightlon + " and lon <= " + topleftlon);
+			query.setSpreadsheetQuery("lat >= " + String.valueOf(btmrightlat)
+					+ " and lat <= " + String.valueOf(topleftlat)
+					+ " and lon <= " + String.valueOf(btmrightlon)
+					+ " and lon >= " + String.valueOf(topleftlon));
 			ListFeed listFeed = service.query(query, ListFeed.class);
 
 			int i = 0;
