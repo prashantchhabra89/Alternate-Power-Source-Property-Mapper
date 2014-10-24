@@ -19,9 +19,9 @@ public class WindCalc {
 	private DataTuple[] testUse;
 	
 	public WindCalc() {
-		this.wind_5 = null;
-		this.wind_10 = null;
-		this.wind_15 = null;
+		this.wind_5 = new DataTuple[10000000];
+		this.wind_10 = new DataTuple[10000000];
+		this.wind_15 = new DataTuple[10000000];
 		this.testUse = null;
 	}
 	
@@ -42,7 +42,7 @@ public class WindCalc {
 		if(height == -1) {
 			forTesting(topleftlat,topleftlon,btmrightlat,btmrightlon);
 		}
-		else if(this.wind_5 == null) {
+		else {
 			fromDatabase(topleftlat,topleftlon,btmrightlat,btmrightlon);		
 		}
 		
