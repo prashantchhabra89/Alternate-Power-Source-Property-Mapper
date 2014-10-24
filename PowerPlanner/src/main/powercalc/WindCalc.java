@@ -55,7 +55,6 @@ public class WindCalc {
 		default: handle = this.testUse; break;
 		}
 		
-		System.out.println("Handle length: " + handle.length);
 		DataTuple[] temp = new DataTuple[handle.length];
 		
 		for(int i = 0; i < handle.length; i++) {
@@ -96,6 +95,10 @@ public class WindCalc {
 			ListFeed listFeed = service.query(query, ListFeed.class);
 
 			int i = 0;
+			int totalResults = listFeed.getEntries().size();
+			this.wind_5 = new DataTuple[totalResults];
+			this.wind_10 = new DataTuple[totalResults];
+			this.wind_15 = new DataTuple[totalResults];
 			// Iterate through each row.
 			for (ListEntry row : listFeed.getEntries()) {
 				this.wind_5[i] = new DataTuple(Integer.parseInt(row.getCustomElements().getValue("season")),
