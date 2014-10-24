@@ -106,6 +106,8 @@ public class SolarCalc {
 			ListFeed listFeed = service.query(query, ListFeed.class);
 
 			int i = 0;
+			
+			/* Daniel's additions */
 			int totalResults = listFeed.getEntries().size();
 			this.sunlight_0 = new DataTuple[totalResults];
 			this.sunlight_30 = new DataTuple[totalResults];
@@ -113,6 +115,8 @@ public class SolarCalc {
 			this.sunlight_60 = new DataTuple[totalResults];
 			this.sunlight_90 = new DataTuple[totalResults];
 			this.sunlight_360 = new DataTuple[totalResults];
+			/* End of Daniel's additions*/
+			
 			// Iterate through each row.
 			for (ListEntry row : listFeed.getEntries()) {
 				this.sunlight_0[i] = new DataTuple(Integer.parseInt(row.getCustomElements().getValue("month")),

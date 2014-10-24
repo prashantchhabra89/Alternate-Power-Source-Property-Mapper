@@ -14,6 +14,9 @@ import main.powercalc.WindCalc;
 
 @SuppressWarnings("serial")
 public class PowerPlannerServlet extends HttpServlet {
+	/**
+	 * Gets fake data.
+	 */
 	public void doTestPost(HttpServletRequest req, HttpServletResponse resp)
 			throws IOException {
 		final String type = req.getParameter("type");
@@ -52,6 +55,19 @@ public class PowerPlannerServlet extends HttpServlet {
 		resp.getOutputStream().close();
 	}
 
+	/**
+	 * Post request for data. Request is expected to contain several
+	 * parameters, including:
+	 * 'type' - Valid Values: WIND, SOLAR, HYDRO
+	 * 'neLat' - Valid Values: -90.0 to 90.0
+	 * 'swLat' 				''
+	 * 'neLng' - Valid Values: -180.0 to 180.0
+	 * 'swLng' 				''
+	 * 
+	 * Sends a JSON formatted response with 'lat', 'lng', and 'weight'
+	 * parameters. 'lat' and 'lng' will fall within the bounds specified
+	 * in the request parameters.
+	 */
 	public void doPost(HttpServletRequest req, HttpServletResponse resp)
 			throws IOException {
 		WindCalc wind_query = new WindCalc();
@@ -73,6 +89,7 @@ public class PowerPlannerServlet extends HttpServlet {
 		} else if (type.equals(PowerType.SOLAR.toString())) {
 			retData = solar_query.powerCalc(neLat, swLng, swLat, neLng, 0.5, 2,
 					0.75, 45);
+			System.out.println("Data fetched: " + retData.length);
 		} else {
 			System.out.println("Error: Not currently set up for " + type
 					+ " data.");
@@ -107,13 +124,6 @@ public class PowerPlannerServlet extends HttpServlet {
 
 	/**
 	 * Temporary method for generating fake server data.
-	 * 
-	 * @param pType
-	 * @param neLat
-	 * @param neLng
-	 * @param swLat
-	 * @param swLng
-	 * @return
 	 */
 	private ArrayList<DataTuple> getFakeData(PowerType pType, double neLat,
 			double neLng, double swLat, double swLng) {

@@ -95,10 +95,14 @@ public class WindCalc {
 			ListFeed listFeed = service.query(query, ListFeed.class);
 
 			int i = 0;
+			
+			/* Daniel's additions */
 			int totalResults = listFeed.getEntries().size();
 			this.wind_5 = new DataTuple[totalResults];
 			this.wind_10 = new DataTuple[totalResults];
 			this.wind_15 = new DataTuple[totalResults];
+			/* End of Daniel's additions*/
+			
 			// Iterate through each row.
 			for (ListEntry row : listFeed.getEntries()) {
 				this.wind_5[i] = new DataTuple(Integer.parseInt(row.getCustomElements().getValue("season")),
