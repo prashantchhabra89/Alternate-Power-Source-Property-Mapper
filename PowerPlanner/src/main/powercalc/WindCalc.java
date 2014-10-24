@@ -1,15 +1,16 @@
 package main.powercalc;
 
-import com.google.appengine.api.datastore.DatastoreService;
-import com.google.appengine.api.datastore.DatastoreServiceFactory;
-import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.FetchOptions;
-import com.google.appengine.api.datastore.PreparedQuery;
-import com.google.appengine.api.datastore.Query;
-import com.google.appengine.api.datastore.Query.CompositeFilterOperator;
-import com.google.appengine.api.datastore.Query.Filter;
-import com.google.appengine.api.datastore.Query.FilterOperator;
-import com.google.appengine.api.datastore.Query.FilterPredicate;
+import java.net.URL;
+import java.util.List;
+
+import com.google.gdata.client.spreadsheet.ListQuery;
+import com.google.gdata.client.spreadsheet.SpreadsheetService;
+import com.google.gdata.data.spreadsheet.ListEntry;
+import com.google.gdata.data.spreadsheet.ListFeed;
+import com.google.gdata.data.spreadsheet.SpreadsheetEntry;
+import com.google.gdata.data.spreadsheet.SpreadsheetFeed;
+import com.google.gdata.data.spreadsheet.WorksheetEntry;
+import com.google.gdata.data.spreadsheet.WorksheetFeed;
 
 public class WindCalc {
 	private DataTuple[] wind_5;
@@ -18,9 +19,9 @@ public class WindCalc {
 	private DataTuple[] testUse;
 	
 	public WindCalc() {
-		this.wind_5 = null;
-		this.wind_10 = null;
-		this.wind_15 = null;
+		this.wind_5 = new DataTuple[10000000];
+		this.wind_10 = new DataTuple[10000000];
+		this.wind_15 = new DataTuple[10000000];
 		this.testUse = null;
 	}
 	
@@ -41,7 +42,7 @@ public class WindCalc {
 		if(height == -1) {
 			forTesting(topleftlat,topleftlon,btmrightlat,btmrightlon);
 		}
-		else if(this.wind_5 == null) {
+		else {
 			fromDatabase(topleftlat,topleftlon,btmrightlat,btmrightlon);		
 		}
 		
@@ -65,33 +66,64 @@ public class WindCalc {
 	}
 	
 	private void fromDatabase(double topleftlat, double topleftlon, double btmrightlat, double btmrightlon) {
-		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+		try {
+			SpreadsheetService service =
+					new SpreadsheetService("WindDatabase");
+			service.setUserCredentials("powerplanner.startup@gmail.com", "startupprogramming");
 
-		Filter minLat = new FilterPredicate("lat",FilterOperator.GREATER_THAN_OR_EQUAL,btmrightlat);
-		Filter maxLat = new FilterPredicate("lat",FilterOperator.LESS_THAN_OR_EQUAL,topleftlat);
-		Filter minLon = new FilterPredicate("lon",FilterOperator.GREATER_THAN_OR_EQUAL,btmrightlon);
-		Filter maxLon = new FilterPredicate("lon",FilterOperator.LESS_THAN_OR_EQUAL,topleftlon);
-		Filter boxRange = CompositeFilterOperator.and(minLat,maxLat,minLon,maxLon);
-		
-		Query q = new Query("Wind").setFilter(boxRange);
-		PreparedQuery pq = datastore.prepare(q);
-		
-		this.wind_5 = new DataTuple[pq.countEntities(FetchOptions.Builder.withDefaults())];
-		this.wind_10 = new DataTuple[pq.countEntities(FetchOptions.Builder.withDefaults())];
-		this.wind_15 = new DataTuple[pq.countEntities(FetchOptions.Builder.withDefaults())];
-		
-		int i = 0;
-		for (Entity result : pq.asIterable()) {
-			this.wind_5[i] = new DataTuple((Integer)result.getProperty("month"),
-					(Double)result.getProperty("lat"), (Double)result.getProperty("lon"),
-					(Double)result.getProperty("ws_5"),(Double)result.getProperty("pre_5"));
-			this.wind_10[i] = new DataTuple((Integer)result.getProperty("month"),
-					(Double)result.getProperty("lat"), (Double)result.getProperty("lon"),
-					(Double)result.getProperty("ws_10"),(Double)result.getProperty("pre_10"));
-			this.wind_15[i] = new DataTuple((Integer)result.getProperty("month"),
-					(Double)result.getProperty("lat"), (Double)result.getProperty("lon"),
-					(Double)result.getProperty("ws_15"),(Double)result.getProperty("pre_15"));
-			i++;
+			URL SPREADSHEET_FEED_URL = new URL(
+					"https://spreadsheets.google.com/feeds/spreadsheets/private/full");
+
+			// Make a request to the API and get all spreadsheets.
+			SpreadsheetFeed feed = service.getFeed(SPREADSHEET_FEED_URL,
+					SpreadsheetFeed.class);
+			List<SpreadsheetEntry> spreadsheets = feed.getEntries();
+
+			SpreadsheetEntry spreadsheet = spreadsheets.get(0);
+
+			// Get the first worksheet of the first spreadsheet.
+			WorksheetFeed worksheetFeed = service.getFeed(
+					spreadsheet.getWorksheetFeedUrl(), WorksheetFeed.class);
+			List<WorksheetEntry> worksheets = worksheetFeed.getEntries();
+			WorksheetEntry worksheet = worksheets.get(0);
+
+			// Fetch the list feed of the worksheet.
+			URL listFeedUrl = worksheet.getListFeedUrl();
+			ListQuery query = new ListQuery(listFeedUrl);
+			query.setSpreadsheetQuery("lat >= " + String.valueOf(btmrightlat) + " and lat <= " + String.valueOf(topleftlat)
+					+ " and lon >= " + String.valueOf(topleftlon) + " and lon <= " + String.valueOf(btmrightlon));
+			ListFeed listFeed = service.query(query, ListFeed.class);
+
+			int i = 0;
+			
+			/* Daniel's additions */
+			int totalResults = listFeed.getEntries().size();
+			this.wind_5 = new DataTuple[totalResults];
+			this.wind_10 = new DataTuple[totalResults];
+			this.wind_15 = new DataTuple[totalResults];
+			/* End of Daniel's additions*/
+			
+			// Iterate through each row.
+			for (ListEntry row : listFeed.getEntries()) {
+				this.wind_5[i] = new DataTuple(Integer.parseInt(row.getCustomElements().getValue("season")),
+						Double.parseDouble(row.getCustomElements().getValue("lat")), 
+						Double.parseDouble(row.getCustomElements().getValue("lon")),
+						Double.parseDouble(row.getCustomElements().getValue("ws5")),
+						Double.parseDouble(row.getCustomElements().getValue("pre5")));
+				this.wind_10[i] = new DataTuple(Integer.parseInt(row.getCustomElements().getValue("season")),
+						Double.parseDouble(row.getCustomElements().getValue("lat")), 
+						Double.parseDouble(row.getCustomElements().getValue("lon")),
+						Double.parseDouble(row.getCustomElements().getValue("ws10")),
+						Double.parseDouble(row.getCustomElements().getValue("pre10")));
+				this.wind_15[i] = new DataTuple(Integer.parseInt(row.getCustomElements().getValue("season")),
+						Double.parseDouble(row.getCustomElements().getValue("lat")), 
+						Double.parseDouble(row.getCustomElements().getValue("lon")),
+						Double.parseDouble(row.getCustomElements().getValue("ws15")),
+						Double.parseDouble(row.getCustomElements().getValue("pre15")));
+				i++;
+			}
+		} catch(Exception e) {
+			e.printStackTrace();
 		}
 	}
 	
