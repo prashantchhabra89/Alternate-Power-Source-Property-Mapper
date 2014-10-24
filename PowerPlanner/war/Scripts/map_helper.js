@@ -148,13 +148,21 @@ function _getHeatmapData(type, neLat, neLng, swLat, swLng) {
 		dataType : 'json',
 		success : function(data, status) {
 			if (status) {
+				var weight_points = [];
+				for (var i = 0; i < data.length; i++) {
+					weight_points.push(data[i].weight);
+				}
+				var scaler = getArrayMax(weight_points);
+				console.log("Scaler: " + scaler);
+
 				hm_data = [];
 				for (var i = 0; i < data.length; i++) {
 					addHeatmapCoord(hm_data, data[i].lat, data[i].lng,
-							data[i].weight);
+							data[i].weight / scaler);
 				}
 				if (type == "WIND") {
-					wind_data = hm_data;
+					wind_data = _interpolateData(hm_data, neLat, neLng, swLat,
+							swLng);
 				} else if (type == "SOLAR") {
 					solar_data = hm_data;
 				} else if (type == "HYDRO") {
@@ -164,6 +172,62 @@ function _getHeatmapData(type, neLat, neLng, swLat, swLng) {
 			}
 		}
 	});
+}
+
+function _interpolateData(hm_data, neLat, neLng, swLat, swLng) {
+	var offset = 0.005;
+	var temp_data = [];
+
+	for (var i = 0.0; i <= (neLat - swLat); i += 0.005) {
+		for (var j = 0.0; j <= (neLng - swLng); j += 0.01) {
+			var weighted = getDataWeight(hm_data, swLat + i, swLng + j + offset);
+			addHeatmapCoord(temp_data, swLat + i, swLng + j + offset, weighted);
+		}
+		offset = (offset == 0.0 ? 0.005 : 0.0);
+	}
+
+	return temp_data;
+}
+
+function getDataWeight(hm_data, lat, lng) {
+	var nearest = [];
+	var nearest_distance = [];
+
+	for (var i = 0; i < hm_data.length; i++) {
+		if (nearest.length < 4) {
+			// Trivial case; populate the first 4 nearest
+			nearest.push(hm_data[i]);
+			nearest_distance.push(distanceTo(lat, lng, hm_data[i].lat,
+					hm_data[i].lng));
+		} else {
+			var dist_to_i = distanceTo(lat, lng, hm_data[i].lat, hm_data[i].lng);
+			var furthest_near_point = getArrayMax(nearest_distance);
+			if (dist_to_i < furthest_near_point) {
+				for (var j = 0; j < nearest_distance.length; j++) {
+					if (nearest_distance[j] == furthest_near_point) {
+						nearest[j] = hm_data[i];
+						nearest_distance[j] = dist_to_i;
+						break;
+					}
+				}
+			}
+		}
+	}
+
+	var final_weight = 0;
+	var max_nearest_distance = getArrayMax(nearest_distance);
+	for (var i = 0; i < nearest.length; i++) {
+		// Weighting should be applied better. (sum of i (1 - dist[i]/totDist) * weighting) / (i-1)
+		final_weight += ((nearest[i].weight * (nearest_distance[i] / max_nearest_distance)) / 1.5);
+	}
+	return (final_weight/nearest.length);
+}
+
+function distanceTo(src_lat, src_lng, dest_lat, dest_lng) {
+	var a = Math.pow((src_lat - dest_lat), 2);
+	var b = Math.pow((src_lng - dest_lng), 2);
+
+	return (Math.sqrt(a+b));
 }
 
 /*
@@ -199,7 +263,7 @@ function initHeatmap(map) {
 	var heatmap = new google.maps.visualization.HeatmapLayer({
 		maxIntensity : 1,
 		map : map,
-		radius : 0.0022,
+		radius : 0.0095,
 		dissipating : false,
 		opacity : 0.4,
 		gradient : [ 'rgba(0,0,0,0)', 'rgba(255,0,0,1)', 'rgba(255,63,0,1)',
@@ -276,6 +340,10 @@ function getNELatitude(map) {
  */
 function getNELongitude(map) {
 	return map.getBounds().getNorthEast().lng();
+}
+
+function getArrayMax(number_array) {
+	return Math.max.apply(null, number_array);
 }
 
 /*
