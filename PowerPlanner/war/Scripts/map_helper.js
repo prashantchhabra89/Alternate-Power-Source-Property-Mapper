@@ -221,10 +221,11 @@ function getDataWeight(hm_data, lat, lng) {
 		if (nearest.length < 4) {
 			// Trivial case; populate the first 4 nearest
 			nearest.push(hm_data[i]);
-			nearest_distance.push(distanceTo(lat, lng, hm_data[i].lat,
-					hm_data[i].lng));
+			nearest_distance.push(distanceTo(lat, lng, hm_data[i].location
+					.lat(), hm_data[i].location.lng()));
 		} else {
-			var dist_to_i = distanceTo(lat, lng, hm_data[i].lat, hm_data[i].lng);
+			var dist_to_i = distanceTo(lat, lng, hm_data[i].location.lat(),
+					hm_data[i].location.lng());
 			var furthest_near_point = getArrayMax(nearest_distance);
 			if (dist_to_i < furthest_near_point) {
 				for (var j = 0; j < nearest_distance.length; j++) {
@@ -241,17 +242,18 @@ function getDataWeight(hm_data, lat, lng) {
 	var final_weight = 0;
 	var max_nearest_distance = getArrayMax(nearest_distance);
 	for (var i = 0; i < nearest.length; i++) {
-		// Weighting should be applied better. (sum of i (1 - dist[i]/totDist) * weighting) / (i-1)
+		// Weighting should be applied better. (sum of i (1 - dist[i]/totDist) *
+		// weighting) / (i-1)
 		final_weight += ((nearest[i].weight * (nearest_distance[i] / max_nearest_distance)) / 1.5);
 	}
-	return (final_weight/nearest.length);
+	return (final_weight / nearest.length);
 }
 
 function distanceTo(src_lat, src_lng, dest_lat, dest_lng) {
 	var a = Math.pow((src_lat - dest_lat), 2);
 	var b = Math.pow((src_lng - dest_lng), 2);
 
-	return (Math.sqrt(a+b));
+	return (Math.sqrt(a + b));
 }
 
 /*
