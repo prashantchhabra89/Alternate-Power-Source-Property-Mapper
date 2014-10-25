@@ -1,4 +1,4 @@
-package come.powerplanner;
+package com.powerplanner;
 
 import java.io.IOException;
 
