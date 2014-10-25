@@ -44,5 +44,6 @@ function startButtonClick() {
 	if($("#pac-input-intro").val() != "")	{
 		$("#pac-input").val($("#pac-input-intro").val());
 	}
+	mapLoader();
 }
 

@@ -344,8 +344,3 @@ function getNELatitude(map) {
 function getNELongitude(map) {
 	return map.getBounds().getNorthEast().lng();
 }
-
-/*
- * Map setup entry point.
- */
-google.maps.event.addDomListener(window, 'load', mapLoader);
