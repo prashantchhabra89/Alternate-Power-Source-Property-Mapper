@@ -5,10 +5,13 @@ var wind_data = []; /* The wind data for the current heatmap view */
 var solar_data = []; /* The solar data for the current heatmap view */
 var hydro_data = []; /* The hydro data for the current heatmap view */
 
-// This example adds a search box to a map, using the Google Place Autocomplete
-// feature. People can enter geographical searches. The search box will return a
-// pick list containing a mix of places and predicted search terms.
+var POINT_DEBUGGER = false; /* true = view data points instead of interpolation */
 
+/*
+ * This example adds a search box to a map, using the Google Place Autocomplete
+ * feature. People can enter geographical searches. The search box will return a
+ * pick list containing a mix of places and predicted search terms.
+ */
 function initialize() {
 
 	var markers = [];
@@ -101,29 +104,6 @@ function initialize() {
 }
 
 /*
- * Initializes a test version of the map and heatmap, loading fake data on the
- * client side.
- */
-function mapTest() {
-	g_map = initialize();
-	g_heatmap = initHeatmap(g_map);
-
-	attachHeatmap(g_heatmap, g_map);
-
-	/*
-	 * Horrible ugly hack while I figure out why map load callback listener
-	 * hangs infinitely. This lets the map finish loading before trying to get
-	 * its boundaries.
-	 */
-	function sleep(millis, callback, map) {
-		setTimeout(function() {
-			callback(map);
-		}, millis);
-	}
-	sleep(500, loadHeatmapData, g_map);
-}
-
-/*
  * Initializes the map, heatmap, and important event listeners.
  */
 function mapLoader() {
@@ -135,55 +115,6 @@ function mapLoader() {
 	google.maps.event.addListener(g_map, 'dragend', _eventHeatmapDataToggler);
 	google.maps.event.addListener(g_map, 'zoom_changed',
 			_eventHeatmapDataToggler)
-}
-
-/*
- * Creates fake data (but only for the loading map view!) of wind, solar, and
- * hydro energy
- */
-function loadHeatmapData(map) {
-	var startLat = getSWLatitude(map);
-	var startLng = getSWLongitude(map);
-	var endLat = getNELatitude(map);
-	var endLng = getNELongitude(map);
-
-	var offset = 0.00075;
-
-	/* Wind */
-	for (var i = 0.0; i <= (endLat - startLat); i += 0.00075) {
-		for (var j = 0.0; j <= (endLng - startLng); j += 0.00225) {
-			if (Math.random() > 0.45) {
-				var weighted = Math.random() / 2.5;
-				addHeatmapCoord(wind_data, startLat + i, startLng + j + offset,
-						weighted);
-			}
-		}
-		offset = (offset == 0.0 ? 0.00075 : 0.0);
-	} // */
-
-	/* Solar */
-	for (var i = 0.0; i <= (endLat - startLat); i += 0.00075) {
-		for (var j = 0.0; j <= (endLng - startLng); j += 0.00225) {
-			if (Math.random() > 0.1) {
-				var weighted = Math.random() / 4 + 0.025;
-				addHeatmapCoord(solar_data, startLat + i,
-						startLng + j + offset, weighted);
-			}
-		}
-		offset = (offset == 0.0 ? 0.00075 : 0.0);
-	} // */
-
-	/* Hydro */
-	for (var i = 0.0; i <= (endLat - startLat); i += 0.00075) {
-		for (var j = 0.0; j <= (endLng - startLng); j += 0.00225) {
-			if (Math.random() > 0.9) {
-				var weighted = Math.random() / 2 + 0.4;
-				addHeatmapCoord(hydro_data, startLat + i,
-						startLng + j + offset, weighted);
-			}
-		}
-		offset = (offset == 0.0 ? 0.00075 : 0.0);
-	} // */
 }
 
 /*
@@ -204,19 +135,21 @@ function toggleHeatmapData(showWind, showSolar, showHydro) {
 	solar_data = [];
 	hydro_data = [];
 
+	var neLat = getNELatitude(g_map);
+	var neLng = getNELongitude(g_map);
+	var swLat = getSWLatitude(g_map);
+	var swLng = getSWLongitude(g_map);
+
 	if (showWind) {
-		_getHeatmapData("WIND", getNELatitude(g_map), getNELongitude(g_map),
-				getSWLatitude(g_map), getSWLongitude(g_map));
+		_getHeatmapData("WIND", neLat, neLng, swLat, swLng);
 	}
 
 	if (showSolar) {
-		_getHeatmapData("SOLAR", getNELatitude(g_map), getNELongitude(g_map),
-				getSWLatitude(g_map), getSWLongitude(g_map));
+		_getHeatmapData("SOLAR", neLat, neLng, swLat, swLng);
 	}
 
 	if (showHydro) {
-		_getHeatmapData("HYDRO", getNELatitude(g_map), getNELongitude(g_map),
-				getSWLatitude(g_map), getSWLongitude(g_map));
+		_getHeatmapData("HYDRO", neLat, neLng, swLat, swLng);
 	}
 
 	if (!showWind && !showSolar && !showHydro) {
@@ -230,28 +163,48 @@ function toggleHeatmapData(showWind, showSolar, showHydro) {
  * HYDRO. Triggers a heatmap update upon successful server response.
  */
 function _getHeatmapData(type, neLat, neLng, swLat, swLng) {
+	var lat_offset = (neLat - swLat) / 2;
+	var lng_offset = (neLng - swLng) / 2;
+
 	$.ajax({
 		url : '/powerplanner',
 		type : 'POST',
 		data : {
 			type : type,
-			neLat : neLat,
-			neLng : neLng,
-			swLat : swLat,
-			swLng : swLng
+			neLat : neLat + lat_offset,
+			neLng : neLng + lng_offset,
+			swLat : swLat - lat_offset,
+			swLng : swLng - lng_offset
 		},
 		dataType : 'json',
 		success : function(data, status) {
 			if (status) {
+				var weight_points = [];
+				for (var i = 0; i < data.length; i++) {
+					weight_points.push(data[i].weight);
+				}
+				var scaler = getArrayMax(weight_points);
+				console.log("Scaler: " + scaler);
+
 				hm_data = [];
 				for (var i = 0; i < data.length; i++) {
 					addHeatmapCoord(hm_data, data[i].lat, data[i].lng,
-							data[i].weight);
+							data[i].weight / scaler);
 				}
 				if (type == "WIND") {
-					wind_data = hm_data;
+					if (POINT_DEBUGGER) {
+						wind_data = hm_data;
+					} else {
+						wind_data = _interpolateData(hm_data, neLat, neLng,
+								swLat, swLng);
+					}
 				} else if (type == "SOLAR") {
-					solar_data = hm_data;
+					if (POINT_DEBUGGER) {
+						solar_data = hm_data;
+					} else {
+						solar_data = _interpolateData(hm_data, neLat, neLng,
+								swLat, swLng);
+					}
 				} else if (type == "HYDRO") {
 					hydro_data = hm_data;
 				}
@@ -262,13 +215,96 @@ function _getHeatmapData(type, neLat, neLng, swLat, swLng) {
 }
 
 /*
+ * Fills in a grid of all the points visible on the screen as defined by the
+ * provided boundary coordinates (with a little bit of bleed over the boundaries
+ * to prevent visible edge discolouration) by interpolating values from the
+ * provided set of real data points based on a weighting algorithm. Returns the
+ * set of interpolated values.
+ */
+function _interpolateData(hm_data, neLat, neLng, swLat, swLng) {
+	var lat_offset = (neLat - swLat) / 10;
+	var lng_offset = (neLng - swLng) / 10;
+
+	var offset = 0.005;
+	var temp_data = [];
+
+	for (var i = 0.0; i <= (neLat - swLat) + 2 * lat_offset; i += 0.005) {
+		for (var j = 0.0; j <= (neLng - swLng) + 2 * lng_offset; j += 0.01) {
+			var weighted = getDataWeight(hm_data, swLat + i, swLng + j + offset);
+			addHeatmapCoord(temp_data, swLat + i - lat_offset, swLng + j
+					+ offset - lng_offset, weighted);
+		}
+		offset = (offset == 0.0 ? 0.005 : 0.0);
+	}
+
+	return temp_data;
+}
+
+/*
+ * Gets the data weight for a given point on the map by applying a weighted
+ * average to the four nearest data points (or if fewer than four data points,
+ * using all the ones available).
+ */
+function getDataWeight(hm_data, lat, lng) {
+	var nearest = [];
+	var nearest_distance = [];
+
+	for (var i = 0; i < hm_data.length; i++) {
+		if (nearest.length < 4) {
+			// Trivial case; populate the first 4 nearest
+			nearest.push(hm_data[i]);
+			nearest_distance.push(distanceTo(lat, lng, hm_data[i].location
+					.lat(), hm_data[i].location.lng()));
+		} else {
+			var dist_to_i = distanceTo(lat, lng, hm_data[i].location.lat(),
+					hm_data[i].location.lng());
+			var furthest_near_point = getArrayMax(nearest_distance);
+			if (dist_to_i < furthest_near_point) {
+				for (var j = 0; j < nearest_distance.length; j++) {
+					if (nearest_distance[j] == furthest_near_point) {
+						nearest[j] = hm_data[i];
+						nearest_distance[j] = dist_to_i;
+						break;
+					}
+				}
+			}
+		}
+	}
+
+	var final_weight = 0;
+	var max_nearest_distance = getArrayMax(nearest_distance);
+	/*
+	 * var weight_max = nearest.reduce(function(a, b) { return Math.max(a,
+	 * b.weight); }, 0); var dist_sum = nearest_distance.reduce(function(a, b) {
+	 * return a + b; });
+	 */
+	for (var i = 0; i < nearest.length; i++) {
+		final_weight += ((nearest[i].weight * (nearest_distance[i] / max_nearest_distance)) / 1.5);
+		// final_weight += ((1 - (nearest_distance[i] / dist_sum))
+		// * (nearest[i].weight / weight_max) / 1.5);
+	}
+	return (final_weight / (nearest.length));
+}
+
+/*
+ * Find the distance from one provided point to another (assumes latitude and
+ * longitude cover the same distance).
+ */
+function distanceTo(src_lat, src_lng, dest_lat, dest_lng) {
+	var a = Math.pow((src_lat - dest_lat), 2);
+	var b = Math.pow((src_lng - dest_lng), 2);
+
+	return (Math.sqrt(a + b));
+}
+
+/*
  * Initializes heatmap with current basic settings.
  */
 function initHeatmap(map) {
 	var heatmap = new google.maps.visualization.HeatmapLayer({
 		maxIntensity : 1,
 		map : map,
-		radius : 0.0022,
+		radius : 0.0095,
 		dissipating : false,
 		opacity : 0.4,
 		gradient : [ 'rgba(0,0,0,0)', 'rgba(255,0,0,1)', 'rgba(255,63,0,1)',
@@ -345,6 +381,13 @@ function getNELatitude(map) {
  */
 function getNELongitude(map) {
 	return map.getBounds().getNorthEast().lng();
+}
+
+/*
+ * Gets the maximum value in an array of numbers.
+ */
+function getArrayMax(number_array) {
+	return Math.max.apply(null, number_array);
 }
 
 /*
