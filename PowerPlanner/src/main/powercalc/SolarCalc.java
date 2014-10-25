@@ -23,12 +23,12 @@ public class SolarCalc {
 	private DataTuple[] testUse;
 	
 	public SolarCalc() {
-		this.sunlight_0 = null;
-		this.sunlight_30 = null;
-		this.sunlight_45 = null;
-		this.sunlight_60 = null;
-		this.sunlight_90 = null;
-		this.sunlight_360 = null;
+		this.sunlight_0 = new DataTuple[4746];
+		this.sunlight_30 = new DataTuple[4746];
+		this.sunlight_45 = new DataTuple[4746];
+		this.sunlight_60 = new DataTuple[4746];
+		this.sunlight_90 = new DataTuple[4746];
+		this.sunlight_360 = new DataTuple[4746];
 		this.testUse = null;
 	}
 
@@ -50,7 +50,7 @@ public class SolarCalc {
 		if(tilt == -1) {
 			forTesting(topleftlat,topleftlon,btmrightlat,btmrightlon);
 		}
-		else if(this.sunlight_0 == null) {
+		else {
 			fromDatabase(topleftlat,topleftlon,btmrightlat,btmrightlon);
 		}
 		
@@ -101,11 +101,22 @@ public class SolarCalc {
 			// Fetch the list feed of the worksheet.
 			URL listFeedUrl = worksheet.getListFeedUrl();
 			ListQuery query = new ListQuery(listFeedUrl);
-			query.setSpreadsheetQuery("lat >= " + btmrightlat + " and lat <= " + topleftlat
-					+ " and lon >= " + btmrightlon + " and lon <= " + topleftlon);
+			query.setSpreadsheetQuery("lat >= " + String.valueOf(btmrightlat) + " and lat <= " + String.valueOf(topleftlat)
+					+ " and lon >= " + String.valueOf(topleftlon) + " and lon <= " + String.valueOf(btmrightlon));
 			ListFeed listFeed = service.query(query, ListFeed.class);
 
 			int i = 0;
+			
+			/* Daniel's additions */
+			int totalResults = listFeed.getEntries().size();
+			this.sunlight_0 = new DataTuple[totalResults];
+			this.sunlight_30 = new DataTuple[totalResults];
+			this.sunlight_45 = new DataTuple[totalResults];
+			this.sunlight_60 = new DataTuple[totalResults];
+			this.sunlight_90 = new DataTuple[totalResults];
+			this.sunlight_360 = new DataTuple[totalResults];
+			/* End of Daniel's additions*/
+			
 			// Iterate through each row.
 			for (ListEntry row : listFeed.getEntries()) {
 				this.sunlight_0[i] = new DataTuple(Integer.parseInt(row.getCustomElements().getValue("month")),

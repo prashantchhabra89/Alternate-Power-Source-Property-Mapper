@@ -19,9 +19,9 @@ public class WindCalc {
 	private DataTuple[] testUse;
 	
 	public WindCalc() {
-		this.wind_5 = null;
-		this.wind_10 = null;
-		this.wind_15 = null;
+		this.wind_5 = new DataTuple[10000000];
+		this.wind_10 = new DataTuple[10000000];
+		this.wind_15 = new DataTuple[10000000];
 		this.testUse = null;
 	}
 	
@@ -42,7 +42,7 @@ public class WindCalc {
 		if(height == -1) {
 			forTesting(topleftlat,topleftlon,btmrightlat,btmrightlon);
 		}
-		else if(this.wind_5 == null) {
+		else {
 			fromDatabase(topleftlat,topleftlon,btmrightlat,btmrightlon);		
 		}
 		
@@ -68,7 +68,7 @@ public class WindCalc {
 	private void fromDatabase(double topleftlat, double topleftlon, double btmrightlat, double btmrightlon) {
 		try {
 			SpreadsheetService service =
-					new SpreadsheetService("SolarDatabase");
+					new SpreadsheetService("WindDatabase");
 			service.setUserCredentials("powerplanner.startup@gmail.com", "startupprogramming");
 
 			URL SPREADSHEET_FEED_URL = new URL(
@@ -90,24 +90,32 @@ public class WindCalc {
 			// Fetch the list feed of the worksheet.
 			URL listFeedUrl = worksheet.getListFeedUrl();
 			ListQuery query = new ListQuery(listFeedUrl);
-			query.setSpreadsheetQuery("lat >= " + btmrightlat + " and lat <= " + topleftlat
-					+ " and lon >= " + btmrightlon + " and lon <= " + topleftlon);
+			query.setSpreadsheetQuery("lat >= " + String.valueOf(btmrightlat) + " and lat <= " + String.valueOf(topleftlat)
+					+ " and lon >= " + String.valueOf(topleftlon) + " and lon <= " + String.valueOf(btmrightlon));
 			ListFeed listFeed = service.query(query, ListFeed.class);
 
 			int i = 0;
+			
+			/* Daniel's additions */
+			int totalResults = listFeed.getEntries().size();
+			this.wind_5 = new DataTuple[totalResults];
+			this.wind_10 = new DataTuple[totalResults];
+			this.wind_15 = new DataTuple[totalResults];
+			/* End of Daniel's additions*/
+			
 			// Iterate through each row.
 			for (ListEntry row : listFeed.getEntries()) {
-				this.wind_5[i] = new DataTuple(Integer.parseInt(row.getCustomElements().getValue("month")),
+				this.wind_5[i] = new DataTuple(Integer.parseInt(row.getCustomElements().getValue("season")),
 						Double.parseDouble(row.getCustomElements().getValue("lat")), 
 						Double.parseDouble(row.getCustomElements().getValue("lon")),
 						Double.parseDouble(row.getCustomElements().getValue("ws5")),
 						Double.parseDouble(row.getCustomElements().getValue("pre5")));
-				this.wind_10[i] = new DataTuple(Integer.parseInt(row.getCustomElements().getValue("month")),
+				this.wind_10[i] = new DataTuple(Integer.parseInt(row.getCustomElements().getValue("season")),
 						Double.parseDouble(row.getCustomElements().getValue("lat")), 
 						Double.parseDouble(row.getCustomElements().getValue("lon")),
 						Double.parseDouble(row.getCustomElements().getValue("ws10")),
 						Double.parseDouble(row.getCustomElements().getValue("pre10")));
-				this.wind_15[i] = new DataTuple(Integer.parseInt(row.getCustomElements().getValue("month")),
+				this.wind_15[i] = new DataTuple(Integer.parseInt(row.getCustomElements().getValue("season")),
 						Double.parseDouble(row.getCustomElements().getValue("lat")), 
 						Double.parseDouble(row.getCustomElements().getValue("lon")),
 						Double.parseDouble(row.getCustomElements().getValue("ws15")),
