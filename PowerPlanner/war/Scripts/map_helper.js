@@ -214,14 +214,25 @@ function _getHeatmapData(type, neLat, neLng, swLat, swLng) {
 	});
 }
 
+/*
+ * Fills in a grid of all the points visible on the screen as defined by the
+ * provided boundary coordinates (with a little bit of bleed over the boundaries
+ * to prevent visible edge discolouration) by interpolating values from the
+ * provided set of real data points based on a weighting algorithm. Returns the
+ * set of interpolated values.
+ */
 function _interpolateData(hm_data, neLat, neLng, swLat, swLng) {
+	var lat_offset = (neLat - swLat) / 10;
+	var lng_offset = (neLng - swLng) / 10;
+
 	var offset = 0.005;
 	var temp_data = [];
 
-	for (var i = 0.0; i <= (neLat - swLat); i += 0.005) {
-		for (var j = 0.0; j <= (neLng - swLng); j += 0.01) {
+	for (var i = 0.0; i <= (neLat - swLat) + 2 * lat_offset; i += 0.005) {
+		for (var j = 0.0; j <= (neLng - swLng) + 2 * lng_offset; j += 0.01) {
 			var weighted = getDataWeight(hm_data, swLat + i, swLng + j + offset);
-			addHeatmapCoord(temp_data, swLat + i, swLng + j + offset, weighted);
+			addHeatmapCoord(temp_data, swLat + i - lat_offset, swLng + j
+					+ offset - lng_offset, weighted);
 		}
 		offset = (offset == 0.0 ? 0.005 : 0.0);
 	}
@@ -229,6 +240,11 @@ function _interpolateData(hm_data, neLat, neLng, swLat, swLng) {
 	return temp_data;
 }
 
+/*
+ * Gets the data weight for a given point on the map by applying a weighted
+ * average to the four nearest data points (or if fewer than four data points,
+ * using all the ones available).
+ */
 function getDataWeight(hm_data, lat, lng) {
 	var nearest = [];
 	var nearest_distance = [];
@@ -257,14 +273,23 @@ function getDataWeight(hm_data, lat, lng) {
 
 	var final_weight = 0;
 	var max_nearest_distance = getArrayMax(nearest_distance);
+	/*
+	 * var weight_max = nearest.reduce(function(a, b) { return Math.max(a,
+	 * b.weight); }, 0); var dist_sum = nearest_distance.reduce(function(a, b) {
+	 * return a + b; });
+	 */
 	for (var i = 0; i < nearest.length; i++) {
-		// Weighting should be applied better. (sum of i (1 - dist[i]/totDist) *
-		// weighting) / (i-1)
 		final_weight += ((nearest[i].weight * (nearest_distance[i] / max_nearest_distance)) / 1.5);
+		// final_weight += ((1 - (nearest_distance[i] / dist_sum))
+		// * (nearest[i].weight / weight_max) / 1.5);
 	}
-	return (final_weight / nearest.length);
+	return (final_weight / (nearest.length));
 }
 
+/*
+ * Find the distance from one provided point to another (assumes latitude and
+ * longitude cover the same distance).
+ */
 function distanceTo(src_lat, src_lng, dest_lat, dest_lng) {
 	var a = Math.pow((src_lat - dest_lat), 2);
 	var b = Math.pow((src_lng - dest_lng), 2);
@@ -358,6 +383,9 @@ function getNELongitude(map) {
 	return map.getBounds().getNorthEast().lng();
 }
 
+/*
+ * Gets the maximum value in an array of numbers.
+ */
 function getArrayMax(number_array) {
 	return Math.max.apply(null, number_array);
 }
