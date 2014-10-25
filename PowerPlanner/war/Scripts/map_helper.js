@@ -5,6 +5,8 @@ var wind_data = []; /* The wind data for the current heatmap view */
 var solar_data = []; /* The solar data for the current heatmap view */
 var hydro_data = []; /* The hydro data for the current heatmap view */
 
+var POINT_DEBUGGER = false; /* true = view data points instead of interpolation */
+
 /*
  * This example adds a search box to a map, using the Google Place Autocomplete
  * feature. People can enter geographical searches. The search box will return a
@@ -133,19 +135,21 @@ function toggleHeatmapData(showWind, showSolar, showHydro) {
 	solar_data = [];
 	hydro_data = [];
 
+	var neLat = getNELatitude(g_map);
+	var neLng = getNELongitude(g_map);
+	var swLat = getSWLatitude(g_map);
+	var swLng = getSWLongitude(g_map);
+
 	if (showWind) {
-		_getHeatmapData("WIND", getNELatitude(g_map), getNELongitude(g_map),
-				getSWLatitude(g_map), getSWLongitude(g_map));
+		_getHeatmapData("WIND", neLat, neLng, swLat, swLng);
 	}
 
 	if (showSolar) {
-		_getHeatmapData("SOLAR", getNELatitude(g_map), getNELongitude(g_map),
-				getSWLatitude(g_map), getSWLongitude(g_map));
+		_getHeatmapData("SOLAR", neLat, neLng, swLat, swLng);
 	}
 
 	if (showHydro) {
-		_getHeatmapData("HYDRO", getNELatitude(g_map), getNELongitude(g_map),
-				getSWLatitude(g_map), getSWLongitude(g_map));
+		_getHeatmapData("HYDRO", neLat, neLng, swLat, swLng);
 	}
 
 	if (!showWind && !showSolar && !showHydro) {
@@ -159,15 +163,18 @@ function toggleHeatmapData(showWind, showSolar, showHydro) {
  * HYDRO. Triggers a heatmap update upon successful server response.
  */
 function _getHeatmapData(type, neLat, neLng, swLat, swLng) {
+	var lat_offset = (neLat - swLat) / 2;
+	var lng_offset = (neLng - swLng) / 2;
+
 	$.ajax({
 		url : '/powerplanner',
 		type : 'POST',
 		data : {
 			type : type,
-			neLat : neLat,
-			neLng : neLng,
-			swLat : swLat,
-			swLng : swLng
+			neLat : neLat + lat_offset,
+			neLng : neLng + lng_offset,
+			swLat : swLat - lat_offset,
+			swLng : swLng - lng_offset
 		},
 		dataType : 'json',
 		success : function(data, status) {
@@ -185,10 +192,19 @@ function _getHeatmapData(type, neLat, neLng, swLat, swLng) {
 							data[i].weight / scaler);
 				}
 				if (type == "WIND") {
-					wind_data = _interpolateData(hm_data, neLat, neLng, swLat,
-							swLng);
+					if (POINT_DEBUGGER) {
+						wind_data = hm_data;
+					} else {
+						wind_data = _interpolateData(hm_data, neLat, neLng,
+								swLat, swLng);
+					}
 				} else if (type == "SOLAR") {
-					solar_data = hm_data;
+					if (POINT_DEBUGGER) {
+						solar_data = hm_data;
+					} else {
+						solar_data = _interpolateData(hm_data, neLat, neLng,
+								swLat, swLng);
+					}
 				} else if (type == "HYDRO") {
 					hydro_data = hm_data;
 				}
