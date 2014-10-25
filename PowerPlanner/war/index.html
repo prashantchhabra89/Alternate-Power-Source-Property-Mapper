@@ -14,8 +14,11 @@
 <link rel="stylesheet" type="text/css"
 	href="Styles/jquery.mobile-1.4.2.min.css" />
 <link rel="stylesheet" type="text/css" href="Styles/main.css">
+<link href='http://fonts.googleapis.com/css?family=Raleway:800, 200'
+	rel='stylesheet' type='text/css'>
 
-<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=visualization"></script>
+<script
+	src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=places,visualization"></script>
 <script src="Scripts/map_helper.js"></script>
 
 </head>
@@ -23,9 +26,119 @@
 <body>
 	<!-- Start of first page -->
 	<div data-role="page" id="home">
+		<!-- /header -->
+		<div data-role="header" data-theme="a" class="ui-header-intro">
+			<header class="intro">
+				<h1 class="intro-title">Power Planner</h1>
+				<p class="intro-text">Putting power in people's hands for finding 
+				sites for sustainable electricity generation.</p>
+				<input type="text" name="placesTextSearch" id="pac-input-intro"
+					class="controls placesTextSearch"
+					placeholder="Search a place in BC">
+					<br> 
+				<a href="#app" class="ui-btn ui-btn-inline start-button">Start</a>
+			</header>
+		</div>
+		<div role="main" class="ui-content ">
+			<h3 class="intro-header calc-text">Calculations</h3>
+			<p class="intro-text calc-text">The Team: Charlie Guan, Chuan Yun
+				Loe, Daniel Faulkner, Jonathan Lam, Prashant Chhabra Description: A
+				web application that puts the power into people's hands for finding
+				sites for sustainable electricity generation. This application is
+				being developed as a project for the Startup Programming class at
+				the University of Victoria.</p>
+		</div>
+		<div role="main" class="ui-content about-background">
+			<h3 class="intro-header about-text">About Us</h3>
+			<h4 class="intro-subheading">
+				<strong>Description</strong>
+			</h4>
+			<p class="intro-text">A web application that puts the power into
+				people's hands for finding sites for sustainable electricity
+				generation. This application is being developed as a project for the
+				Startup Programming class at the University of Victoria.</p>
+			<h4 class="intro-subheading">
+				<strong>The Team</strong>
+			</h4>
+			<p class="intro-text">Charlie Guan, Chuan Yun Loe, Daniel
+				Faulkner, Jonathan Lam, Prashant Chhabra</p>
+			<div class="circular jonathan"></div>
+			<div class="circular"></div>
+			<br>
+			<div class="circular"></div>
+			<div class="circular"></div>
+			<div class="circular"></div>
+
+
+		</div>
+		<!-- /content -->
+		<div data-role="footer" data-position="fixed" data-theme="b"
+			class="intro-footer">
+			<p>Copyright &copy Power Planner 2014</p>
+		</div>
+	</div>
+
+
+	<!-- Start of app page -->
+	<div data-role="page" id="app">
 		<div data-role="panel" data-position="left" data-display="overlay"
 			id="menu">
-			<h1>MENU PAGE</h1>
+			<div class="resourceBox">
+				<h4>WIND POWER</h4>
+				<img src="images/windmill30.png" alt="a picture of a windmill"
+					class="resourceImg">
+				<form class="resourceRadioButton" action="">
+					<input type="radio" name="windPower" value="pgv" id="pgv">
+					<label for="pgv">Power generation view</label> 
+					<input type="radio" name="windPower" value="wsv" id="wsv"> 
+					<label for="wsv">Wind speed view</label>
+				</form>
+				<form class="showCheckbox">
+					<input type="checkbox" name="showCheckboxWind"
+						id="showCheckboxWind" data-mini="true"> 
+					<label class="showAdvancedOptions" for="showCheckboxWind"> 
+						Show
+					</label>
+				</form>
+			</div>
+			
+			<div class="resourceBox">
+				<h4>SOLAR POWER</h4>
+				<img src="images/solar20.png" alt="a picture of a solar panel"
+					class="resourceImg">
+				<form class="resourceRadioButton" action="">
+					<input type="radio" name="solarPower" value="pgv" id="pgv">
+					<label for="pgv">Power generation view</label> 
+					<input type="radio" name="solarPower" value="shv" id="shv"> 
+					<label for="shv">Sunlight hours view</label>
+				</form>
+				<form class="showCheckbox">
+					<input type="checkbox" name="showCheckboxSolar"
+						id="showCheckboxSolar" data-mini="true"> 
+					<label class="showAdvancedOptions" for="showCheckboxSolar"> 
+						Show
+					</label>
+				</form>
+			</div>
+
+			<div class="resourceBox">
+				<h4>HYDRO POWER</h4>
+				<img src="images/waterfall7.png" alt="a picture of a waterfall"
+					class="resourceImg">
+				<form class="resourceRadioButton" action="">
+					<input type="radio" name="hydroPower" value="pgv" id="pgv">
+					<label for="pgv">Power generation view</label> <input 
+						type="radio" name="hydroPower" value="watersv" id="watersv">
+					<label for="watersv">Water speed view</label>
+				</form>
+				<form class="showCheckbox">
+					<input type="checkbox" name="showCheckboxHydro"
+						id="showCheckboxHydro" data-mini="true"> <label
+						class="showAdvancedOptions" for="showCheckboxHydro"> Show</label>
+				</form>
+			</div>
+			<input type="text" name="placesTextSearch" id="pac-input"
+				class="controls" placeholder="Search Box">
 		</div>
 		<div data-role="panel" data-position="right" data-display="overlay"
 			id="menu2">
@@ -44,69 +157,7 @@
 		</div>
 		<!-- /header -->
 		<div role="main" class="ui-content">
-			<div class="ui-grid-a">
-				<div class="ui-block-a settingsWidgets">
-					<div class="resourceBox">
-						<img src="images/windmill30.png" alt="a picture of a windmill" class="resourceImg">
-						<h4>WIND POWER</h4>
-						<form class="resourceRadioButton"action="">
-								<input type="radio" name="windPower" value="pgv" id="pgv" checked>
-								<label class="radioButtonLabel" for="pgv">Power generation view</label>
-								<input type="radio" name="windPower" value="wsv" id="wsv">
-								<label class="radioButtonLabel" for="wsv">Wind speed view</label>
-						</form>
-						<form class="showCheckbox">
-								<input type="checkbox" name="showCheckboxWind" id="showCheckboxWind" data-mini="true"> 
-								<label class="showAdvancedOptions" for="showCheckboxWind"> Show</label>
-							</form>
-					</div>
-
-					<div class="resourceBox">
-					<img src="images/solar20.png" alt="a picture of a solar panel" class="resourceImg">
-					
-						<h4>SOLAR POWER</h4>
-						<form class="resourceRadioButton"action="">
-								<input type="radio" name="solarPower" value="pgv" id="pgv" checked>
-								<label class="radioButtonLabel" for="pgv">Power generation view</label>
-								<input type="radio" name="solarPower" value="wsv" id="shv">
-								<label class="radioButtonLabel" for="shv">Sunlight hours View</label>
-						</form>
-						<form class="showCheckbox">
-								<input type="checkbox" name="showCheckboxSolar" id="showCheckboxSolar" data-mini="true"> 
-								<label class="showAdvancedOptions" for="showCheckboxSolar"> Show</label>
-						</form>
-					</div>
-
-					<div class="resourceBox">
-						<img src="images/waterfall7.png" alt="a picture of a waterfall" class="resourceImg">
-						<h4>HYDRO POWER</h4>
-						<form class="resourceRadioButton"action="">
-								<input type="radio" name="hydroPower" value="pgv" id="pgv" checked>
-								<label class="radioButtonLabel" for="pgv">Power generation view</label>
-								<input type="radio" name="hydroPower" value="wsv" id="watersv">
-								<label class="radioButtonLabel" for="watersv">Water speed view</label>
-						</form>
-						<form class="showCheckbox">
-								<input type="checkbox" name="showCheckboxHydro" id="showCheckboxHydro" data-mini="true"> 
-								<label class="showAdvancedOptions" for="showCheckboxHydro"> Show</label>
-							</form>
-					</div>
-					<div class="propertyButton">
-						<label><input type="checkbox">Properties for Sale</label>
-					</div>
-					<div class="mapSettings">
-						<button class="ui-btn ui-mini mapSelect">Normal</button>
-						<button class="ui-btn ui-mini mapSelect">Heat Map</button>
-					</div>
-				</div>
-				<div
-					class="ui-block-b ui-btn ui-icon-arrow-l ui-btn-icon-left expandSettingButton">
-					<div class="expandOptions"></div>
-				</div>
-				<div class="ui-block-c gMap" id="googleMap"></div>
-			</div>
-			<!-- /grid-a -->
-			<div></div>
+			<div class="ui-block-c gMap" id="googleMap"></div>
 		</div>
 		<!-- /content -->
 	</div>
