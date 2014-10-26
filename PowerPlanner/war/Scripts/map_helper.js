@@ -5,6 +5,10 @@ var wind_data = []; /* The wind data for the current heatmap view */
 var solar_data = []; /* The solar data for the current heatmap view */
 var hydro_data = []; /* The hydro data for the current heatmap view */
 
+var LEAST_ZOOM = 8;
+var DEFAULT_ZOOM = 14;
+var MAX_DATA_WIDTH = 0.32;
+
 var POINT_DEBUGGER = false; /* true = view data points instead of interpolation */
 
 /*
@@ -17,9 +21,9 @@ function initialize() {
 	var markers = [];
 	var map = new google.maps.Map(document.getElementById('googleMap'), {
 		mapTypeId : google.maps.MapTypeId.ROADMAP,
-		zoom : 14,
+		zoom : DEFAULT_ZOOM,
 		maxZoom : 15,
-		minZoom : 8,
+		minZoom : LEAST_ZOOM,
 		streetViewControl : false,
 		scaleControl : true,
 		center : new google.maps.LatLng(48.4647, -123.3085),
@@ -225,16 +229,19 @@ function _interpolateData(hm_data, neLat, neLng, swLat, swLng) {
 	var lat_offset = (neLat - swLat) / 10;
 	var lng_offset = (neLng - swLng) / 10;
 
-	var offset = 0.005;
+	var lngset = MAX_DATA_WIDTH / Math.pow(2, (g_map.getZoom() - LEAST_ZOOM));
+	var latset = lngset / 2;
+	var offset = latset;
+
 	var temp_data = [];
 
-	for (var i = 0.0; i <= (neLat - swLat) + 2 * lat_offset; i += 0.005) {
-		for (var j = 0.0; j <= (neLng - swLng) + 2 * lng_offset; j += 0.01) {
+	for (var i = 0.0; i <= (neLat - swLat) + 2 * lat_offset; i += latset) {
+		for (var j = 0.0; j <= (neLng - swLng) + 2 * lng_offset; j += lngset) {
 			var weighted = getDataWeight(hm_data, swLat + i, swLng + j + offset);
 			addHeatmapCoord(temp_data, swLat + i - lat_offset, swLng + j
 					+ offset - lng_offset, weighted);
 		}
-		offset = (offset == 0.0 ? 0.005 : 0.0);
+		offset = (offset == 0.0 ? latset : 0.0);
 	}
 
 	return temp_data;
@@ -304,7 +311,8 @@ function initHeatmap(map) {
 	var heatmap = new google.maps.visualization.HeatmapLayer({
 		maxIntensity : 1,
 		map : map,
-		radius : 0.0095,
+		radius : MAX_DATA_WIDTH / Math.pow(2, (DEFAULT_ZOOM - LEAST_ZOOM))
+				* 0.95,
 		dissipating : false,
 		opacity : 0.4,
 		gradient : [ 'rgba(0,0,0,0)', 'rgba(255,0,0,1)', 'rgba(255,63,0,1)',
@@ -330,6 +338,11 @@ function updateHeatmap() {
 	hm_data = wind_data;
 	hm_data = hm_data.concat(solar_data);
 	hm_data = hm_data.concat(hydro_data);
+
+	g_heatmap.set('radius', MAX_DATA_WIDTH
+			/ Math.pow(2, (g_map.getZoom() - LEAST_ZOOM)) * 0.95);
+	
+	console.log("Points on map: " + hm_data.length);
 
 	_updateHeatmap(g_heatmap, hm_data);
 }
