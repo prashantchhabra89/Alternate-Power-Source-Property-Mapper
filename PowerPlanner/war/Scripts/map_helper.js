@@ -5,11 +5,24 @@ var wind_data = []; /* The wind data for the current heatmap view */
 var solar_data = []; /* The solar data for the current heatmap view */
 var hydro_data = []; /* The hydro data for the current heatmap view */
 
-var LEAST_ZOOM = 8;
-var DEFAULT_ZOOM = 14;
-var MAX_DATA_WIDTH = 0.32;
+var SMALL_VIEW = 0 /* State variable for have a small view (very zoomed in) */
+var AVE_VIEW = 1; /* State variable for having an average view */
+var WIDE_VIEW = 2; /* State variable for having a wide view (zoomed out) */
+var OVER_VIEW = 3; /* State variable for having a super wide view */
+var CHANGETO_AVE_VIEW = 14; /* Zoom level where SMALL changes to AVE state */
+var CHANGETO_WIDE_VIEW = 12; /* Zoom level where AVE changes to WIDE state */
+var CHANGETO_OVER_VIEW = 10; /* Zoom level where WIDE changes to OVER state */
+
+var LEAST_ZOOM = 8; /* Farthest out the user can zoom */
+var MAX_ZOOM = 15; /* Farthest in the user can zoom */
+var DEFAULT_ZOOM = 14; /* Starting zoom level */
+var MAX_DATA_WIDTH = 0.32; /* Width of interpolating points (LEAST_ZOOM = 8) */
 
 var POINT_DEBUGGER = false; /* true = view data points instead of interpolation */
+
+var view_state = (DEFAULT_ZOOM <= CHANGETO_WIDE_VIEW 
+		? (DEFAULT_ZOOM <= CHANGETO_OVER_VIEW ? OVER_VIEW : WIDE_VIEW)
+		: (DEFAULT_ZOOM <= CHANGETO_AVE_VIEW ? AVE_VIEW : SMALL_VIEW));
 
 /*
  * This example adds a search box to a map, using the Google Place Autocomplete
@@ -22,7 +35,7 @@ function initialize() {
 	var map = new google.maps.Map(document.getElementById('googleMap'), {
 		mapTypeId : google.maps.MapTypeId.ROADMAP,
 		zoom : DEFAULT_ZOOM,
-		maxZoom : 15,
+		maxZoom : MAX_ZOOM,
 		minZoom : LEAST_ZOOM,
 		streetViewControl : false,
 		scaleControl : true,
@@ -117,8 +130,14 @@ function mapLoader() {
 	attachHeatmap(g_heatmap, g_map);
 
 	google.maps.event.addListener(g_map, 'dragend', _eventHeatmapDataToggler);
-	google.maps.event.addListener(g_map, 'zoom_changed',
-			_eventHeatmapDataToggler)
+	google.maps.event.addListener(g_map, 'zoom_changed', function() {
+		zoom = g_map.getZoom();
+		view_state = (zoom <= CHANGETO_WIDE_VIEW 
+				? (zoom <= CHANGETO_OVER_VIEW ? OVER_VIEW : WIDE_VIEW)
+				: (zoom <= CHANGETO_AVE_VIEW ? AVE_VIEW : SMALL_VIEW));
+		console.log("View state: " + view_state);
+		_eventHeatmapDataToggler();
+	});
 }
 
 /*
@@ -167,8 +186,11 @@ function toggleHeatmapData(showWind, showSolar, showHydro) {
  * HYDRO. Triggers a heatmap update upon successful server response.
  */
 function _getHeatmapData(type, neLat, neLng, swLat, swLng) {
-	var lat_offset = (neLat - swLat) / 2;
-	var lng_offset = (neLng - swLng) / 2;
+	var lat_offset = getLatOffset(neLat, swLat);
+	var lng_offset = getLngOffset(neLng, swLng);
+	wind_data = [];
+	solar_data = [];
+	hydro_data = [];
 
 	$.ajax({
 		url : '/powerplanner',
@@ -182,13 +204,16 @@ function _getHeatmapData(type, neLat, neLng, swLat, swLng) {
 		},
 		dataType : 'json',
 		success : function(data, status) {
+			console.log("Hello?");
 			if (status) {
 				var weight_points = [];
 				for (var i = 0; i < data.length; i++) {
 					weight_points.push(data[i].weight);
 				}
 				var scaler = getArrayMax(weight_points);
+				console.log("Min: " + Math.min.apply(null, weight_points));
 				console.log("Scaler: " + scaler);
+				console.log("Zoom: " + g_map.getZoom());
 
 				hm_data = [];
 				for (var i = 0; i < data.length; i++) {
@@ -199,8 +224,10 @@ function _getHeatmapData(type, neLat, neLng, swLat, swLng) {
 					if (POINT_DEBUGGER) {
 						wind_data = hm_data;
 					} else {
+						console.time('_interpolateData');
 						wind_data = _interpolateData(hm_data, neLat, neLng,
 								swLat, swLng);
+						console.timeEnd('_interpolateData');
 					}
 				} else if (type == "SOLAR") {
 					if (POINT_DEBUGGER) {
@@ -212,10 +239,36 @@ function _getHeatmapData(type, neLat, neLng, swLat, swLng) {
 				} else if (type == "HYDRO") {
 					hydro_data = hm_data;
 				}
-				updateHeatmap();
 			}
-		}
+		},
+		complete : function() {
+			updateHeatmap();
+		},
 	});
+}
+
+function getLatOffset(northLat, southLat) {
+	var lat_offset = (northLat - southLat);
+	if (view_state == WIDE_VIEW) {
+		lat_offset = lat_offset / 4;
+	} else if (view_state == SMALL_VIEW) {
+		lat_offset = lat_offset * 2;
+	} else if (view_state == OVER_VIEW) {
+		lat_offset = lat_offset / 8;
+	}
+	return lat_offset;
+}
+
+function getLngOffset(eastLng, westLng) {
+	var lng_offset = (eastLng - westLng);
+	if (view_state == WIDE_VIEW) {
+		lng_offset = lng_offset / 4;
+	} else if (view_state == SMALL_VIEW) {
+		lng_offset = lng_offset * 2;
+	} else if (view_state == OVER_VIEW) {
+		lng_offset = lng_offset / 8;
+	}
+	return lng_offset;
 }
 
 /*
@@ -229,22 +282,131 @@ function _interpolateData(hm_data, neLat, neLng, swLat, swLng) {
 	var lat_offset = (neLat - swLat) / 10;
 	var lng_offset = (neLng - swLng) / 10;
 
+	var lat_width = (neLat - swLat) + (2 * lat_offset);
+	var lng_width = (neLng - swLng) + (2 * lng_offset);
+	
 	var lngset = MAX_DATA_WIDTH / Math.pow(2, (g_map.getZoom() - LEAST_ZOOM));
 	var latset = lngset / 2;
 	var offset = latset;
 
 	var temp_data = [];
 
-	for (var i = 0.0; i <= (neLat - swLat) + 2 * lat_offset; i += latset) {
-		for (var j = 0.0; j <= (neLng - swLng) + 2 * lng_offset; j += lngset) {
-			var weighted = getDataWeight(hm_data, swLat + i, swLng + j + offset);
-			addHeatmapCoord(temp_data, swLat + i - lat_offset, swLng + j
-					+ offset - lng_offset, weighted);
+	if (view_state != OVER_VIEW) {
+	//if (true) {
+		_createInterpolation(hm_data, temp_data, lat_width, lng_width, swLat - lat_offset,
+				swLng - lng_offset, latset, lngset, offset);
+		/*for (var i = 0.0; i <= (neLat - swLat) + 2 * lat_offset; i += latset) {
+			for (var j = 0.0; j <= (neLng - swLng) + 2 * lng_offset; j += lngset) {
+				var lat_point = swLat + i - lat_offset;
+				var lng_point = swLng + j + offset - lng_offset;
+				var weighted = getDataWeight(hm_data, lat_point, lng_point);
+				addHeatmapCoord(temp_data, lat_point, lng_point, weighted);
+			}
+			offset = (offset == 0.0 ? latset : 0.0);
+		}*/
+	} else {
+		var d_lat_offset = getLatOffset(neLat, swLat);
+		var d_lng_offset = getLngOffset(neLng, swLng);
+		var data_bins = _binData(hm_data, neLat, neLng, swLat, swLng, d_lat_offset, d_lng_offset);
+		
+		var lat_increment = lat_width/3;
+		lat_increment += lat_increment % latset;
+		var lng_increment = lng_width/3;
+		lng_increment += lng_increment % lngset;
+		var BIN_SIZE = 3;
+		
+		for (var lngbin = 0; lngbin < BIN_SIZE; lngbin++) {
+			for (var latbin = 0; latbin < BIN_SIZE; latbin++) {
+				var hm_bin = data_bins[latbin][lngbin]
+							.concat(data_bins[latbin][lngbin+1])
+							.concat(data_bins[latbin+1][lngbin])
+							.concat(data_bins[latbin+1][lngbin+1]);
+				_createInterpolation(hm_bin, temp_data, lat_increment, lng_increment,
+						swLat - lat_offset + (lat_increment * latbin),
+						swLng - lng_offset + (lng_increment * lngbin),
+						latset, lngset, offset);
+			}
+			offset = latset;
 		}
-		offset = (offset == 0.0 ? latset : 0.0);
 	}
 
 	return temp_data;
+}
+
+function _createInterpolation(hm_data, fill_data, lat_width, lng_width, 
+		lat_start, lng_start, latset, lngset, offset) {
+	var curr_offset = offset;
+	
+	for (var i = 0.0; i <= lat_width; i += latset) {
+		for (var j = 0.0; j <= lng_width; j += lngset) {
+			var lat_point = i + lat_start;
+			var lng_point = j + curr_offset + lng_start;
+			var weighted = getDataWeight(hm_data, lat_point, lng_point);
+			addHeatmapCoord(fill_data, lat_point, lng_point, weighted);
+		}
+		curr_offset = (curr_offset == 0.0 ? latset : 0.0);
+	}
+}
+
+function _binData(hm_data, neLat, neLng, swLat, swLng, data_lat_offset, data_lng_offset){
+	var BIN_SIZE = 4;
+	var data_bins = [];
+	for (var i = 0; i < BIN_SIZE; i++) {
+		data_bins[i] = new Array(BIN_SIZE);			
+		for (var j = 0; j < BIN_SIZE; j++) {
+			data_bins[i][j] = [];
+		}
+	}
+	var lat_width = (neLat - swLat) + 2 * data_lat_offset;
+	var lng_width = (neLng - swLng) + 2 * data_lng_offset;
+	var southLat = swLat - data_lat_offset;
+	var westLng = swLng - data_lng_offset;
+	
+	var error_state = false;
+	for (var i = 0; i < hm_data.length; i++) {
+		var lat_bin = 0;
+		var lng_bin = 0;
+		var curr_lat = southLat + (lat_width / 4);
+		var curr_lng = westLng + (lng_width / 4);
+		
+		while (hm_data[i].location.lat() > curr_lat) {
+			curr_lat += (lat_width / 4);
+			lat_bin ++;
+			if (lat_bin > 3) {
+				console.log("ERROR: data point failed to fit into a bin (lat failure)");
+				error_state = true;
+				break;
+			}
+		}
+		if (error_state) {
+			error_state = false;
+			break;
+		}
+
+		while (hm_data[i].location.lng() > curr_lng) {
+			curr_lng += (lng_width / 4);
+			lng_bin ++;
+			if (lng_bin > 3) {
+				console.log("ERROR: data point failed to fit into a bin (lng failure)");
+				error_state = true;
+				break;
+			}
+		}
+		if (error_state) {
+			error_state = false;
+			break;
+		}
+		
+		data_bins[lat_bin][lng_bin].push(hm_data[i]);
+	}
+	
+	for (var i = 0; i < data_bins.length; i++) {
+		for (var j = 0; j < data_bins[i].length; j++) {
+			console.log("Bin size: " + data_bins[i][j].length);
+		}
+	}
+	
+	return data_bins;
 }
 
 /*
@@ -280,17 +442,19 @@ function getDataWeight(hm_data, lat, lng) {
 
 	var final_weight = 0;
 	var max_nearest_distance = getArrayMax(nearest_distance);
+	var dist_sum = nearest_distance.reduce(function(a, b) {
+		return a + b; 
+	});
 	/*
 	 * var weight_max = nearest.reduce(function(a, b) { return Math.max(a,
-	 * b.weight); }, 0); var dist_sum = nearest_distance.reduce(function(a, b) {
-	 * return a + b; });
+	 * b.weight); }, 0); 
 	 */
 	for (var i = 0; i < nearest.length; i++) {
-		final_weight += ((nearest[i].weight * (nearest_distance[i] / max_nearest_distance)) / 1.5);
+		final_weight += (nearest[i].weight * (1 - nearest_distance[i] / dist_sum));
 		// final_weight += ((1 - (nearest_distance[i] / dist_sum))
-		// * (nearest[i].weight / weight_max) / 1.5);
+		// * (nearest[i].weight / weight_max));
 	}
-	return (final_weight / (nearest.length));
+	return (nearest.length > 0 ? (final_weight / (nearest.length)) : 0);
 }
 
 /*
@@ -312,7 +476,7 @@ function initHeatmap(map) {
 		maxIntensity : 1,
 		map : map,
 		radius : MAX_DATA_WIDTH / Math.pow(2, (DEFAULT_ZOOM - LEAST_ZOOM))
-				* 0.95,
+				* 0.95 + 0.01,
 		dissipating : false,
 		opacity : 0.4,
 		gradient : [ 'rgba(0,0,0,0)', 'rgba(255,0,0,1)', 'rgba(255,63,0,1)',
@@ -339,9 +503,11 @@ function updateHeatmap() {
 	hm_data = hm_data.concat(solar_data);
 	hm_data = hm_data.concat(hydro_data);
 
-	g_heatmap.set('radius', MAX_DATA_WIDTH
+	if (!POINT_DEBUGGER) {
+		g_heatmap.set('radius', MAX_DATA_WIDTH
 			/ Math.pow(2, (g_map.getZoom() - LEAST_ZOOM)) * 0.95);
-	
+	}
+
 	console.log("Points on map: " + hm_data.length);
 
 	_updateHeatmap(g_heatmap, hm_data);
