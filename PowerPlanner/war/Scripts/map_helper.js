@@ -23,6 +23,7 @@ var MIN_DISPLAY_WEIGHT = 0.005; /* Don't add a point with less weight to heatmap
 
 var POINT_DEBUGGER = false; /* true = view data points instead of interpolation */
 
+// View (or zoom) state of the map; used to implement different time saving measures
 var view_state = (DEFAULT_ZOOM <= CHANGETO_WIDE_VIEW 
 		? (DEFAULT_ZOOM <= CHANGETO_OVER_VIEW ? OVER_VIEW : WIDE_VIEW)
 		: (DEFAULT_ZOOM <= CHANGETO_AVE_VIEW ? AVE_VIEW : SMALL_VIEW));
@@ -186,7 +187,7 @@ function toggleHeatmapData(showWind, showSolar, showHydro) {
 /*
  * Sends a POST request to the server for data within the provided latitude and
  * longitude bounds of a particular type. Acceptable types are WIND, SOLAR, and
- * HYDRO. Triggers a heatmap update upon successful server response.
+ * HYDRO. Triggers a heatmap update upon server response.
  */
 function _getHeatmapData(type, neLat, neLng, swLat, swLng) {
 	var lat_offset = getLatOffset(neLat, swLat);
@@ -207,14 +208,12 @@ function _getHeatmapData(type, neLat, neLng, swLat, swLng) {
 		},
 		dataType : 'json',
 		success : function(data, status) {
-			console.log("Hello?");
 			if (status) {
 				var weight_points = [];
 				for (var i = 0; i < data.length; i++) {
 					weight_points.push(data[i].weight);
 				}
 				var scaler = getArrayMax(weight_points);
-				console.log("Min: " + Math.min.apply(null, weight_points));
 				console.log("Scaler: " + scaler);
 				console.log("Zoom: " + g_map.getZoom());
 
@@ -250,6 +249,10 @@ function _getHeatmapData(type, neLat, neLng, swLat, swLng) {
 	});
 }
 
+/*
+ * Gets the latitude offset for the provided latitude bounds based off the map's
+ * current global view state.
+ */
 function getLatOffset(northLat, southLat) {
 	var lat_offset = (northLat - southLat);
 	if (view_state == WIDE_VIEW) {
@@ -262,6 +265,10 @@ function getLatOffset(northLat, southLat) {
 	return lat_offset;
 }
 
+/*
+ * Gets the longitude offset for the provided longitude bounds based off the map's
+ * current global view state.
+ */
 function getLngOffset(eastLng, westLng) {
 	var lng_offset = (eastLng - westLng);
 	if (view_state == WIDE_VIEW) {
@@ -279,7 +286,8 @@ function getLngOffset(eastLng, westLng) {
  * provided boundary coordinates (with a little bit of bleed over the boundaries
  * to prevent visible edge discolouration) by interpolating values from the
  * provided set of real data points based on a weighting algorithm. Returns the
- * set of interpolated values.
+ * set of interpolated values. Runs the interpolation in bins if the map view
+ * is too large.
  */
 function _interpolateData(hm_data, neLat, neLng, swLat, swLng) {
 	var lat_offset = (neLat - swLat) / 10;
@@ -304,9 +312,9 @@ function _interpolateData(hm_data, neLat, neLng, swLat, swLng) {
 		var data_bins = _binData(hm_data, neLat, neLng, swLat, swLng, d_lat_offset, d_lng_offset);
 		
 		var lat_increment = lat_width/3;
-		lat_increment += lat_increment % latset;
+		lat_increment += latset - (lat_increment % latset);
 		var lng_increment = lng_width/3;
-		lng_increment += lng_increment % lngset;
+		lng_increment -= lng_increment % lngset;
 		var BIN_SIZE = 3;
 		
 		for (var lngbin = 0; lngbin < BIN_SIZE; lngbin++) {
@@ -317,7 +325,7 @@ function _interpolateData(hm_data, neLat, neLng, swLat, swLng) {
 							.concat(data_bins[latbin+1][lngbin+1]);
 				_createInterpolation(hm_bin, temp_data, lat_increment, lng_increment,
 						swLat - lat_offset + (lat_increment * latbin),
-						swLng - lng_offset + (lng_increment * lngbin),
+						swLng - lng_offset + ((lng_increment + lngset) * lngbin),
 						latset, lngset, offset);
 			}
 			offset = latset;
@@ -327,12 +335,21 @@ function _interpolateData(hm_data, neLat, neLng, swLat, swLng) {
 	return temp_data;
 }
 
+/*
+ * Fills in a grid of all the points visible on the screen as defined by the
+ * provided lat/lng widths, beginning from the specified start points and 
+ * incrementing by the specified lat/lng set values. Applies a specified offset
+ * to every other longitudinal row.
+ * 
+ * hm_data is the array of real data and fill_data is an array to dump the
+ * interpolated points into
+ */
 function _createInterpolation(hm_data, fill_data, lat_width, lng_width, 
 		lat_start, lng_start, latset, lngset, offset) {
 	var curr_offset = offset;
 	
-	for (var i = 0.0; i <= lat_width; i += latset) {
-		for (var j = 0.0; j <= lng_width; j += lngset) {
+	for (var i = 0.0; i < lat_width; i += latset) {
+		for (var j = 0.0; j < lng_width; j += lngset) {
 			var lat_point = i + lat_start;
 			var lng_point = j + curr_offset + lng_start;
 			var weighted = getDataWeight(hm_data, lat_point, lng_point);
@@ -344,6 +361,11 @@ function _createInterpolation(hm_data, fill_data, lat_width, lng_width,
 	}
 }
 
+/*
+ * Takes in an array of real data points, map boundary points, and offset distances for
+ * latitude and longitude. Separates data points into a 4x4 matrix that evenly divides up
+ * the boundary size (with offsets added to all sides).
+ */
 function _binData(hm_data, neLat, neLng, swLat, swLng, data_lat_offset, data_lng_offset){
 	var BIN_SIZE = 4;
 	var data_bins = [];
@@ -398,7 +420,7 @@ function _binData(hm_data, neLat, neLng, swLat, swLng, data_lat_offset, data_lng
 	
 	for (var i = 0; i < data_bins.length; i++) {
 		for (var j = 0; j < data_bins[i].length; j++) {
-			console.log("Bin size: " + data_bins[i][j].length);
+			console.log("Bin size[" + i + "][" + j + "]: " + data_bins[i][j].length);
 		}
 	}
 	
