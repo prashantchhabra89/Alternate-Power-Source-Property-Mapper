@@ -18,6 +18,9 @@ var MAX_ZOOM = 15; /* Farthest in the user can zoom */
 var DEFAULT_ZOOM = 14; /* Starting zoom level */
 var MAX_DATA_WIDTH = 0.32; /* Width of interpolating points (LEAST_ZOOM = 8) */
 
+var WEIGHT_SCALING_DISTANCE = 0.06651; /* Data points further away have less impact */
+var MIN_DISPLAY_WEIGHT = 0.005; /* Don't add a point with less weight to heatmap */
+
 var POINT_DEBUGGER = false; /* true = view data points instead of interpolation */
 
 var view_state = (DEFAULT_ZOOM <= CHANGETO_WIDE_VIEW 
@@ -295,15 +298,6 @@ function _interpolateData(hm_data, neLat, neLng, swLat, swLng) {
 	//if (true) {
 		_createInterpolation(hm_data, temp_data, lat_width, lng_width, swLat - lat_offset,
 				swLng - lng_offset, latset, lngset, offset);
-		/*for (var i = 0.0; i <= (neLat - swLat) + 2 * lat_offset; i += latset) {
-			for (var j = 0.0; j <= (neLng - swLng) + 2 * lng_offset; j += lngset) {
-				var lat_point = swLat + i - lat_offset;
-				var lng_point = swLng + j + offset - lng_offset;
-				var weighted = getDataWeight(hm_data, lat_point, lng_point);
-				addHeatmapCoord(temp_data, lat_point, lng_point, weighted);
-			}
-			offset = (offset == 0.0 ? latset : 0.0);
-		}*/
 	} else {
 		var d_lat_offset = getLatOffset(neLat, swLat);
 		var d_lng_offset = getLngOffset(neLng, swLng);
@@ -342,7 +336,9 @@ function _createInterpolation(hm_data, fill_data, lat_width, lng_width,
 			var lat_point = i + lat_start;
 			var lng_point = j + curr_offset + lng_start;
 			var weighted = getDataWeight(hm_data, lat_point, lng_point);
-			addHeatmapCoord(fill_data, lat_point, lng_point, weighted);
+			if (weighted > MIN_DISPLAY_WEIGHT) {
+				addHeatmapCoord(fill_data, lat_point, lng_point, weighted);
+			}
 		}
 		curr_offset = (curr_offset == 0.0 ? latset : 0.0);
 	}
@@ -441,20 +437,22 @@ function getDataWeight(hm_data, lat, lng) {
 	}
 
 	var final_weight = 0;
-	var max_nearest_distance = getArrayMax(nearest_distance);
-	var dist_sum = nearest_distance.reduce(function(a, b) {
-		return a + b; 
-	});
-	/*
-	 * var weight_max = nearest.reduce(function(a, b) { return Math.max(a,
-	 * b.weight); }, 0); 
-	 */
-	for (var i = 0; i < nearest.length; i++) {
-		final_weight += (nearest[i].weight * (1 - nearest_distance[i] / dist_sum));
-		// final_weight += ((1 - (nearest_distance[i] / dist_sum))
-		// * (nearest[i].weight / weight_max));
+	if (nearest.length > 0) {
+		var dist_sum = nearest_distance.reduce(function(a, b) { return a + b; });		
+		
+		for (var i = 0; i < nearest.length; i++) {
+			var dist_scaling = WEIGHT_SCALING_DISTANCE / nearest_distance[i];
+			if (dist_scaling > 1) {
+				dist_scaling = 1;
+			}
+			final_weight += (nearest[i].weight * (1 - nearest_distance[i] / dist_sum) 
+					* dist_scaling);
+			// final_weight += ((1 - (nearest_distance[i] / dist_sum))
+			// * (nearest[i].weight / weight_max));
+		}
+		
 	}
-	return (nearest.length > 0 ? (final_weight / (nearest.length)) : 0);
+	return (nearest.length > 0 ? final_weight / nearest.length : 0);
 }
 
 /*
@@ -476,7 +474,7 @@ function initHeatmap(map) {
 		maxIntensity : 1,
 		map : map,
 		radius : MAX_DATA_WIDTH / Math.pow(2, (DEFAULT_ZOOM - LEAST_ZOOM))
-				* 0.95 + 0.01,
+				* 0.95,
 		dissipating : false,
 		opacity : 0.4,
 		gradient : [ 'rgba(0,0,0,0)', 'rgba(255,0,0,1)', 'rgba(255,63,0,1)',
@@ -567,6 +565,13 @@ function getNELongitude(map) {
  */
 function getArrayMax(number_array) {
 	return Math.max.apply(null, number_array);
+}
+
+/*
+ * Gets the minimum value in an array of numbers.
+ */
+function getArrayMin(number_array) {
+	return Math.min.apply(null, number_array);
 }
 
 /*
