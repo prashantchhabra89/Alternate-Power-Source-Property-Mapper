@@ -4,25 +4,33 @@ import java.io.File;
 
 
 public class DataGridFileFinder {
-	File file = new File("/Users/pchhabra/Documents/Git/Alternate-Power-Source-Property-Mapper/PowerPlanner/Database/Wind");
-	String arr[] = new String[file.listFiles().length];
-	File fileList[] = file.listFiles();
+	File fileWind = new File("/Users/pchhabra/Documents/Git/Alternate-Power-Source-Property-Mapper/PowerPlanner/Database/Wind");
+	File fileListWind[] = fileWind.listFiles();
+	File fileSolar = new File("/Users/pchhabra/Documents/Git/Alternate-Power-Source-Property-Mapper/PowerPlanner/Database/Solar");
+	File fileListSolar[] = fileSolar.listFiles();
 	Double latitude1;
 	Double latitude2;
 	Double longitude1;
 	Double longitude2;
 
-	String returnFileListArray[] = new String[file.listFiles().length];
-	int counter;
-	int counter2;
+	String returnWindFileListArray[] = new String[fileWind.listFiles().length];
+	String returnSolarFileListArray[] = new String[fileSolar.listFiles().length];
+	int counterWindfileFinder;
+	int counterSolarfileFinder;
+	int counterDisplayWindFileList;
+	int counterDisplaySolarFileList;
 
 
-	public String[] fileFinder(Double neLat, Double neLon, Double swLat, Double swLon)
+	public String[] windFileFinder(Double neLat, Double neLon, Double swLat, Double swLon, String season)
 	{
-		counter=0;
-		for(int i=0;i<file.listFiles().length;i++)
+		counterWindfileFinder=0;
+		for(int i=0;i<fileWind.listFiles().length;i++)
 		{
-			String name = fileList[i].getName();
+			String name = fileListWind[i].getName();
+			if(!(name.contains(season)))
+					{
+				continue;
+					}
 			latitude1 = Double.parseDouble(name.charAt(0)+""+name.charAt(1)+".");
 			//System.out.println(latitude1);
 			latitude2 = Double.parseDouble(name.charAt(8)+""+name.charAt(9)+".");
@@ -35,8 +43,8 @@ public class DataGridFileFinder {
 			{
 				if((neLon>=longitude1&&neLon<=longitude2)||(swLon>=longitude1&&swLon<=longitude2))
 				{
-					returnFileListArray[counter]=fileList[i].getPath();
-					counter++;
+					returnWindFileListArray[counterWindfileFinder]=fileListWind[i].getPath();
+					counterWindfileFinder++;
 				}
 			}
 			else
@@ -45,22 +53,79 @@ public class DataGridFileFinder {
 				{
 					if((longitude1<=swLon&&longitude1>=neLon)||(longitude2<=swLon&&longitude2>=neLon))
 					{
-						returnFileListArray[counter]=fileList[i].getPath();
-						counter++;
+						returnWindFileListArray[counterWindfileFinder]=fileListWind[i].getPath();
+						counterWindfileFinder++;
 					}
 				}
 			}
 
 		}
-		return returnFileListArray;
+		return returnWindFileListArray;
 	}
-	public void displayFileList()
+	public void displayWindFileList()
 	{
-		counter2=0;
-		while(returnFileListArray[counter2]!=null) 
+		counterDisplayWindFileList=0;
+		while(returnWindFileListArray[counterDisplayWindFileList]!=null) 
 		{
-			System.out.println(returnFileListArray[counter2]);
-			counter2++;
+			System.out.println(returnWindFileListArray[counterDisplayWindFileList]);
+			counterDisplayWindFileList++;
+		}
+	}
+	public String [] solarFileFinder(String Season)
+	{
+		counterSolarfileFinder = 0;
+		
+		switch(Season)
+		{
+			case "Jan" : returnSolarFileListArray[counterSolarfileFinder] = fileListSolar[0].getName();
+			counterSolarfileFinder++;
+			break;
+			case "Feb" : returnSolarFileListArray[counterSolarfileFinder] = fileListSolar[5].getName();
+			counterSolarfileFinder++;
+			break;
+			case "Mar" : returnSolarFileListArray[counterSolarfileFinder] = fileListSolar[6].getName();
+			counterSolarfileFinder++;
+			break;
+			case "Apr" : returnSolarFileListArray[counterSolarfileFinder] = fileListSolar[7].getName();
+			counterSolarfileFinder++;
+			break;
+			case "May" : returnSolarFileListArray[counterSolarfileFinder] = fileListSolar[8].getName();
+			counterSolarfileFinder++;
+			break;
+			case "Jun" : returnSolarFileListArray[counterSolarfileFinder] = fileListSolar[9].getName();
+			counterSolarfileFinder++;
+			break;
+			case "Jul" : returnSolarFileListArray[counterSolarfileFinder] = fileListSolar[10].getName();
+			counterSolarfileFinder++;
+			break;
+			case "Aug" : returnSolarFileListArray[counterSolarfileFinder] = fileListSolar[11].getName();
+			counterSolarfileFinder++;
+			break;
+			case "Sep" : returnSolarFileListArray[counterSolarfileFinder] = fileListSolar[12].getName();
+			counterSolarfileFinder++;
+			break;
+			case "Oct" : returnSolarFileListArray[counterSolarfileFinder] = fileListSolar[1].getName();
+			counterSolarfileFinder++;
+			break;
+			case "Nov" : returnSolarFileListArray[counterSolarfileFinder] = fileListSolar[2].getName();
+			counterSolarfileFinder++;
+			break;
+			case "Dec" : returnSolarFileListArray[counterSolarfileFinder] = fileListSolar[3].getName();
+			counterSolarfileFinder++;
+			break;
+			case "Anu" : returnSolarFileListArray[counterSolarfileFinder] = fileListSolar[4].getName();
+			counterSolarfileFinder++;
+			break;	
+		}
+		return returnSolarFileListArray;
+	}
+	public void displaySolarFileList()
+	{
+		counterDisplaySolarFileList=0;
+		while(returnWindFileListArray[counterDisplaySolarFileList]!=null) 
+		{
+			System.out.println(returnSolarFileListArray[counterDisplaySolarFileList]);
+			counterDisplaySolarFileList++;
 		}
 	}
 }

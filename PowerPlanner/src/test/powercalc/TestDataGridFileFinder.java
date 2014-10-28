@@ -6,7 +6,10 @@ public class TestDataGridFileFinder {
 
     public static void main(String[] args) {
        DataGridFileFinder dataGridFileFinder = new DataGridFileFinder();
-    dataGridFileFinder.fileFinder(48.463083,123.310996,48.463083,123.310996);
-    dataGridFileFinder.displayFileList();
+    dataGridFileFinder.windFileFinder(48.463083,123.310996,48.463083,123.310996,"anu");
+    dataGridFileFinder.displayWindFileList();
+    dataGridFileFinder.solarFileFinder("Jan");
+    dataGridFileFinder.displaySolarFileList();
+
     }
 }
