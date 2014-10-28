@@ -617,6 +617,32 @@ function getArrayMin(number_array) {
 }
 
 /*
+ * Function to call to get data from a point on the map. Provided
+ * the latitude and longitude of a point, this returns a pointDataObj,
+ * which has the wind_raw, solar_raw, hydro_raw, and total_energy
+ * properties.
+ * 
+ * All this data is fake right now.
+ */
+function getPointData(lat_point, lng_point) {
+	var pointDataObj = {
+		wind_raw : 0,
+		solar_raw : 0,
+		hydro_raw : 0,
+		total_energy : 0
+	};
+	
+	// Fake all the data!!
+	pointDataObj.wind_raw = (Math.random() > 0.1 ? 1000 * Math.random() : 0);
+	pointDataObj.solar_raw = 100 * Math.random();
+	pointDataObj.hydro_raw = (Math.random() > 0.98 ? 5000 * Math.random() : 0);
+	pointDataObj.total_energy = pointDataObj.wind_raw * 25 +
+								pointDataObj.solar_raw * 10 + 
+								pointDataObj.hydro_raw * 50;
+	return pointDataObj;
+}
+
+/*
  * Map setup entry point.
  */
 google.maps.event.addDomListener(window, 'load', mapLoader);
