@@ -320,6 +320,7 @@ function _interpolateData(hm_data, neLat, neLng, swLat, swLng) {
 		lng_increment -= lng_increment % lngset;
 		var BIN_SIZE = 3;
 		
+		var lat_start = swLat - lat_offset;
 		var lng_start = swLng - lng_offset; 
 		for (var lngbin = 0; lngbin < BIN_SIZE; lngbin++) {
 			for (var latbin = 0; latbin < BIN_SIZE; latbin++) {
@@ -328,12 +329,15 @@ function _interpolateData(hm_data, neLat, neLng, swLat, swLng) {
 							.concat(data_bins[latbin+1][lngbin])
 							.concat(data_bins[latbin+1][lngbin+1]);
 				_createInterpolation(hm_bin, temp_data, lat_increment, lng_increment,
-						swLat - lat_offset + (lat_increment * latbin),
+						lat_start,
 						lng_start,
 						latset, lngset, offset);
+				lat_start = _getNextStart(lat_start, lat_start + lat_increment, latset)
+				offset = (offset == latset ? 0.0 : latset); //alternate offset
 			}
+			lat_start = swLat - lat_offset;
 			lng_start = _getNextStart(lng_start, lng_start + lng_increment, lngset);
-			offset = latset;
+			offset = latset; //reset offset
 		}
 	}
 
