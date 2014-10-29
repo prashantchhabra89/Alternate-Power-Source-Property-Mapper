@@ -58,8 +58,8 @@ function initialize() {
 		} ]
 	});
 	
-
 	// the following adds a red marker to the map upon right click.
+	// markerBalloon is declared global.
 	markerBalloon = new google.maps.InfoWindow();
 	
 	map.addListener('rightclick', function(event) {
@@ -73,11 +73,15 @@ function initialize() {
 			map : map,
 			icon : "http://www.google.com/intl/en_us/mapfiles/ms/micons/red-dot.png"		
 		});
-		//marker.addListener('click', function() {
 
-		
+		// the object handle returned from the current fake function.
 		var fakeObject = getPointData(marker.getPosition().lat(), marker.getPosition().lng());
 		
+		// store the marker's fields in variables here.
+		// the reason to store them here is because those values are needed twice
+		// once when the pin is dropped and bubble is displayed instantly, 
+		// once when the pin is clicked and bubble is displayed again. 
+		// note that the numeric value returned are rounded to 2/3 digits. Change this if needed.
 		var latPosition = marker.getPosition().lat().toFixed(3).toString();
 		var lngPosition = marker.getPosition().lng().toFixed(3).toString();
 		var wind = fakeObject.wind_raw.toFixed(2).toString();
@@ -85,19 +89,17 @@ function initialize() {
 		var hydro = fakeObject.hydro_raw.toFixed(2).toString();
 		var total = fakeObject.total_energy.toFixed(2).toString();
 		
-		
+		// this is the bubble displayed when pin is dropped
 		markerBalloon.setContent("<p>Latitude: " + marker.getPosition().lat().toFixed(3).toString() + "</p>" + 
 									"<p>Longitute: " + marker.getPosition().lng().toFixed(3).toString() + "</p>" +
 									"<p>Wind Energy: " + wind + "</p>" + 
 									"<p>Solar Energy: " + solar + "</p>" + 
 									"<p>Hydro Energy: " + hydro + "</p>" + 
 									"<p>Total Energy: " + total + "</p>" +
-									"<p>Yes it's very energetic. Build a house here.</p>");
-		
+									"<p>Double click on the pin to remove pin.</p>");		
 		markerBalloon.open(map, marker);
-		
-		
-		
+				
+		// this is the bubble displayed when pin is left-clicked.
 		marker.addListener('click', function() {			
 			markerBalloon.setContent("<p>Latitude: " + latPosition + "</p>" + 
 										"<p>Longitute: " + lngPosition + "</p>" +
@@ -105,23 +107,18 @@ function initialize() {
 										"<p>Solar Energy: " + solar + "</p>" + 
 										"<p>Hydro Energy: " + hydro + "</p>" + 
 										"<p>Total Energy: " + total + "</p>" +
-										"<p>Yes it's very energetic. Build a house here.</p>");
-			
-			markerBalloon.open(map, this);
-			
-	
+										"<p>Double click on the pin to remove pin.</p>");			
+			markerBalloon.open(map, this);	
 		});
 		
-
-	
-		//});
+		// when the pin is double clicked, the pin and the bubble are removed.
+		marker.addListener('dblclick', function() {
+			// didn't actually delete or close the marker, just set it to invisible.
+			this.setVisible(false);
+			// the balloon is really closed.
+			markerBalloon.close();
+		});
 	}
-	/*
-	map.addListener(marker, 'click', function() {
-		markerBalloon.setContent("<p>Buy a house here!</p>");
-		markerBalloon.open(map, marker);
-	});
-	*/
 
 	var defaultBounds = new google.maps.LatLngBounds(new google.maps.LatLng(
 			48.4647, -123.3085), new google.maps.LatLng(48.4647, -123.3085));
