@@ -74,7 +74,15 @@ function initialize() {
 				
 		});
 		marker.addListener('click', function() {
-			markerBalloon.setContent("<p>Buy a house here!</p>");
+			var fakeObject = getPointData(this.getPosition().lat(), this.getPosition().lng());
+			
+			markerBalloon.setContent("<p>Latitude: " + this.getPosition().lat().toFixed(2).toString() + "</p>" + 
+					"<p>Longitute: " + this.getPosition().lng().toFixed(2).toString() + "</p>" +
+					"<p>Wind Energy: " + fakeObject.wind_raw.toFixed(2).toString() + "</p>" + 
+										"<p>Solar Energy: " + fakeObject.solar_raw.toFixed(2).toString() + "</p>" + 
+										"<p>Hydro Energy: " + fakeObject.hydro_raw.toFixed(2).toString() + "</p>" + 
+										"<p>Total Energy: " + fakeObject.total_energy.toFixed(2).toString() + "</p>" +
+										"<p>Yes it's very energetic. Build a house here.</p>");
 			markerBalloon.open(map, this);
 		});
 		
