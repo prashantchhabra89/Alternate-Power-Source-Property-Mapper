@@ -90,26 +90,28 @@ function initialize() {
 		var total = fakeObject.total_energy.toFixed(2).toString();
 		
 		// this is the bubble displayed when pin is dropped
-		markerBalloon.setContent("<p>Latitude: " + marker.getPosition().lat().toFixed(3).toString() + "</p>" + 
-									"<p>Longitute: " + marker.getPosition().lng().toFixed(3).toString() + "</p>" +
+		markerBalloon.setContent(	"<h2>Detailed Energy Data</h2>" + 
+									"<h3>Latitude: " + marker.getPosition().lat().toFixed(3).toString() + "</h3>" + 
+									"<h3>Longitute: " + marker.getPosition().lng().toFixed(3).toString() + "</h3>" +
 									"<p>Wind Energy: " + wind + "</p>" + 
 									"<p>Solar Energy: " + solar + "</p>" + 
 									"<p>Hydro Energy: " + hydro + "</p>" + 
-									"<p>Total Energy: " + total + "</p>" +
-									"<p>Right click on the pin to remove pin.</p>");		
+									"<h4>Total Energy: " + total + "</h4>" +
+									"<p><i>Right click on the pin to remove pin.</i></p>");		
 		markerBalloon.open(map, marker);
 				
 		// this is the bubble displayed when pin is left-clicked.
 		// left click to toggle the bubble.
 		marker.addListener('click', function() {
 			if (markerBalloon.getContent()=="") {
-				markerBalloon.setContent("<p>Latitude: " + latPosition + "</p>" + 
-											"<p>Longitute: " + lngPosition + "</p>" +
+				markerBalloon.setContent("<h2>Detailed Energy Data</h2>" + 
+											"<h3>Latitude: " + marker.getPosition().lat().toFixed(3).toString() + "</h3>" + 
+											"<h3>Longitute: " + marker.getPosition().lng().toFixed(3).toString() + "</h3>" +
 											"<p>Wind Energy: " + wind + "</p>" + 
 											"<p>Solar Energy: " + solar + "</p>" + 
 											"<p>Hydro Energy: " + hydro + "</p>" + 
-											"<p>Total Energy: " + total + "</p>" +
-											"<p>Right click on the pin to remove pin.</p>");
+											"<h4>Total Energy: " + total + "</h4>" +
+											"<p><i>Right click on the pin to remove pin.</i></p>");
 				markerBalloon.open(map, this);	
 
 			} else {
