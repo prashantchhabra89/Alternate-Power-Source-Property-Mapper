@@ -96,41 +96,32 @@ function initialize() {
 									"<p>Solar Energy: " + solar + "</p>" + 
 									"<p>Hydro Energy: " + hydro + "</p>" + 
 									"<p>Total Energy: " + total + "</p>" +
-									"<p>Double click on the pin to remove pin.</p>");		
+									"<p>Right click on the pin to remove pin.</p>");		
 		markerBalloon.open(map, marker);
 				
 		// this is the bubble displayed when pin is left-clicked.
+		// left click to toggle the bubble.
 		marker.addListener('click', function() {
-			markerBalloon.setContent("<p>Latitude: " + latPosition + "</p>" + 
-										"<p>Longitute: " + lngPosition + "</p>" +
-										"<p>Wind Energy: " + wind + "</p>" + 
-										"<p>Solar Energy: " + solar + "</p>" + 
-										"<p>Hydro Energy: " + hydro + "</p>" + 
-										"<p>Total Energy: " + total + "</p>" +
-										"<p>Double click on the pin to remove pin.</p>");
+			if (markerBalloon.getContent()=="") {
+				markerBalloon.setContent("<p>Latitude: " + latPosition + "</p>" + 
+											"<p>Longitute: " + lngPosition + "</p>" +
+											"<p>Wind Energy: " + wind + "</p>" + 
+											"<p>Solar Energy: " + solar + "</p>" + 
+											"<p>Hydro Energy: " + hydro + "</p>" + 
+											"<p>Total Energy: " + total + "</p>" +
+											"<p>Right click on the pin to remove pin.</p>");
+				markerBalloon.open(map, this);	
+
+			} else {
+				markerBalloon.setContent("");
+				markerBalloon.open(null,null);
+			} 
+				
 													
-			markerBalloon.open(map, this);	
 		});
 		
-		// when the pin is double clicked, the pin and the bubble are removed.
-		// NOTE
-		// assume I have a pin A, and another pin B. Currently, a bubble is displayed on A.
-		// If I double click on B to remove B, here is what happens:
-		// First, the bubble belong to B will show up on B for a split second before the 2nd click in double click;
-		// then, the bubble on B and pin B will both be removed when the second click arrived.
-		// Having the bubble flash for a split second seems a bit weird; that's a small issue.
-		// I was expecting the bubble on pin B to not show up at all.
-
-		// However, if that's really the case, then another problem appears:
-		// B has to wait for a split second to determine whether that click is a lift click or a double click, 
-		// so if that click is really just a left click (which is probably more common than double click), 
-		// the bubble  will not show up right away because pin B is still waiting. That is not good, since
-		// the user will think the web page is lagging, instead of knowing what really happened.
-		
-		// I guess there is nothing I can do, and it's actually better to stay what it is like right now.
-		// I guess Google Map just treat the 1st click as a left click anyway, before thinking about 
-		// the case of double click. And I guess that's a good thing in most cases.
-		marker.addListener('dblclick', function() {
+		// right click on a marker to remove the pin.
+		marker.addListener('rightclick', function() {
 			// didn't actually delete or close the marker, just set it to invisible.
 			this.setVisible(false);
 			// the balloon is really closed.
