@@ -142,6 +142,7 @@ function initialize() {
 			// didn't actually delete or close the marker, just set it to invisible.
 			this.setVisible(false);
 			// the balloon is really closed.
+			markerBalloon.setContent("");
 			markerBalloon.close();
 		});
 	}
