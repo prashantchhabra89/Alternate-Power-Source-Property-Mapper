@@ -52,6 +52,32 @@ function initialize() {
 			} ]
 		} ]
 	});
+	
+
+	map.addListener('rightclick', function(event) {
+		addMarker(event.latLng);
+
+	});
+			
+	function addMarker(loc) {
+		marker = new google.maps.Marker({
+			position : loc,
+			map : map,
+			icon : "http://www.google.com/intl/en_us/mapfiles/ms/micons/red-dot.png"
+		});
+		marker.addListener('click', function() {
+			if (this.getIcon()=="http://www.google.com/intl/en_us/mapfiles/ms/micons/green-dot.png") {
+					this.setIcon("http://www.google.com/intl/en_us/mapfiles/ms/micons/blue-dot.png");
+			} else if (this.getIcon()=="http://www.google.com/intl/en_us/mapfiles/ms/micons/blue-dot.png") {
+				this.setIcon("http://www.google.com/intl/en_us/mapfiles/ms/micons/red-dot.png");
+			} else {
+				this.setIcon("http://www.google.com/intl/en_us/mapfiles/ms/micons/green-dot.png");
+			}
+		});
+				
+
+			  }
+		  
 
 	var defaultBounds = new google.maps.LatLngBounds(new google.maps.LatLng(
 			48.4647, -123.3085), new google.maps.LatLng(48.4647, -123.3085));
