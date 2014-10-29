@@ -21,6 +21,8 @@ var MAX_DATA_WIDTH = 0.32; /* Width of interpolating points (LEAST_ZOOM = 8) */
 var WEIGHT_SCALING_DISTANCE = 0.06651; /* Data points further away have less impact */
 var MIN_DISPLAY_WEIGHT = 0.005; /* Don't add a point with less weight to heatmap */
 
+var scaler = 500;
+
 var POINT_DEBUGGER = false; /* true = view data points instead of interpolation */
 
 // View (or zoom) state of the map; used to implement different time saving measures
@@ -246,8 +248,9 @@ function _getHeatmapData(type, neLat, neLng, swLat, swLng) {
 				for (var i = 0; i < data.length; i++) {
 					weight_points.push(data[i].weight);
 				}
-				var scaler = getArrayMax(weight_points);
+				var topval = getArrayMax(weight_points);
 				console.log("Scaler: " + scaler);
+				console.log("Top val: " + topval);
 				console.log("Zoom: " + g_map.getZoom());
 
 				hm_data = [];
@@ -350,6 +353,7 @@ function _interpolateData(hm_data, neLat, neLng, swLat, swLng) {
 		lng_increment -= lng_increment % lngset;
 		var BIN_SIZE = 3;
 		
+		var lng_start = swLng - lng_offset; 
 		for (var lngbin = 0; lngbin < BIN_SIZE; lngbin++) {
 			for (var latbin = 0; latbin < BIN_SIZE; latbin++) {
 				var hm_bin = data_bins[latbin][lngbin]
@@ -358,9 +362,10 @@ function _interpolateData(hm_data, neLat, neLng, swLat, swLng) {
 							.concat(data_bins[latbin+1][lngbin+1]);
 				_createInterpolation(hm_bin, temp_data, lat_increment, lng_increment,
 						swLat - lat_offset + (lat_increment * latbin),
-						swLng - lng_offset + ((lng_increment + lngset) * lngbin),
+						lng_start,
 						latset, lngset, offset);
 			}
+			lng_start = _getNextStart(lng_start, lng_start + lng_increment, lngset);
 			offset = latset;
 		}
 	}
@@ -381,8 +386,8 @@ function _createInterpolation(hm_data, fill_data, lat_width, lng_width,
 		lat_start, lng_start, latset, lngset, offset) {
 	var curr_offset = offset;
 	
-	for (var i = 0.0; i < lat_width; i += latset) {
-		for (var j = 0.0; j < lng_width; j += lngset) {
+	for (var i = 0.0; i <= lat_width; i += latset) {
+		for (var j = 0.0; j <= lng_width; j += lngset) {
 			var lat_point = i + lat_start;
 			var lng_point = j + curr_offset + lng_start;
 			var weighted = getDataWeight(hm_data, lat_point, lng_point);
@@ -511,6 +516,21 @@ function getDataWeight(hm_data, lat, lng) {
 }
 
 /*
+ * When binning, this safely gets you the next point you could safely draw,
+ * based on where the next point would be if the view hadn't been cut into
+ * sections. Pass in the current start point, the end point of the cut, and
+ * the amount you increment by each step.
+ */
+function _getNextStart(curr_start, end_point, increment) {
+	var next_start = curr_start;
+	while (next_start < end_point) {
+		next_start += increment;
+	}
+	
+	return next_start;
+}
+
+/*
  * Find the distance from one provided point to another (assumes latitude and
  * longitude cover the same distance).
  */
@@ -627,6 +647,32 @@ function getArrayMax(number_array) {
  */
 function getArrayMin(number_array) {
 	return Math.min.apply(null, number_array);
+}
+
+/*
+ * Function to call to get data from a point on the map. Provided
+ * the latitude and longitude of a point, this returns a pointDataObj,
+ * which has the wind_raw, solar_raw, hydro_raw, and total_energy
+ * properties.
+ * 
+ * All this data is fake right now.
+ */
+function getPointData(lat_point, lng_point) {
+	var pointDataObj = {
+		wind_raw : 0,
+		solar_raw : 0,
+		hydro_raw : 0,
+		total_energy : 0
+	};
+	
+	// Fake all the data!!
+	pointDataObj.wind_raw = (Math.random() > 0.1 ? 1000 * Math.random() : 0);
+	pointDataObj.solar_raw = 100 * Math.random();
+	pointDataObj.hydro_raw = (Math.random() > 0.98 ? 5000 * Math.random() : 0);
+	pointDataObj.total_energy = pointDataObj.wind_raw * 25 +
+								pointDataObj.solar_raw * 10 + 
+								pointDataObj.hydro_raw * 50;
+	return pointDataObj;
 }
 
 /*
