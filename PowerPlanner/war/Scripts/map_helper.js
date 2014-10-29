@@ -31,6 +31,7 @@ var view_state = (DEFAULT_ZOOM <= CHANGETO_WIDE_VIEW
 		: (DEFAULT_ZOOM <= CHANGETO_AVE_VIEW ? AVE_VIEW : SMALL_VIEW));
 
 var markerBalloon // this is the balloon for the marker.
+//var marker // this is the marker dropped by right click
 
 /*
  * This example adds a search box to a map, using the Google Place Autocomplete
@@ -70,24 +71,50 @@ function initialize() {
 		marker = new google.maps.Marker({
 			position : loc,
 			map : map,
-			icon : "http://www.google.com/intl/en_us/mapfiles/ms/micons/red-dot.png"
-				
+			icon : "http://www.google.com/intl/en_us/mapfiles/ms/micons/red-dot.png"		
 		});
-		marker.addListener('click', function() {
-			var fakeObject = getPointData(this.getPosition().lat(), this.getPosition().lng());
-			
-			markerBalloon.setContent("<p>Latitude: " + this.getPosition().lat().toFixed(2).toString() + "</p>" + 
-					"<p>Longitute: " + this.getPosition().lng().toFixed(2).toString() + "</p>" +
-					"<p>Wind Energy: " + fakeObject.wind_raw.toFixed(2).toString() + "</p>" + 
-										"<p>Solar Energy: " + fakeObject.solar_raw.toFixed(2).toString() + "</p>" + 
-										"<p>Hydro Energy: " + fakeObject.hydro_raw.toFixed(2).toString() + "</p>" + 
-										"<p>Total Energy: " + fakeObject.total_energy.toFixed(2).toString() + "</p>" +
-										"<p>Yes it's very energetic. Build a house here.</p>");
-			markerBalloon.open(map, this);
-		});
+		//marker.addListener('click', function() {
+
 		
+		var fakeObject = getPointData(marker.getPosition().lat(), marker.getPosition().lng());
+		
+		var latPosition = marker.getPosition().lat().toFixed(3).toString();
+		var lngPosition = marker.getPosition().lng().toFixed(3).toString();
+		var wind = fakeObject.wind_raw.toFixed(2).toString();
+		var solar = fakeObject.solar_raw.toFixed(2).toString();
+		var hydro = fakeObject.hydro_raw.toFixed(2).toString();
+		var total = fakeObject.total_energy.toFixed(2).toString();
+		
+		
+		markerBalloon.setContent("<p>Latitude: " + marker.getPosition().lat().toFixed(3).toString() + "</p>" + 
+									"<p>Longitute: " + marker.getPosition().lng().toFixed(3).toString() + "</p>" +
+									"<p>Wind Energy: " + wind + "</p>" + 
+									"<p>Solar Energy: " + solar + "</p>" + 
+									"<p>Hydro Energy: " + hydro + "</p>" + 
+									"<p>Total Energy: " + total + "</p>" +
+									"<p>Yes it's very energetic. Build a house here.</p>");
+		
+		markerBalloon.open(map, marker);
+		
+		
+		
+		marker.addListener('click', function() {			
+			markerBalloon.setContent("<p>Latitude: " + latPosition + "</p>" + 
+										"<p>Longitute: " + lngPosition + "</p>" +
+										"<p>Wind Energy: " + wind + "</p>" + 
+										"<p>Solar Energy: " + solar + "</p>" + 
+										"<p>Hydro Energy: " + hydro + "</p>" + 
+										"<p>Total Energy: " + total + "</p>" +
+										"<p>Yes it's very energetic. Build a house here.</p>");
+			
+			markerBalloon.open(map, this);
+			
+	
+		});
 		
 
+	
+		//});
 	}
 	/*
 	map.addListener(marker, 'click', function() {
