@@ -5,10 +5,10 @@ import java.io.File;
 
 public class DataGridFileFinder {
 	//path for wind data
-	File fileWind = new File("/Users/pchhabra/Documents/Git/Alternate-Power-Source-Property-Mapper/PowerPlanner/Database/Wind");
+	File fileWind = new File("Database/Wind");
 	File fileListWind[] = fileWind.listFiles();
 	//path for solar data
-	File fileSolar = new File("/Users/pchhabra/Documents/Git/Alternate-Power-Source-Property-Mapper/PowerPlanner/Database/Solar");
+	File fileSolar = new File("Database/Solar");
 	File fileListSolar[] = fileSolar.listFiles();
 	Double latitude1;
 	Double latitude2;
