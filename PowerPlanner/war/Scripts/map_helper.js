@@ -62,6 +62,21 @@ function initialize() {
 	// markerBalloon is declared global.
 	markerBalloon = new google.maps.InfoWindow();
 	
+	
+	// code for get rid of top-left bug. Doesn't affect functions.
+	testMarker = new google.maps.Marker({
+		position:map.getCenter(),
+		map : map,
+		icon : "http://www.google.com/intl/en_us/mapfiles/ms/micons/red-dot.png"		
+	});
+	markerBalloon.setContent("1");
+	markerBalloon.open(map, testMarker);
+	
+	testMarker.setVisible(false);
+	markerBalloon.open(null);
+	// end of the top-left thing.
+	
+	
 	map.addListener('rightclick', function(event) {
 		addMarker(event.latLng);
 
@@ -104,7 +119,7 @@ function initialize() {
 		// left click to toggle the bubble.
 		marker.addListener('click', function() {
 			if (markerBalloon.getContent()=="") {
-				markerBalloon.setContent("<h2>Detailed Energy Data</h2>" + 
+				markerBalloon.setContent(	"<h2>Detailed Energy Data</h2>" + 
 											"<h3>Latitude: " + marker.getPosition().lat().toFixed(3).toString() + "</h3>" + 
 											"<h3>Longitute: " + marker.getPosition().lng().toFixed(3).toString() + "</h3>" +
 											"<p>Wind Energy: " + wind + "</p>" + 
