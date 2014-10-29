@@ -28,6 +28,8 @@ var view_state = (DEFAULT_ZOOM <= CHANGETO_WIDE_VIEW
 		? (DEFAULT_ZOOM <= CHANGETO_OVER_VIEW ? OVER_VIEW : WIDE_VIEW)
 		: (DEFAULT_ZOOM <= CHANGETO_AVE_VIEW ? AVE_VIEW : SMALL_VIEW));
 
+var markerBalloon // this is the balloon for the marker.
+
 /*
  * This example adds a search box to a map, using the Google Place Autocomplete
  * feature. People can enter geographical searches. The search box will return a
@@ -54,6 +56,9 @@ function initialize() {
 	});
 	
 
+	// the following adds a red marker to the map upon right click.
+	markerBalloon = new google.maps.InfoWindow();
+	
 	map.addListener('rightclick', function(event) {
 		addMarker(event.latLng);
 
@@ -64,20 +69,22 @@ function initialize() {
 			position : loc,
 			map : map,
 			icon : "http://www.google.com/intl/en_us/mapfiles/ms/micons/red-dot.png"
+				
 		});
 		marker.addListener('click', function() {
-			if (this.getIcon()=="http://www.google.com/intl/en_us/mapfiles/ms/micons/green-dot.png") {
-					this.setIcon("http://www.google.com/intl/en_us/mapfiles/ms/micons/blue-dot.png");
-			} else if (this.getIcon()=="http://www.google.com/intl/en_us/mapfiles/ms/micons/blue-dot.png") {
-				this.setIcon("http://www.google.com/intl/en_us/mapfiles/ms/micons/red-dot.png");
-			} else {
-				this.setIcon("http://www.google.com/intl/en_us/mapfiles/ms/micons/green-dot.png");
-			}
+			markerBalloon.setContent("<p>Buy a house here!</p>");
+			markerBalloon.open(map, this);
 		});
-				
+		
+		
 
-			  }
-		  
+	}
+	/*
+	map.addListener(marker, 'click', function() {
+		markerBalloon.setContent("<p>Buy a house here!</p>");
+		markerBalloon.open(map, marker);
+	});
+	*/
 
 	var defaultBounds = new google.maps.LatLngBounds(new google.maps.LatLng(
 			48.4647, -123.3085), new google.maps.LatLng(48.4647, -123.3085));
