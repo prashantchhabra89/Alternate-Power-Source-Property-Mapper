@@ -44,5 +44,12 @@ function startButtonClick() {
 	if($("#pac-input-intro").val() != "")	{
 		$("#pac-input").val($("#pac-input-intro").val());
 	}
+	
+	// Resize the map to page once the new page has finished loading.
+	$(document).on("pageshow", function(e, d) {
+		var center = g_map.getCenter();
+		google.maps.event.trigger(g_map, 'resize');
+		g_map.setCenter(center);
+	});
 }
 
