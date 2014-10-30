@@ -17,11 +17,11 @@ body {
 	height: 30px;
 	font-size: 15px;
 	font-weight: 300;
-	margin-top: 16px;
 	text-overflow: ellipsis;
 }
 #pac-input {
 	width: 401px;
+	margin-top: 16px;
 }
 #pac-input:focus, #pac-input-intro:focus {
 	border-color: #4d90fe;
