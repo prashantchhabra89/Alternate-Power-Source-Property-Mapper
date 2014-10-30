@@ -14,11 +14,10 @@ http://power-planner.appspot.com/
 Use this application to find areas in British Columbia to become electrically self-sustaining or to help others accomplish that dream - find locations that historically provide bright sunlight for your solar panels, strong wind for your turbines, and fast flowing rivers for your mini hydro generators. With a simple-on-the-surface interface, quickly and visually locate just the spot for you, or find the potential in your current area! In the future, you'll be able to navigate around the map easily and view data in a number of informative ways. For basic use just remember, green marks the spot for high energy production potential!
 
 **Screenshots:**
-![Image of Regular Map](https://lh5.googleusercontent.com/8TpMBwAabUUxzbO-s3Bv6fH27zHmYLubsLMO-D1Jjm1aytFnjqWC-9vas6lhpNJHyqF1oW-vIZU=w1896-h835)
+[Image of Regular Map](https://dl-web.dropbox.com/get/StartupProgramming/demo_01.png?_subject_uid=50321307&w=AAAu79P3EVJNxHtZ58Key81CHnbfdlZuREnt1CPEei5jAQ)
 *Regular Map*
 
----
-![Image of Map With Wind Heatmap](https://lh3.googleusercontent.com/ICEqtrNMx_v1uwis_zGyl_TlOz8bjhQ3xoTgnHYe-K2Q0SfnEwboglO6Rp-zq9klAY0iy7LxgYs=w1896-h835)
+[Image of Map With Wind Heatmap](https://dl-web.dropbox.com/get/StartupProgramming/demo_02_wind.png?_subject_uid=50321307&w=AAA8JJPePay5Q0AOtuYYMPNp9xV0PLRCI_bOrjcCkOjb6Q)
 *Map with Wind Heatmap On*
 
 **Limitations:**
