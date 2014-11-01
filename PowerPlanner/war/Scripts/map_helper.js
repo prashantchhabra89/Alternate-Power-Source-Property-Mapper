@@ -197,9 +197,15 @@ function _getHeatmapData(type, neLat, neLng, swLat, swLng) {
 	wind_data = [];
 	solar_data = [];
 	hydro_data = [];
+	
+	console.log("nelat: " + (neLat + lat_offset));
+	console.log("nelng: " + (neLng + lng_offset));
+	console.log("swlat: " + (swLat - lat_offset));
+	console.log("swlng: " + (swLng - lng_offset));
 
 	$.ajax({
-		url : '/powerplanner',
+		//url : '/powerplanner',
+		url : '/powerdb',
 		type : 'POST',
 		data : {
 			type : type,

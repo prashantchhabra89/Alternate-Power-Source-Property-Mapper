@@ -1,13 +1,7 @@
 package com.powerplanner;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class DatabaseFileFInder {
 	String [] windFileFullArr = new String[100];
@@ -153,14 +147,20 @@ public class DatabaseFileFInder {
 			{
 		continue;
 			}
-			latitude1 = Double.parseDouble(item.charAt(0)+""+item.charAt(1)+".");
-			latitude2 = Double.parseDouble(item.charAt(8)+""+item.charAt(9)+".");
-			longitude1 = Double.parseDouble(item.charAt(4)+""+item.charAt(5)+item.charAt(6)+".");
-			longitude2 = Double.parseDouble(item.charAt(12)+""+item.charAt(13)+item.charAt(14)+".");
+			Pattern boundaryP = Pattern.compile("^([-]?\\d+)_([-]?\\d+)_([-]?\\d+)_([-]?\\d+)_.*$");
+			Matcher boundaryM = boundaryP.matcher(item);
+			if (!boundaryM.matches()) {
+				continue;
+			} else {
+				latitude1 = Double.parseDouble(boundaryM.group(1));
+				latitude2 = Double.parseDouble(boundaryM.group(3));
+				longitude1 = Double.parseDouble(boundaryM.group(2));
+				longitude2 = Double.parseDouble(boundaryM.group(4));
+			}
 			//if one of the corner of requested grid falls inside our database grid
 			if((neLat>=latitude2&&neLat<=latitude1)||(swLat>=latitude2&&swLat<=latitude1))
 			{
-				if((neLon>=longitude1&&neLon<=longitude2)||(swLon>=longitude1&&swLon<=longitude2))
+				if((neLon<=longitude1&&neLon>=longitude2)||(swLon<=longitude1&&swLon>=longitude2))
 				{
 					returnWindFileListArray[counterWindfileFinder]=pathWind+item;
 					counterWindfileFinder++;
@@ -171,7 +171,7 @@ public class DatabaseFileFInder {
 				//if one of the corner of our database grid falls inside requested grid
 				if((latitude1>=swLat&&latitude1<=neLat)||(latitude2>=swLat&&latitude2<=neLat))
 				{
-					if((longitude1<=swLon&&longitude1>=neLon)||(longitude2<=swLon&&longitude2>=neLon))
+					if((longitude1>=swLon&&longitude1<=neLon)||(longitude2>=swLon&&longitude2<=neLon))
 					{
 						returnWindFileListArray[counterWindfileFinder]=pathWind+item;;
 						counterWindfileFinder++;
