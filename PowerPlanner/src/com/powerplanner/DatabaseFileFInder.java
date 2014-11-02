@@ -233,7 +233,7 @@ public class DatabaseFileFInder {
 				case "Dec" : returnSolarFileListArray[counterSolarfileFinder] = pathSolar+SolardFileFullArr[11];
 				counterSolarfileFinder++;
 				break;
-				case "Anu" : returnSolarFileListArray[counterSolarfileFinder] = pathSolar+SolardFileFullArr[12];
+				case "anu" : returnSolarFileListArray[counterSolarfileFinder] = pathSolar+SolardFileFullArr[12];
 				counterSolarfileFinder++;
 				break;	
 			}

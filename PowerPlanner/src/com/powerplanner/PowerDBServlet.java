@@ -1,5 +1,8 @@
 package com.powerplanner;
 
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 
 import javax.servlet.http.*;
@@ -23,30 +26,42 @@ public class PowerDBServlet extends HttpServlet {
 	public void doPost(HttpServletRequest req, HttpServletResponse resp)
 			throws IOException {
 
+		final String type = req.getParameter("type");
 		final double neLat = Double.parseDouble(req.getParameter("neLat"));
 		final double neLng = Double.parseDouble(req.getParameter("neLng"));
 		final double swLat = Double.parseDouble(req.getParameter("swLat"));
 		final double swLng = Double.parseDouble(req.getParameter("swLng"));
+		final String season = req.getParameter("season");
 
 		DatabaseFileFInder dbFind = new DatabaseFileFInder();
-		String[] jsonFiles = dbFind.windFileFinder(neLat, neLng, swLat, swLng, "anu");
-		//System.out.println("Servlet got: " + jsonFiles.toString());
+		String[] jsonFiles = new String[0];
 		
-		//System.out.print("Displaying: ");
-		//dbFind.displayWindReturnarr();
+		if (type.equals(PowerType.WIND.toString())) {
+			jsonFiles = dbFind.windFileFinder(neLat, neLng, swLat, swLng, season);
+		}
+
+		StringBuilder dataBuilder = new StringBuilder();
+		dataBuilder.append("[");
 		
 		for (String jsonFile : jsonFiles) {
 			if (jsonFile != null) {
-				System.out.println(jsonFile);
+				File jFile = new File(jsonFile);
+				FileInputStream jfIn = new FileInputStream(jFile);
+				byte[] buffer = new byte[(int) jFile.length()];
+				new DataInputStream(jfIn).readFully(buffer);
+				String newData = new String(buffer, "UTF-8");
+				jfIn.close();
+				if (newData.length() > 1) {
+					dataBuilder.append(newData.substring(1, newData.length() - 1));
+					dataBuilder.append(",");
+				}
 			}
-			//BufferedReader br = new BufferedReader(new FileReader(jsonFile));
-			//for (String line; (line = br.readLine()) != null;) {
-			//	System.out.print(line);
-			//}
-			//br.close();
 		}
+		dataBuilder.deleteCharAt(dataBuilder.length() - 1);
+		dataBuilder.append("]");
 		
-		String dataResponse = "";
+		String dataResponse = dataBuilder.toString();
+		
 		resp.setContentLength(dataResponse.length());
 		resp.getOutputStream().write(dataResponse.getBytes());
 		resp.getOutputStream().flush();
