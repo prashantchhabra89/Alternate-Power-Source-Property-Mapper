@@ -63,7 +63,7 @@ body {
 	position: absolute;
 	margin: 0px 0px 0px 10px;
 	height: 95px;
-	margin-top: 20%;
+	margin-top: 7%;
 	right: 0%;
 }
 
@@ -265,7 +265,7 @@ h4.intro-subheading {
 		font-size: 70px;
 	}
 	.show-description {
-		height: 29% !important;
+		height: 43% !important;
 	}
 	.ui-header .ui-title {
 		padding: 0.5em 0 !important;
@@ -279,7 +279,7 @@ h4.intro-subheading {
 		font-size: 80px;
 	}
 	.show-description {
-		height: 17% !important;
+		height: 30% !important;
 	}
 }
 
