@@ -363,12 +363,12 @@ function _interpolateData(hm_data, neLat, neLng, swLat, swLng) {
 							.concat(data_bins[latbin][lngbin+1])
 							.concat(data_bins[latbin+1][lngbin])
 							.concat(data_bins[latbin+1][lngbin+1]);
-				_createInterpolation(hm_bin, temp_data, lat_increment, lng_increment,
-						lat_start,
-						lng_start,
+				var next_inter = _createInterpolation(hm_bin, temp_data, 
+						lat_increment, lng_increment,
+						lat_start, lng_start,
 						latset, lngset, offset);
-				lat_start = _getNextStart(lat_start, lat_start + lat_increment, latset)
-				offset = (offset == latset ? 0.0 : latset); //alternate offset
+				lat_start = next_inter.max_lat + latset;
+				offset = next_inter.offset;
 			}
 			lat_start = swLat - lat_offset;
 			lng_start = _getNextStart(lng_start, lng_start + lng_increment, lngset);
@@ -387,15 +387,23 @@ function _interpolateData(hm_data, neLat, neLng, swLat, swLng) {
  * 
  * hm_data is the array of real data and fill_data is an array to dump the
  * interpolated points into
+ * 
+ * returns an object containing the maximum latitude value placed, the maximum
+ * longitude value placed, and the next offset value (which would have been used
+ * had there been another longitude line to add)
  */
 function _createInterpolation(hm_data, fill_data, lat_width, lng_width, 
 		lat_start, lng_start, latset, lngset, offset) {
 	var curr_offset = offset;
+	var max_lat = -90;
+	var max_lng = -180;
 	
 	for (var i = 0.0; i <= lat_width; i += latset) {
 		for (var j = 0.0; j <= lng_width; j += lngset) {
 			var lat_point = i + lat_start;
 			var lng_point = j + curr_offset + lng_start;
+			max_lat = Math.max(max_lat, lat_point);
+			max_lng = Math.max(max_lng, lng_point);
 			var weighted = getDataWeight(hm_data, lat_point, lng_point);
 			if (weighted > MIN_DISPLAY_WEIGHT) {
 				addHeatmapCoord(fill_data, lat_point, lng_point, weighted);
@@ -403,6 +411,8 @@ function _createInterpolation(hm_data, fill_data, lat_width, lng_width,
 		}
 		curr_offset = (curr_offset == 0.0 ? latset : 0.0);
 	}
+	
+	return {max_lat : max_lat, max_lng : max_lng, offset : curr_offset};
 }
 
 /*
