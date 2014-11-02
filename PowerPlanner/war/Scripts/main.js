@@ -3,6 +3,7 @@ $(document).ready(function() {
 	$("a.start-button").click(startButtonClick);
 
 	$("#showCheckboxWind").click(function() {
+		$('#wind-panel').toggleClass('selected-resource');
 		toggleHeatmapData(
 				$(this).is(':checked'),
 				$("#showCheckboxSolar").is(':checked'),
@@ -11,6 +12,7 @@ $(document).ready(function() {
 	});
 
 	$("#showCheckboxSolar").click(function() {
+		$('#solar-panel').toggleClass('selected-resource');
 		toggleHeatmapData(
 				$("#showCheckboxWind").is(':checked'),
 				$(this).is(':checked'),
@@ -19,6 +21,7 @@ $(document).ready(function() {
 	});
 
 	$("#showCheckboxHydro").click(function() {
+		$('#hydro-panel').toggleClass('selected-resource');
 		toggleHeatmapData(
 				$("#showCheckboxWind").is(':checked'),
 				$("#showCheckboxSolar").is(':checked'),
@@ -26,16 +29,63 @@ $(document).ready(function() {
 		);
 	});
 
+	$('.wind').on('click', function() {
+		$('#windResource').toggleClass('show-description');
+		$('#solarResource').removeClass('show-description');
+		$('#hydroResource').removeClass('show-description');
+
+		setTimeout(function() {
+			$('#windResouceRadio').toggleClass('displayRadioButtons');
+			$('#windResourceCheck').toggleClass('displayRadioButtons');
+		}, 400);
+		
+		hideSolarResources();
+		hideHydroResources();
+	});
+	$('.solar').on('click', function() {
+		$('#windResource').removeClass('show-description');
+		$('#solarResource').toggleClass('show-description');
+		$('#hydroResource').removeClass('show-description');
+		
+		setTimeout(function() {
+			$('#solarResouceRadio').toggleClass('displayRadioButtons');
+			$('#solarResourceCheck').toggleClass('displayRadioButtons');
+		}, 400);		
+		
+		hideWindResources();
+		hideHydroResources();
+	});
+	$('.hydro').on('click', function() {
+		$('#windResource').removeClass('show-description');
+		$('#solarResource').removeClass('show-description');
+		$('#hydroResource').toggleClass('show-description');
+		
+		setTimeout(function() {
+			$('#hydroResourceRadio').toggleClass('displayRadioButtons');
+			$('#hydroResourceCheck').toggleClass('displayRadioButtons');
+		}, 400);
+		
+		hideWindResources();
+		hideSolarResources();
+	});
 });
 
 window.onresize = function(event) {
 	resizeDiv();
 }
 
+function hideWindResources() {
+	$('#windResouceRadio').removeClass('displayRadioButtons');
+}
+function hideSolarResources() {
+	$('#solarResouceRadio').removeClass('displayRadioButtons');
+}
+function hideHydroResources() {
+	$('#hydroResourceRadio').removeClass('displayRadioButtons');
+}
 function resizeDiv() {
 	// HACK: ui-header height not available during startup.
-	// $(".ui-header").outerHeight();
-	vph = $(window).height() - 80; // 80px is ui-header and margins
+	vph = $(window).height() - 80 - 10; // 80px is ui-header and margins 40 is footer
 	$(".gMap").css({
 		'height' : vph + 'px'
 	});
@@ -44,7 +94,7 @@ function startButtonClick() {
 	if($("#pac-input-intro").val() != "")	{
 		$("#pac-input").val($("#pac-input-intro").val());
 	}
-	
+
 	// Resize the map to page once the new page has finished loading.
 	$(document).on("pageshow", function(e, d) {
 		var center = g_map.getCenter();

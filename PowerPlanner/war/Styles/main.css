@@ -1,7 +1,21 @@
 body {
 	font-family: Helvetica, Arial, sans-serif;
 }
-
+.logo-small {
+	background: url(../images/PowerPlannerLogo-small.png) no-repeat bottom center scroll;
+	width:80px;
+	height:80px;
+	margin: 0 auto;
+}
+.logo-min {
+	background: url(../images/PowerPlannerLogo-min.png) no-repeat bottom center scroll;
+	width:25px;
+	height:25px;
+	margin: 0 auto;
+}
+.ui-header .ui-title {
+	padding: 0.5em 0 !important;
+}
 .resourceBox h4 {
 	margin: 0px 0px 4px 0px;
 	height: 1%;
@@ -20,7 +34,6 @@ body {
 	text-overflow: ellipsis;
 }
 #pac-input {
-	width: 401px;
 	margin-top: 16px;
 }
 #pac-input:focus, #pac-input-intro:focus {
@@ -45,18 +58,62 @@ body {
 	width: 25% !important;
 }
 
-.resourceBox {
-	opacity: 1;
-	background-size: cover;
-	position: relative;
-	margin: 0px 16px 10px 0px;
-	padding: 10px 10px 10px 10px;
-	border-radius: 12px;
-	border: 1px solid #AAA;
+.resourceContainer {
+	width: 70px;
+	position: absolute;
+	margin: 0px 0px 0px 10px;
+	height: 95px;
+	margin-top: 20%;
+	right: 0%;
 }
 
-.showCheckbox {
-	width: 80px;
+.show-description {
+  height: 35% !important;
+}
+
+.selected-resource {
+	border: rgb(249, 72, 112) solid;
+}
+
+.resources-panel {
+  color: rgba(255,255,255,1);
+  background: black;
+  background: linear-gradient(bottom, rgba(0,0,0,1), rgba(0,0,0,.4));
+  background: -webkit-linear-gradient(bottom, rgba(0,0,0,1), rgba(0,0,0,.4));
+  background: -moz-linear-gradient(bottom, rgba(0,0,0,1), rgba(0,0,0,.4));
+  line-height: 28px;
+  text-align: justify;
+  position: absolute;
+  bottom: 0;
+  margin: 0;
+  height: 0px;
+  width:100%;
+  transition: height .5s;
+  -webkit-transition: height .5s;
+  -moz-transition: height .5s;
+}
+
+.wind {
+	background: url(../images/wind-icon.png) no-repeat bottom center scroll !important;
+	width: 55px !important;
+	height: 55px !important;
+	float: left;
+}
+.solar {
+	background: url(../images/solar-icon.png) no-repeat bottom center scroll !important;
+	width: 55px !important;
+	height: 55px !important;
+	float: left;	
+}
+.hydro {
+	background: url(../images/hydro-icon.png) no-repeat bottom center scroll !important;
+	width: 55px !important;
+	height: 55px !important;	
+	float: left;
+}
+
+.ui-content {
+	padding: 0px !important;
 }
 
 .mapSettings {
@@ -68,17 +125,18 @@ body {
 	float: left;
 }
 
-.resourceRadioButton .radioButtonLabel {
+.displayRadioButtons {
+	display: block !important;
+}
+.resourceRadioButton, .radioButtonLabel {
 	font-size: 8pt;
-	width: 44%;
+	width: 95% !important;
+	display: none;
+ 	margin-left: auto;
+	margin-right: auto;
 }
 
-.showCheckbox .showAdvancedOptions {
-	font-size: 6pt;
-	width: 100%;
-}
-
-.resourceBox .resourceImg {
+.resourceBox, .resourceImg {
 	margin-top: 8px;
 }
 
@@ -202,9 +260,16 @@ h4.intro-subheading {
 
 /*FOR RESPONSIVE LAYOUT*/
 /* 0 - 252px */
-@media all and (min-width: 480px) {
+@media all and (max-width: 480px) {
 	h1.intro-title {
 		font-size: 70px;
+	}
+	.show-description {
+		height: 29% !important;
+	}
+	.ui-header .ui-title {
+		padding: 0.5em 0 !important;
+		font-size: 0.8em !important;
 	}
 }
 
@@ -212,6 +277,9 @@ h4.intro-subheading {
 @media only screen and (min-width: 768px) {
 	h1.intro-title {
 		font-size: 80px;
+	}
+	.show-description {
+		height: 17% !important;
 	}
 }
 
