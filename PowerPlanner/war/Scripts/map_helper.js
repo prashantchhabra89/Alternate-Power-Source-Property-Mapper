@@ -197,23 +197,58 @@ function _getHeatmapData(type, neLat, neLng, swLat, swLng) {
 	wind_data = [];
 	solar_data = [];
 	hydro_data = [];
+	
+	console.log("nelat: " + (neLat + lat_offset));
+	console.log("nelng: " + (neLng + lng_offset));
+	console.log("swlat: " + (swLat - lat_offset));
+	console.log("swlng: " + (swLng - lng_offset));
 
 	$.ajax({
-		url : '/powerplanner',
+		//url : '/powerplanner',
+		url : '/powerdb',
 		type : 'POST',
 		data : {
 			type : type,
 			neLat : neLat + lat_offset,
 			neLng : neLng + lng_offset,
 			swLat : swLat - lat_offset,
-			swLng : swLng - lng_offset
+			swLng : swLng - lng_offset,
+			season : "anu"
 		},
 		dataType : 'json',
 		success : function(data, status) {
 			if (status) {
-				var weight_points = [];
+				console.log(data.length);
+				//console.log(data);
+				
+				/*
+				 *  This currently discards any unused points.
+				 *  INSERT CACHING HERE!
+				 */ 
+				usable_data = []
 				for (var i = 0; i < data.length; i++) {
-					weight_points.push(data[i].weight);
+					if (data[i].lat > (swLat - lat_offset) && 
+							data[i].lat < (neLat + lat_offset)) {
+						if (data[i].lon > (swLng - lng_offset) && 
+								data[i].lon < (neLng + lng_offset)) {
+							/*
+							console.log("FOUND DATA POINT!");
+							console.log("Latitude: " + data[i].lat);
+							console.log("Longitude: " + data[i].lon);
+							console.log("Weight: " + data[i].pre15);
+							*/
+							usable_data.push({
+								lat : data[i].lat,
+								lng : data[i].lon,
+								weight : data[i].pre15
+							});
+						}
+					}
+				}
+				
+				var weight_points = [];
+				for (var i = 0; i < usable_data.length; i++) {
+					weight_points.push(usable_data[i].weight);
 				}
 				var topval = getArrayMax(weight_points);
 				console.log("Scaler: " + scaler);
@@ -221,9 +256,9 @@ function _getHeatmapData(type, neLat, neLng, swLat, swLng) {
 				console.log("Zoom: " + g_map.getZoom());
 
 				hm_data = [];
-				for (var i = 0; i < data.length; i++) {
-					addHeatmapCoord(hm_data, data[i].lat, data[i].lng,
-							data[i].weight / scaler);
+				for (var i = 0; i < usable_data.length; i++) {
+					addHeatmapCoord(hm_data, usable_data[i].lat, usable_data[i].lng,
+							usable_data[i].weight / scaler);
 				}
 				if (type == "WIND") {
 					if (POINT_DEBUGGER) {
