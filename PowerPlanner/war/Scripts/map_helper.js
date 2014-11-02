@@ -192,6 +192,7 @@ function toggleHeatmapData(showWind, showSolar, showHydro) {
  * HYDRO. Triggers a heatmap update upon server response.
  */
 function _getHeatmapData(type, neLat, neLng, swLat, swLng) {
+	console.time("_getHeatmapData");
 	var lat_offset = getLatOffset(neLat, swLat);
 	var lng_offset = getLngOffset(neLng, swLng);
 	wind_data = [];
@@ -218,25 +219,19 @@ function _getHeatmapData(type, neLat, neLng, swLat, swLng) {
 		dataType : 'json',
 		success : function(data, status) {
 			if (status) {
-				console.log(data.length);
+				console.log("Total Data Points: " + data.length);
 				//console.log(data);
 				
 				/*
 				 *  This currently discards any unused points.
 				 *  INSERT CACHING HERE!
 				 */ 
-				usable_data = []
+				usable_data = [];
 				for (var i = 0; i < data.length; i++) {
 					if (data[i].lat > (swLat - lat_offset) && 
 							data[i].lat < (neLat + lat_offset)) {
 						if (data[i].lon > (swLng - lng_offset) && 
 								data[i].lon < (neLng + lng_offset)) {
-							/*
-							console.log("FOUND DATA POINT!");
-							console.log("Latitude: " + data[i].lat);
-							console.log("Longitude: " + data[i].lon);
-							console.log("Weight: " + data[i].pre15);
-							*/
 							usable_data.push({
 								lat : data[i].lat,
 								lng : data[i].lon,
@@ -251,6 +246,8 @@ function _getHeatmapData(type, neLat, neLng, swLat, swLng) {
 					weight_points.push(usable_data[i].weight);
 				}
 				var topval = getArrayMax(weight_points);
+				//scaler = topval;
+				console.log("Data Points on Screen: " + usable_data.length);
 				console.log("Scaler: " + scaler);
 				console.log("Top val: " + topval);
 				console.log("Zoom: " + g_map.getZoom());
@@ -273,8 +270,10 @@ function _getHeatmapData(type, neLat, neLng, swLat, swLng) {
 					if (POINT_DEBUGGER) {
 						solar_data = hm_data;
 					} else {
+						console.time('_interpolateData');
 						solar_data = _interpolateData(hm_data, neLat, neLng,
 								swLat, swLng);
+						console.timeEnd('_interpolateData');
 					}
 				} else if (type == "HYDRO") {
 					hydro_data = hm_data;
@@ -283,6 +282,7 @@ function _getHeatmapData(type, neLat, neLng, swLat, swLng) {
 		},
 		complete : function() {
 			updateHeatmap();
+			console.timeEnd("_getHeatmapData");
 		},
 	});
 }
@@ -507,7 +507,7 @@ function getDataWeight(hm_data, lat, lng) {
 		var dist_sum = nearest_distance.reduce(function(a, b) { return a + b; });		
 		
 		for (var i = 0; i < nearest.length; i++) {
-			var dist_scaling = WEIGHT_SCALING_DISTANCE / nearest_distance[i];
+			var dist_scaling = Math.pow(WEIGHT_SCALING_DISTANCE / nearest_distance[i], 2);
 			if (dist_scaling > 1) {
 				dist_scaling = 1;
 			}

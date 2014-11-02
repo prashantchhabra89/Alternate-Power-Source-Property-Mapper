@@ -38,6 +38,35 @@ public class PowerDBServlet extends HttpServlet {
 		
 		if (type.equals(PowerType.WIND.toString())) {
 			jsonFiles = dbFind.windFileFinder(neLat, neLng, swLat, swLng, season);
+			System.out.println("FETCHED GRID FILES: ");
+			dbFind.displayWindReturnarr();			
+		} else if (type.equals(PowerType.SOLAR.toString())) {
+			switch(season) {
+			case "dfj" :
+				dbFind.solarFileFinder("Dec");
+				dbFind.solarFileFinder("Jan");
+				jsonFiles = dbFind.solarFileFinder("Feb");
+				break;
+			case "mam" :
+				dbFind.solarFileFinder("Mar");
+				dbFind.solarFileFinder("Apr");
+				jsonFiles = dbFind.solarFileFinder("May");
+				break;
+			case "jja" :
+				dbFind.solarFileFinder("Jun");
+				dbFind.solarFileFinder("Jul");
+				jsonFiles = dbFind.solarFileFinder("Aug");
+				break;
+			case "son" : 
+				dbFind.solarFileFinder("Sep");
+				dbFind.solarFileFinder("Oct");
+				jsonFiles = dbFind.solarFileFinder("Nov");
+				break;
+			case "anu" :
+			default :
+				jsonFiles = dbFind.solarFileFinder("Anu");
+				break;
+			}
 		}
 
 		StringBuilder dataBuilder = new StringBuilder();

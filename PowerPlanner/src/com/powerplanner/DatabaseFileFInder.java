@@ -158,26 +158,27 @@ public class DatabaseFileFInder {
 				longitude2 = Double.parseDouble(boundaryM.group(4));
 			}
 			//if one of the corner of requested grid falls inside our database grid
-			if((neLat>=latitude2&&neLat<=latitude1)||(swLat>=latitude2&&swLat<=latitude1))
+			if(((neLat>=latitude2&&neLat<=latitude1)||(swLat>=latitude2&&swLat<=latitude1))
+					&& ((neLon<=longitude1&&neLon>=longitude2)||(swLon<=longitude1&&swLon>=longitude2)))
 			{
-				if((neLon<=longitude1&&neLon>=longitude2)||(swLon<=longitude1&&swLon>=longitude2))
-				{
-					returnWindFileListArray[counterWindfileFinder]=pathWind+item;
-					counterWindfileFinder++;
-				}
+				returnWindFileListArray[counterWindfileFinder]=pathWind+item;
+				counterWindfileFinder++;
 			}
-			else
+			//if one of the corner of our database grid falls inside requested grid
+			else if (((latitude1>=swLat&&latitude1<=neLat)||(latitude2>=swLat&&latitude2<=neLat))
+					&& ((longitude1>=swLon&&longitude1<=neLon)||(longitude2>=swLon&&longitude2<=neLon)))
 			{
-				//if one of the corner of our database grid falls inside requested grid
-				if((latitude1>=swLat&&latitude1<=neLat)||(latitude2>=swLat&&latitude2<=neLat))
-				{
-					if((longitude1>=swLon&&longitude1<=neLon)||(longitude2>=swLon&&longitude2<=neLon))
-					{
-						returnWindFileListArray[counterWindfileFinder]=pathWind+item;;
-						counterWindfileFinder++;
-					}
-				}
+				returnWindFileListArray[counterWindfileFinder]=pathWind+item;
+				counterWindfileFinder++;
 			}
+			//if there is overlap of the database and requested grid, but no corners fall in the other
+			else if (((latitude2<swLat && latitude1>neLat)&&(longitude2>swLon && longitude1<neLon))
+					|| ((longitude2<swLon && longitude1>neLon)&&(latitude2>swLat && latitude1<neLat))) 
+			{
+				returnWindFileListArray[counterWindfileFinder]=pathWind+item;
+				counterWindfileFinder++;
+			}
+			
 		}
 		return returnWindFileListArray;
 	}
@@ -233,7 +234,7 @@ public class DatabaseFileFInder {
 				case "Dec" : returnSolarFileListArray[counterSolarfileFinder] = pathSolar+SolardFileFullArr[11];
 				counterSolarfileFinder++;
 				break;
-				case "anu" : returnSolarFileListArray[counterSolarfileFinder] = pathSolar+SolardFileFullArr[12];
+				case "Anu" : returnSolarFileListArray[counterSolarfileFinder] = pathSolar+SolardFileFullArr[12];
 				counterSolarfileFinder++;
 				break;	
 			}
