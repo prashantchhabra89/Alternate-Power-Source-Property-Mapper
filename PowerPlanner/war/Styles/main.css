@@ -153,6 +153,7 @@ div.ui-input-text{
 
 .start-button {
 	width: 65px;
+	color: #333 !important;
 	font-size: 21px !important;
 	background-color: #FAF84E !important;
 	border-color: #FADE4E !important;
@@ -184,6 +185,7 @@ h1.intro-title, h2.intro-header {
 	text-shadow: initial;
 	font-variant: small-caps;
 	margin: 100px 0px 37px 0px;
+	font-size: 60px;
 }
 
 h2.intro-header {
@@ -202,6 +204,9 @@ p.intro-text, h3.intro-header {
 	font-size: 24px;
 	font-weight: 200;
 	text-shadow: initial;
+	color: rgb(253, 231, 2);
+	margin-left: auto;
+	margin-right: auto;
 }
 
 p.calc-text, h3.calc-header {
