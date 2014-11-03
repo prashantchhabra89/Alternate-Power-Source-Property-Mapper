@@ -150,7 +150,6 @@ div.ui-input-text{
 	display: inline-block !important;
 	width: 100% !important;	
 }
-
 .start-button {
 	width: 65px;
 	color: #333 !important;
@@ -161,7 +160,6 @@ div.ui-input-text{
 	font-family: 'Raleway', sans-serif !important;
 	font-weight: lighter !important;
 }
-
 .intro {
 	display: table;
 	width: 100%;
@@ -173,7 +171,6 @@ div.ui-input-text{
 	background-size: cover;
 	background-position: center;
 }
-
 .ui-header-intro {
 	height: 93vh;
 }
