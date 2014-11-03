@@ -18,11 +18,10 @@ var MAX_ZOOM = 15; /* Farthest in the user can zoom */
 var DEFAULT_ZOOM = 14; /* Starting zoom level */
 var MAX_DATA_WIDTH = 0.32; /* Width of interpolating points (LEAST_ZOOM = 8) */
 
-var WEIGHT_SCALING_DISTANCE = 0.06651; /*
-										 * Data points further away have less
-										 * impact
-										 */
-var MIN_DISPLAY_WEIGHT = 0.005; /* Don't add a point with less weight to heatmap */
+var WEIGHT_SCALING_DISTANCE = 0.06651; /* Data point further away has less impact */
+var SOLAR_SCALING_DISTANCE = 1; /* Data point further away may have less impact */
+
+var MIN_DISPLAY_WEIGHT = 0.01; /* Don't add a point with less weight to heatmap */
 
 var scaler = 500;
 
@@ -30,9 +29,9 @@ var POINT_DEBUGGER = false; /* true = view data points instead of interpolation 
 
 // View (or zoom) state of the map; used to implement different time saving
 // measures
-var view_state = (DEFAULT_ZOOM <= CHANGETO_WIDE_VIEW ? (DEFAULT_ZOOM <= CHANGETO_OVER_VIEW ? OVER_VIEW
-		: WIDE_VIEW)
-		: (DEFAULT_ZOOM <= CHANGETO_AVE_VIEW ? AVE_VIEW : SMALL_VIEW));
+var view_state = (DEFAULT_ZOOM <= CHANGETO_WIDE_VIEW ? 
+			(DEFAULT_ZOOM <= CHANGETO_OVER_VIEW ? OVER_VIEW : WIDE_VIEW) : 
+			(DEFAULT_ZOOM <= CHANGETO_AVE_VIEW ? AVE_VIEW : SMALL_VIEW));
 
 /*
  * This example adds a search box to a map, using the Google Place Autocomplete
@@ -140,18 +139,13 @@ function mapLoader() {
 	attachHeatmap(g_heatmap, g_map);
 
 	google.maps.event.addListener(g_map, 'dragend', _eventHeatmapDataToggler);
-	google.maps.event
-			.addListener(
-					g_map,
-					'zoom_changed',
-					function() {
-						zoom = g_map.getZoom();
-						view_state = (zoom <= CHANGETO_WIDE_VIEW ? (zoom <= CHANGETO_OVER_VIEW ? OVER_VIEW
-								: WIDE_VIEW)
-								: (zoom <= CHANGETO_AVE_VIEW ? AVE_VIEW
-										: SMALL_VIEW));
-						console.log("View state: " + view_state);
-						_eventHeatmapDataToggler();
+	google.maps.event.addListener(g_map, 'zoom_changed', function() {
+			zoom = g_map.getZoom();
+			view_state = (zoom <= CHANGETO_WIDE_VIEW ? 
+							(zoom <= CHANGETO_OVER_VIEW ? OVER_VIEW: WIDE_VIEW) : 
+								(zoom <= CHANGETO_AVE_VIEW ? AVE_VIEW : SMALL_VIEW));
+					console.log("View state: " + view_state);
+					_eventHeatmapDataToggler();
 					});
 }
 
@@ -213,101 +207,92 @@ function _getHeatmapData(type, neLat, neLng, swLat, swLng) {
 	console.log("swlat: " + (swLat - lat_offset));
 	console.log("swlng: " + (swLng - lng_offset));
 
-	$
-			.ajax({
-				// url : '/powerplanner',
-				url : '/powerdb',
-				type : 'POST',
-				data : {
-					type : type,
-					neLat : neLat + lat_offset,
-					neLng : neLng + lng_offset,
-					swLat : swLat - lat_offset,
-					swLng : swLng - lng_offset,
-					season : "anu"
-				},
-				dataType : 'json',
-				success : function(data, status) {
-					if (status) {
-						console.log("Total Data Points: " + data.length);
-						// console.log(data);
+	$.ajax({
+			// url : '/powerplanner',
+			url : '/powerdb',
+			type : 'POST',
+			data : {
+				type : type,
+				neLat : neLat + lat_offset,
+				neLng : neLng + lng_offset,
+				swLat : swLat - lat_offset,
+				swLng : swLng - lng_offset,
+				season : "anu"
+			},
+			dataType : 'json',
+			success : function(data, status) {
+				if (status) {
+					console.log("Total Data Points: " + data.length);
+					// console.log(data);
 
-						/*
-						 * This currently discards any unused points. INSERT
-						 * CACHING HERE!
-						 */
-						usable_data = [];
-						for (var i = 0; i < data.length; i++) {
-							if (data[i].lat > (swLat - lat_offset)
-									&& data[i].lat < (neLat + lat_offset)) {
-								if (data[i].lon > (swLng - lng_offset)
-										&& data[i].lon < (neLng + lng_offset)) {
-									var wt = 0;
-									if (type == "WIND") {
-										wt = data[i].pre15;
-									} else if (type == "SOLAR") {
-										wt = data[i].deg45;
-									}
-									usable_data.push({
-										lat : data[i].lat,
-										lng : data[i].lon,
-										weight : wt
-									});
-								}
-							}
-						}
+					// TODO: cache the unused points.
+					usable_data = [];
+					if (type == "WIND") {
+						_filterWindData(data, usable_data, 
+								neLat + lat_offset, neLng + lng_offset, 
+								swLat - lat_offset, swLng - lng_offset);
+						scaler = 500;
+					} else if (type == "SOLAR") {
+						_filterSolarData(data, usable_data);
+						scaler = 5;
+					}
 
-						var weight_points = [];
-						for (var i = 0; i < usable_data.length; i++) {
-							weight_points.push(usable_data[i].weight);
-						}
-						var topval = getArrayMax(weight_points);
-						// scaler = topval;
-						console.log("Data Points on Screen: "
-								+ usable_data.length);
-						console.log("Scaler: " + scaler);
-						console.log("Top val: " + topval);
-						console.log("Zoom: " + g_map.getZoom());
+					var weight_points = [];
+					for (var i = 0; i < usable_data.length; i++) {
+						weight_points.push(usable_data[i].weight);
+					}
+					var topval = getArrayMax(weight_points);
+					var botval = getArrayMin(weight_points);
+					// scaler = topval;
+					console.log("Data Points on Screen: "
+							+ usable_data.length);
+					console.log("Scaler: " + scaler);
+					console.log("Top val: " + topval);
+					console.log("Bottom val: " + botval);
+					console.log("Zoom: " + g_map.getZoom());
 
-						var hm_data = [];
+					var hm_data = [];
+						
+					if (type == "WIND") {
 						for (var i = 0; i < usable_data.length; i++) {
 							addHeatmapCoord(hm_data, usable_data[i].lat,
 									usable_data[i].lng, usable_data[i].weight
 											/ scaler);
 						}
-						if (type == "WIND") {
-							
-							if (POINT_DEBUGGER) {
-								wind_data = hm_data;
-								scaler = 500;
-							} else {
-								scaler = 500;
-								console.time('_interpolateData');
-								wind_data = _interpolateData(hm_data, neLat,
-										neLng, swLat, swLng, type);
-								console.timeEnd('_interpolateData');
-							}
-						} else if (type == "SOLAR") {
-							if (POINT_DEBUGGER) {
-								solar_data = hm_data;
-								scaler = 5;
-							} else {
-								scaler = 5;
-								console.time('_interpolateData');
-								solar_data = _interpolateData(hm_data, neLat,
-										neLng, swLat, swLng, type);
-								console.timeEnd('_interpolateData');
-							}
-						} else if (type == "HYDRO") {
-							hydro_data = hm_data;
+						if (POINT_DEBUGGER) {
+							wind_data = hm_data;
+						} else {
+							console.time('_interpolateData');
+							wind_data = _interpolateData(hm_data, neLat,
+									neLng, swLat, swLng, type);
+							console.timeEnd('_interpolateData');
 						}
+					} else if (type == "SOLAR") {
+						for (var i = 0; i < usable_data.length; i++) {
+							addHeatmapCoord(hm_data, usable_data[i].lat,
+									usable_data[i].lng, 2.5 * 
+											((Math.pow(10, usable_data[i].weight)
+											- Math.pow(10, botval))
+											/ Math.pow(10, scaler)));
+						}
+						if (POINT_DEBUGGER) {
+							solar_data = hm_data;
+						} else {
+							console.time('_interpolateData');
+							solar_data = _interpolateData(hm_data, neLat,
+									neLng, swLat, swLng, type);
+							console.timeEnd('_interpolateData');
+						}
+					} else if (type == "HYDRO") {
+						hydro_data = hm_data;
 					}
-				},
-				complete : function() {
-					updateHeatmap();
-					console.timeEnd("_getHeatmapData");
-				},
-			});
+				}
+			},
+			complete : function() {
+				updateHeatmap();
+				console.timeEnd("_getHeatmapData");
+			},
+		});
 }
 
 /*
@@ -340,6 +325,36 @@ function getLngOffset(eastLng, westLng) {
 		lng_offset = lng_offset / 8;
 	}
 	return lng_offset;
+}
+
+/*
+ * TODO: Add in other metrics for calculations.
+ */
+function _filterWindData(raw_data, push_data, neLat, neLng, swLat, swLng) {
+	for (var i = 0; i < raw_data.length; i++) {
+		if (raw_data[i].lat > swLat && raw_data[i].lat < neLat) {
+			if (raw_data[i].lon > swLng && raw_data[i].lon < neLng) {
+				push_data.push({
+					lat : raw_data[i].lat,
+					lng : raw_data[i].lon,
+					weight : raw_data[i].pre15
+				});
+			}
+		}
+	}
+}
+
+/*
+ * TODO: Add in other metrics for calculations.
+ */
+function _filterSolarData(raw_data, push_data) {
+	for (var i = 0; i < raw_data.length; i++) {
+		push_data.push({
+			lat : raw_data[i].lat,
+			lng : raw_data[i].lon,
+			weight : raw_data[i].deg45
+		});
+	}
 }
 
 /*
@@ -436,6 +451,7 @@ function _createInterpolation(hm_data, fill_data, lat_width, lng_width,
 			max_lat = Math.max(max_lat, lat_point);
 			max_lng = Math.max(max_lng, lng_point);
 			var weighted = getDataWeight(hm_data, lat_point, lng_point, type);
+			//console.log("Point Weight: " + weighted);
 			if (weighted > MIN_DISPLAY_WEIGHT) {
 				addHeatmapCoord(fill_data, lat_point, lng_point, weighted);
 			}
@@ -481,8 +497,7 @@ function _binData(hm_data, neLat, neLng, swLat, swLng, data_lat_offset,
 			curr_lat += (lat_width / 4);
 			lat_bin++;
 			if (lat_bin > 3) {
-				console
-						.log("ERROR: data point failed to fit into a bin (lat failure)");
+				console.log("ERROR: data point failed to fit into a bin (lat failure)");
 				error_state = true;
 				break;
 			}
@@ -496,8 +511,7 @@ function _binData(hm_data, neLat, neLng, swLat, swLng, data_lat_offset,
 			curr_lng += (lng_width / 4);
 			lng_bin++;
 			if (lng_bin > 3) {
-				console
-						.log("ERROR: data point failed to fit into a bin (lng failure)");
+				console.log("ERROR: data point failed to fit into a bin (lng failure)");
 				error_state = true;
 				break;
 			}
@@ -606,15 +620,52 @@ function _getDataWeightSolar(hm_data, lat, lng) {
 		}
 	}
 	
-	// Find nearest point in each bin (or find nothing if empty bin
+	// Find nearest point in each bin (or find nothing if empty bin)
+	for (var i = 0; i < data_bins.length; i++) {
+		for (var j = 0; j < data_bins[i].length; j++) {
+			if (nearest.length < (i+1)) {
+				// Trivial case; the first point looked at is the nearest so far
+				nearest.push(data_bins[i][j]);
+				nearest_distance.push(distanceTo(lat, lng, data_bins[i][j].location
+						.lat(), data_bins[i][j].location.lng()));
+			} else {
+				var dist_to_j = distanceTo(lat, lng, data_bins[i][j].location
+						.lat(), data_bins[i][j].location.lng())
+				if (dist_to_j < nearest_distance[i]) {
+					nearest[i] = data_bins[i][j];
+					nearest_distance[i] = dist_to_j;
+				}
+			}
+		}
+	}
+	/*
+	console.log("Lat: " + lat + " Lng: " + lng);
+	for (var i = 0; i < nearest.length; i++) {
+		console.log("Near point Lat: " + nearest[i].location.lat() + 
+				" Lng: " + nearest[i].location.lng() + " Distance: " +
+				nearest_distance[i]);
+	}
+	*/
 	
-	// If there are 4 nearest points, assign average weighting, with
-	// more impact from nearer points
+	var final_weight = 0;
+	if (nearest.length > 0) {
+		var dist_sum = nearest_distance.reduce(function(a, b) {
+			return a + b;
+		});
+		
+		for (var i = 0; i < nearest.length; i++) {
+			var dist_scaling = Math.pow(SOLAR_SCALING_DISTANCE / nearest_distance[i],
+					4 - nearest.length + 1);
+			if (dist_scaling > 1) {
+				dist_scaling = 1;
+			}
+			
+			final_weight += (nearest[i].weight * (1 - nearest_distance[i] / dist_sum)
+					* dist_scaling);
+		}
+	}
 	
-	// If there are fewer than 4 nearest points, drop off at an exponential
-	// rate (distance to the power of 1 + (4 - number of nearest points))
-	
-	// Return weight
+	return (nearest.length > 0 ? final_weight / nearest.length : 0);
 }
 
 /*

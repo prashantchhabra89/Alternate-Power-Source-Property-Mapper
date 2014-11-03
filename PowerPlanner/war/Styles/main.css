@@ -61,7 +61,7 @@ body {
 .resourceContainer {
 	width: 70px;
 	position: absolute;
-	margin: 19% 0 0 10px;
+	margin: 220px 0 0 10px;
 	/*margin: 0px 0px 0px 10px;
 	height: 95px;
 	margin-top: 7%;
@@ -70,13 +70,13 @@ body {
 
 .resourceContainer div {
 	margin: 0.2em 0.2em;
-	border: 2px solid #555;
+	border: 2px solid #999;
 	border-radius: 7px;
 	box-shadow: 0 0 2px #555;
 }
 
 .resourceContainer div:HOVER {
-	border-color: #1554DA;
+	border-color: #5599DA;
 	box-shadow: 0 0 5px #1554DA;
 	cursor: pointer;
 }
