@@ -27,16 +27,16 @@
 	<!-- Start of first page -->
 	<div data-role="page" id="home">
 		<!-- /header -->
-		<div data-role="header" data-theme="a" class="ui-header-intro">
+		<div data-role="header" data-theme="b" class="ui-header-intro">
 			<header class="intro">
 				<h1 class="intro-title">Power Planner</h1>
-				<p class="intro-text">Putting power in people's hands for finding 
-				sites for sustainable electricity generation.</p>
+				<div class="logo-small"></div>
+				<p class="intro-text">Putting power in people's hands for
+					finding sites for sustainable electricity generation.</p>
 				<input type="text" name="placesTextSearch" id="pac-input-intro"
 					class="controls placesTextSearch"
-					placeholder="Search a place in BC">
-					<br> 
-				<a href="#app" class="ui-btn ui-btn-inline start-button">Start</a>
+					placeholder="Search a place in BC"> <br> <a
+					href="#app" class="ui-btn ui-btn-inline start-button">Start</a>
 			</header>
 		</div>
 		<div role="main" class="ui-content ">
@@ -68,8 +68,6 @@
 			<div class="circular"></div>
 			<div class="circular"></div>
 			<div class="circular"></div>
-
-
 		</div>
 		<!-- /content -->
 		<div data-role="footer" data-position="fixed" data-theme="b"
@@ -81,62 +79,8 @@
 
 	<!-- Start of app page -->
 	<div data-role="page" id="app">
-		<div data-role="panel" data-position="left" data-display="overlay"
-			id="menu">
-			<div class="resourceBox">
-				<h4>WIND POWER</h4>
-				<img src="images/windmill30.png" alt="a picture of a windmill"
-					class="resourceImg">
-				<form class="resourceRadioButton" action="">
-					<input type="radio" name="windPower" value="pgv" id="pgv">
-					<label for="pgv">Power generation view</label> 
-					<input type="radio" name="windPower" value="wsv" id="wsv"> 
-					<label for="wsv">Wind speed view</label>
-				</form>
-				<form class="showCheckbox">
-					<input type="checkbox" name="showCheckboxWind"
-						id="showCheckboxWind" data-mini="true"> 
-					<label class="showAdvancedOptions" for="showCheckboxWind"> 
-						Show
-					</label>
-				</form>
-			</div>
-			
-			<div class="resourceBox">
-				<h4>SOLAR POWER</h4>
-				<img src="images/solar20.png" alt="a picture of a solar panel"
-					class="resourceImg">
-				<form class="resourceRadioButton" action="">
-					<input type="radio" name="solarPower" value="pgv" id="pgv">
-					<label for="pgv">Power generation view</label> 
-					<input type="radio" name="solarPower" value="shv" id="shv"> 
-					<label for="shv">Sunlight hours view</label>
-				</form>
-				<form class="showCheckbox">
-					<input type="checkbox" name="showCheckboxSolar"
-						id="showCheckboxSolar" data-mini="true"> 
-					<label class="showAdvancedOptions" for="showCheckboxSolar"> 
-						Show
-					</label>
-				</form>
-			</div>
-
-			<div class="resourceBox">
-				<h4>HYDRO POWER</h4>
-				<img src="images/waterfall7.png" alt="a picture of a waterfall"
-					class="resourceImg">
-				<form class="resourceRadioButton" action="">
-					<input type="radio" name="hydroPower" value="pgv" id="pgv">
-					<label for="pgv">Power generation view</label> <input 
-						type="radio" name="hydroPower" value="watersv" id="watersv">
-					<label for="watersv">Water speed view</label>
-				</form>
-				<form class="showCheckbox">
-					<input type="checkbox" name="showCheckboxHydro"
-						id="showCheckboxHydro" data-mini="true"> <label
-						class="showAdvancedOptions" for="showCheckboxHydro"> Show</label>
-				</form>
-			</div>
+		<div data-role="panel" data-position="left" data-display="push"
+			id="menu" data-theme="b">
 			<input type="text" name="placesTextSearch" id="pac-input"
 				class="controls" placeholder="Search Box">
 		</div>
@@ -145,39 +89,67 @@
 			<h2>Menu2 h2</h2>
 			<h3>Menu h3</h3>
 		</div>
-		<div data-role="header" data-theme="a">
+		<div data-role="header" data-position="fixed" data-theme="b">
 			<a href="#menu"
-				class="jqm-navmenu-link ui-nodisc-icon ui-alt-icon ui-btn-left ui-btn ui-icon-bars ui-btn-icon-notext ui-corner-all"
-				data-icon="bars" data-theme="a">About</a>
+				class="jqm-navmenu-link ui-nodisc-icon ui-btn-left ui-btn ui-icon-bars ui-btn-icon-notext ui-corner-all"
+				data-icon="bars" data-theme="b">About</a>
 
-			<h1>Power Planner</h1>
+			<h1>
+				Power <img id="logo-icon" src="images/PowerPlannerLogo-min.png"
+					data-thumb="" alt=""> Planner
+			</h1>
 			<a href="#menu2"
-				class="jqm-navmenu-link ui-nodisc-icon ui-alt-icon ui-btn-right ui-btn ui-icon-gear ui-btn-icon-notext ui-corner-all"
-				data-icon="gear" data-theme="a">About</a>
+				class="jqm-navmenu-link ui-nodisc-icon ui-btn-right ui-btn ui-icon-gear ui-btn-icon-notext ui-corner-all"
+				data-icon="gear" data-theme="b">About</a>
 		</div>
 		<!-- /header -->
 		<div role="main" class="ui-content">
-			<div class="ui-block-c gMap" id="googleMap"></div>
-		</div>
-		<!-- /content -->
-	</div>
-	<!-- /page -->
-
-	<!-- Start of second page -->
-	<div data-role="page" id="about">
-
-		<div data-role="header" data-theme="a">
-			<h1>SECOND PAGE</h1>
-		</div>
-		<!-- /header -->
-
-		<div role="main" class="ui-content">
-			<div class="container">
-				<div class="about"></div>
+			<div class="ui-block-a gMap" id="googleMap"></div>
+			<div class="resourceContainer">
+				<div id="wind-panel" class="wind"></div>
+				<div id="solar-panel" class="solar"></div>
+				<div id="hydro-panel" class="hydro"></div>
+			</div>
+			<div class="resources-panel" id="windResource">
+				<form class="resourceRadioButton" action="" id="windResouceRadio">
+					<input type="radio" name="windPower" value="pgv" id="pgv">
+					<label for="pgv">Power generation view</label> <input type="radio"
+						name="windPower" value="wsv" id="wsv"> <label for="wsv">Wind
+						speed view</label>
+					<input type="checkbox" name="showCheckboxWind"
+						id="showCheckboxWind" data-mini="true"> <label
+						class="showAdvancedOptions" for="showCheckboxWind"> Show </label>
+				</form>
+			</div>
+			<div class="resources-panel" id="solarResource">
+				<form class="resourceRadioButton" action="" id="solarResouceRadio">
+					<input type="radio" name="solarPower" value="pgv" id="pgv">
+					<label for="pgv">Power generation view</label> <input type="radio"
+						name="solarPower" value="shv" id="shv"> <label for="shv">Sunlight
+						hours view</label>
+					<input type="checkbox" name="showCheckboxSolar"
+						id="showCheckboxSolar" data-mini="true"> <label
+						class="showAdvancedOptions" for="showCheckboxSolar"> Show
+					</label>
+				</form>
+			</div>
+			<div class="resources-panel" id="hydroResource">
+				<form class="resourceRadioButton" action="" id="hydroResourceRadio">
+					<input type="radio" name="hydroPower" value="pgv" id="pgv">
+					<label for="pgv">Power generation view</label> <input type="radio"
+						name="hydroPower" value="watersv" id="watersv"> <label
+						for="watersv">Water speed view</label>
+					<input type="checkbox" name="showCheckboxHydro"
+						id="showCheckboxHydro" data-mini="true"> <label
+						class="showAdvancedOptions" for="showCheckboxHydro"> Show</label>
+				</form>
 			</div>
 		</div>
 		<!-- /content -->
-		<div data-role="footer" data-position="fixed" data-theme="b"></div>
+		<div data-role="footer" data-position="fixed" data-theme="b"
+			class="intro-footer">
+			<p>Copyright &copy Power Planner 2014</p>
+		</div>
 	</div>
 	<!-- /page -->
 </body>
