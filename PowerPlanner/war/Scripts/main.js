@@ -3,7 +3,8 @@ $(document).ready(function() {
 	$("a.start-button").click(startButtonClick);
 
 	$("#showCheckboxWind").click(function() {
-		$('#wind-panel').toggleClass('selected-resource');
+		var bg_col = ($(this).is(':checked')) ? "#F84684" : "";
+		$('#wind-panel').css("border-color", bg_col);
 		toggleHeatmapData(
 				$(this).is(':checked'),
 				$("#showCheckboxSolar").is(':checked'),
@@ -12,7 +13,8 @@ $(document).ready(function() {
 	});
 
 	$("#showCheckboxSolar").click(function() {
-		$('#solar-panel').toggleClass('selected-resource');
+		var bg_col = ($(this).is(':checked')) ? "#F84684" : "";
+		$('#solar-panel').css("border-color", bg_col);
 		toggleHeatmapData(
 				$("#showCheckboxWind").is(':checked'),
 				$(this).is(':checked'),
@@ -21,7 +23,8 @@ $(document).ready(function() {
 	});
 
 	$("#showCheckboxHydro").click(function() {
-		$('#hydro-panel').toggleClass('selected-resource');
+		var bg_col = ($(this).is(':checked')) ? "#F84684" : "";
+		$('#hydro-panel').css("border-color", bg_col);
 		toggleHeatmapData(
 				$("#showCheckboxWind").is(':checked'),
 				$("#showCheckboxSolar").is(':checked'),
