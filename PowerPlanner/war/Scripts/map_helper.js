@@ -23,7 +23,9 @@ var SOLAR_SCALING_DISTANCE = 1; /* Data point further away may have less impact 
 
 var MIN_DISPLAY_WEIGHT = 0.01; /* Don't add a point with less weight to heatmap */
 
-var scaler = 500;
+var WIND_SCALER = 500;
+var SOLAR_SCALER = 4.6;
+var scaler = WIND_SCALER;
 
 var POINT_DEBUGGER = false; /* true = view data points instead of interpolation */
 
@@ -231,10 +233,10 @@ function _getHeatmapData(type, neLat, neLng, swLat, swLng) {
 						_filterWindData(data, usable_data, 
 								neLat + lat_offset, neLng + lng_offset, 
 								swLat - lat_offset, swLng - lng_offset);
-						scaler = 500;
+						scaler = WIND_SCALER;
 					} else if (type == "SOLAR") {
 						_filterSolarData(data, usable_data);
-						scaler = 5;
+						scaler = SOLAR_SCALER;
 					}
 
 					var weight_points = [];
@@ -704,11 +706,13 @@ function initHeatmap(map) {
 		radius : MAX_DATA_WIDTH / Math.pow(2, (DEFAULT_ZOOM - LEAST_ZOOM))
 				* 0.98,
 		dissipating : false,
-		opacity : 0.4,
-		gradient : [ 'rgba(0,0,0,0)', 'rgba(255,0,0,1)', 'rgba(255,63,0,1)',
-				'rgba(255,127,0,1)', 'rgba(255,191,0,1)', 'rgba(255,255,0,1)',
-				'rgba(223,255,0,1)', 'rgba(191,255,0,1)', 'rgba(159,255,0,1)',
-				'rgba(127,255,0,1)', 'rgba(63,255,0,1)', 'rgba(0,255,0,1)' ]
+		opacity : 0.5,
+		gradient : [ 'rgba(0,0,0,0)', 'rgba(0,50,100,1)', 'rgba(0,75,200,1)', 
+				        'rgba(0,127,255,1)', 'rgba(0,159,255,1)', 'rgba(0,191,255,1)',
+				        'rgba(0,223,255,1)', 'rgba(0,255,255,1)', 'rgba(20,255,191,1)',
+				        'rgba(50,255,127,1)', 'rgba(75,255,0,1)', 'rgba(120,255,0,1)',
+				        'rgba(175,255,0,1)', 'rgba(200,255,0,1)', 'rgba(255,220,0,1)',
+				        'rgba(255,180,0,1)', 'rgba(255,120,0,1)', 'rgba(255,0,0,1)']
 	});
 
 	return heatmap;
