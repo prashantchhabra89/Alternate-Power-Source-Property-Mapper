@@ -1,4 +1,4 @@
-package com.powerplanner;
+package main.powercalc;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
