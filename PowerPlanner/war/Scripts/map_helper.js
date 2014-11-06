@@ -68,8 +68,7 @@ function initialize() {
 	// Yes, we created a bubble first, then we created a marker.
 	// markerBalloon is declared global.
 	markerBalloon = new google.maps.InfoWindow();
-	
-	
+		
 	// Code for get rid of top-left bug. Doesn't affect functions.
 	// Explanation:
 	// When an info window is created, it is not tied with any marker.
@@ -104,7 +103,6 @@ function initialize() {
 	markerBalloon.open(null);
 	// end of the top-left thing.
 	
-	
 	map.addListener('rightclick', function(event) {
 		addMarker(event.latLng);
 
@@ -118,13 +116,11 @@ function initialize() {
 		});
 
 		// the object handle returned from the current fake function.
-		var fakeObject = getPointData(marker.getPosition().lat(), marker.getPosition().lng());
-		
+		var fakeObject = getPointData(marker.getPosition().lat(), marker.getPosition().lng());		
 		// note that the numeric value returned are rounded to 3 digits. Change this if needed.
 		var latPosition = marker.getPosition().lat().toFixed(3).toString();
 		var lngPosition = marker.getPosition().lng().toFixed(3).toString();
 
-		
 		// this is the bubble displayed when pin is dropped
 		// the function balloonText() is called to get the string displayed in the balloon.
 		markerBalloon.setContent(balloonText(fakeObject, latPosition, lngPosition));		
@@ -142,16 +138,13 @@ function initialize() {
 			if (markerBalloon.getContent()=="") {
 				markerBalloon.setContent(balloonText(fakeObject, latPosition, lngPosition));
 				markerBalloon.open(map, this);	
-
 			} else {
 				// the balloon is open.
-				// and the balloon is tied to our marker being clicked.
+				// this part will be modified for MS3.
 				console.log("1");
 				markerBalloon.setContent("");
 				markerBalloon.open(null, null);	
-			}
-				
-													
+			}										
 		});
 		
 		// right click on a marker to remove the pin.
@@ -178,7 +171,6 @@ function initialize() {
 							"<p><i>Right click on the pin to remove pin.</i></p>";
 		return balloonString;
 	}
-	
 	
 	// ********************************************************************************************************
 	// ********************************** End of Charlie's Code ***********************************************
