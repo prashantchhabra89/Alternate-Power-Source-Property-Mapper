@@ -123,49 +123,48 @@ function initialize() {
 
 		// this is the bubble displayed when pin is dropped
 		// the function balloonText() is called to get the string displayed in the balloon.
-		markerBalloon.setContent(balloonText(fakeObject, latPosition, lngPosition));		
+		markerBalloon.setContent(balloonText(fakeObject, latPosition, lngPosition));	
+		markerBalloon.bindTo('position', marker, 'position');
 		markerBalloon.open(map, marker);
 				
 		// this is the bubble displayed when pin is left-clicked.
 		// left click to toggle the bubble.
-		// BUG: for now, clicking ANY marker will toggle the bubble.
-		
-		// FOR MILESTONE 3: 
-		// need to make change to the logic here, so that when Pin A's bubble is showing, click Pin B will show B's bubble,
-		// instead of having to click any marker once, and then click B.
-		
-		// NOTE for MS3:
-		// The main point is: when a marker is clicked, we first check is there any content inside the bubble?
-		// If no, then easy. We just re-populate the bubble with proper string using setContent and balloonText(fakeObject),
-		// which is exactly what is being done here in the "if" part.
-		// However, when a marker is clicked, what if there is already SOME content inside the bubble? ("Else" part)
-		// For now, We just set the content to empty again and close the balloon.
-		// However, that is only appropriate if we are clicking the same marker. (Namely, left click to toggle the bubble.)
-		// As described above, if Pin A's bubble is already showing, clicking pin B should show B's bubble with a single click.
-		// So here we should also check: we have a bubble with content inside, so is that bubble tied with the marker we just clicked or not?
-		// If so, we can simply close the bubble.
-		// If not, we should change the content of the bubble and move that bubble to our newly clicked marker. And that part is going
-		// to be implemented in MS3.
+		// if you left click another pin, the bubble on that pin will show up.
 		marker.addListener('click', function() {
 			// if the current balloon is closed
 			if (markerBalloon.getContent()=="") {
 				markerBalloon.setContent(balloonText(fakeObject, latPosition, lngPosition));
+				markerBalloon.bindTo('position', this, 'position');
 				markerBalloon.open(map, this);	
 			} else {
-				// the balloon is open.
-				// this part will be modified for MS3.
-				markerBalloon.setContent("");
-				markerBalloon.open(null, null);	
+				// clicking a different pin, show a bubble for that pin.
+				if (markerBalloon.getPosition().lat() != this.getPosition().lat()
+						|| markerBalloon.getPosition().lng() != this.getPosition().lng()) {
+					markerBalloon.setContent(balloonText(fakeObject, latPosition, lngPosition));
+					markerBalloon.bindTo('position', this, 'position');
+					markerBalloon.open(map, this);	
+				} else {
+					// we are clicking the same pin. close the bubble.
+					markerBalloon.setContent("");
+					markerBalloon.setPosition(null);
+					markerBalloon.open(null, null);
+				}
 			}										
 		});
 		
 		// right click on a marker to remove the pin.
+		// if that pin has a bubble showing right now, close that bubble as well.
 		marker.addListener('rightclick', function() {
 			// didn't actually delete or close the marker, just set it to invisible.
 			this.setVisible(false);
-			// the balloon is really closed.
-			markerBalloon.setContent("");
-			markerBalloon.close();
+			
+			// test if we are right clicking the pin with opening bubble.
+			// if we are, close the bubble. If we are not, don't do anything.
+			if (markerBalloon.getPosition().lat() == this.getPosition().lat()
+					&& markerBalloon.getPosition().lng() == this.getPosition().lng()) {
+				markerBalloon.setContent("");
+				markerBalloon.close();
+			}
 		});
 	}
 	
@@ -180,7 +179,8 @@ function initialize() {
 							"<p>Solar Energy: " + objectHandle.solar_raw.toFixed(2).toString() + "</p>" +
 							"<p>Hydro Energy: " + objectHandle.hydro_raw.toFixed(2).toString() + "</p>" +
 							"<h4>Total Energy: " + objectHandle.total_energy.toFixed(2).toString() + "</h4>" +
-							"<p><i>Right click on the pin to remove pin.</i></p>";
+							"<p><i>Right click on the pin to remove pin.</i></p>" +
+							"<p><i>Left click on the pin to toggle this window.</i></p>";
 		return balloonString;
 	}
 	
