@@ -133,6 +133,19 @@ function initialize() {
 		// FOR MILESTONE 3: 
 		// need to make change to the logic here, so that when Pin A's bubble is showing, click Pin B will show B's bubble,
 		// instead of having to click any marker once, and then click B.
+		
+		// NOTE for MS3:
+		// The main point is: when a marker is clicked, we first check is there any content inside the bubble?
+		// If no, then easy. We just re-populate the bubble with proper string using setContent and balloonText(fakeObject),
+		// which is exactly what is being done here in the "if" part.
+		// However, when a marker is clicked, what if there is already SOME content inside the bubble? ("Else" part)
+		// For now, We just set the content to empty again and close the balloon.
+		// However, that is only appropriate if we are clicking the same marker. (Namely, left click to toggle the bubble.)
+		// As described above, if Pin A's bubble is already showing, clicking pin B should show B's bubble with a single click.
+		// So here we should also check: we have a bubble with content inside, so is that bubble tied with the marker we just clicked or not?
+		// If so, we can simply close the bubble.
+		// If not, we should change the content of the bubble and move that bubble to our newly clicked marker. And that part is going
+		// to be implemented in MS3.
 		marker.addListener('click', function() {
 			// if the current balloon is closed
 			if (markerBalloon.getContent()=="") {
@@ -141,7 +154,6 @@ function initialize() {
 			} else {
 				// the balloon is open.
 				// this part will be modified for MS3.
-				console.log("1");
 				markerBalloon.setContent("");
 				markerBalloon.open(null, null);	
 			}										
