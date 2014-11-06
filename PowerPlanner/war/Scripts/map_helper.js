@@ -4,6 +4,7 @@ var g_heatmap; /* The heatmap layer for the main map */
 var wind_data = []; /* The wind data for the current heatmap view */
 var solar_data = []; /* The solar data for the current heatmap view */
 var hydro_data = []; /* The hydro data for the current heatmap view */
+var streams_data = []; /* The streams data for where to draw hydro */
 
 var SMALL_VIEW = 0 /* State variable for have a small view (very zoomed in) */
 var AVE_VIEW = 1; /* State variable for having an average view */
@@ -25,9 +26,10 @@ var MIN_DISPLAY_WEIGHT = 0.01; /* Don't add a point with less weight to heatmap 
 
 var WIND_SCALER = 500;
 var SOLAR_SCALER = 4.6;
+var HYDRO_SCALER = 1;
 var scaler = WIND_SCALER;
 
-var POINT_DEBUGGER = false; /* true = view data points instead of interpolation */
+var POINT_DEBUGGER = true; /* true = view data points instead of interpolation */
 
 // View (or zoom) state of the map; used to implement different time saving
 // measures
@@ -237,6 +239,9 @@ function _getHeatmapData(type, neLat, neLng, swLat, swLng) {
 					} else if (type == "SOLAR") {
 						_filterSolarData(data, usable_data);
 						scaler = SOLAR_SCALER;
+					} else if (type == "HYDRO") {
+						_filterHydroData(data, usable_data);
+						scaler = HYDRO_SCALER;
 					}
 
 					var weight_points = [];
@@ -286,14 +291,30 @@ function _getHeatmapData(type, neLat, neLng, swLat, swLng) {
 							console.timeEnd('_interpolateData');
 						}
 					} else if (type == "HYDRO") {
-						hydro_data = hm_data;
+						for (var i = 0; i < usable_data.length; i++) {
+							addHeatmapCoord(hm_data, usable_data[i].lat, 
+									usable_data[i].lng, usable_data[i].weight / scaler);
+						}
+						if (POINT_DEBUGGER) {
+							hydro_data = hm_data;
+						} else {
+							console.log("Sorry, we don't support normal hydro processes yet!");
+						}
 					}
 				}
+				else {
+					console.log("Status: " + status);
+				}
+			},
+			error : function(thing, status, error) {
+				console.log("Error!");
+				console.log(status);
+				console.log(error);
 			},
 			complete : function() {
 				updateHeatmap();
 				console.timeEnd("_getHeatmapData");
-			},
+			}
 		});
 }
 
@@ -347,6 +368,7 @@ function _filterWindData(raw_data, push_data, neLat, neLng, swLat, swLng) {
 }
 
 /*
+ * There's not enough data to worry about not keeping it.
  * TODO: Add in other metrics for calculations.
  */
 function _filterSolarData(raw_data, push_data) {
@@ -356,6 +378,33 @@ function _filterSolarData(raw_data, push_data) {
 			lng : raw_data[i].lon,
 			weight : raw_data[i].deg45
 		});
+	}
+}
+
+/*
+ * There's not enough data to worry about not keeping it.
+ * If stream info is here, add it to the stream array (if it's not already full ...
+ * we'll ignore stream data if the stream array already contains points)
+ * 
+ * TODO: Add in other metrics for calculations.
+ */
+function _filterHydroData(raw_data, push_data) {
+	for (var i = 0; i < raw_data.length; i++) {
+		if (raw_data[i].hasOwnProperty('points')) {
+			for (var j = 0; j < raw_data[i].points.length; j++) {
+				push_data.push({
+					lat : raw_data[i].points[j].lat,
+					lng : raw_data[i].points[j].lon,
+					weight : 1000
+				});
+			}
+		} else {
+			push_data.push({
+				lat : raw_data[i].lat,
+				lng : raw_data[i].lon,
+				weight : raw_data[i].precalc
+			});
+		}
 	}
 }
 

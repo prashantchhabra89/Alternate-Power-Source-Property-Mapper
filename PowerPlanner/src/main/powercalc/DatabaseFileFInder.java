@@ -4,23 +4,28 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class DatabaseFileFInder {
-	String [] windFileFullArr = new String[100];
-	String [] SolardFileFullArr = new String[13];
-	Double latitude1;
-	Double latitude2;
-	Double longitude1;
-	Double longitude2;
-	String returnWindFileListArray[] = new String[100];
-	String returnSolarFileListArray[] = new String[13];
-	int counterWindfileFinder;
-	int counterSolarfileFinder;
-	String pathWind;
-	String pathSolar;
+	private String [] windFileFullArr = new String[100];
+	private String [] SolardFileFullArr = new String[13];
+	private String [] HydroFileFullArr = new String[14];
+	private Double latitude1;
+	private Double latitude2;
+	private Double longitude1;
+	private Double longitude2;
+	private String returnWindFileListArray[] = new String[100];
+	private String returnSolarFileListArray[] = new String[13];
+	private String returnHydroFileListArray[] = new String[14];
+	private int counterWindfileFinder;
+	private int counterSolarfileFinder;
+	private int counterHydrofileFinder;
+	private String pathWind;
+	private String pathSolar;
+	private String pathHydro;
 	
 	public DatabaseFileFInder() 
 	{
 		pathWind = "WEB-INF/Database/Wind/";
 		pathSolar = "WEB-INF/Database/Solar/";
+		pathHydro = "WEB-INF/Database/Hydro/";
 		windFileFullArr[0] = "48_-106_42_-112_anu.json";
 		windFileFullArr[1] = "48_-106_42_-112_djf.json";
 		windFileFullArr[2] = "48_-106_42_-112_jja.json";
@@ -135,6 +140,21 @@ public class DatabaseFileFInder {
 		SolardFileFullArr[10] = "Solar_11.json";
 		SolardFileFullArr[11] = "Solar_12.json";
 	    SolardFileFullArr[12] = "Solar_13.json";
+	    
+	    HydroFileFullArr[0] = "Stream_1.json";
+	    HydroFileFullArr[1] = "Hydro_1.json";
+	    HydroFileFullArr[2] = "Hydro_2.json";
+	    HydroFileFullArr[3] = "Hydro_3.json";
+	    HydroFileFullArr[4] = "Hydro_4.json";
+	    HydroFileFullArr[5] = "Hydro_5.json";
+	    HydroFileFullArr[6] = "Hydro_6.json";
+	    HydroFileFullArr[7] = "Hydro_7.json";
+	    HydroFileFullArr[8] = "Hydro_8.json";
+	    HydroFileFullArr[9] = "Hydro_9.json";
+	    HydroFileFullArr[10] = "Hydro_10.json";
+	    HydroFileFullArr[11] = "Hydro_11.json";
+	    HydroFileFullArr[12] = "Hydro_12.json";
+	    HydroFileFullArr[13] = "Hydro_13.json";
 	}
 	
     //supplied season name should be anu,djf,jja,son,mam
@@ -191,61 +211,121 @@ public class DatabaseFileFInder {
 		}
 	}
 	//season name should be Jan, Feb ,etc..
-		//I think we will later on try to squash solar data into spring, fall, winter, etc
-		public String [] solarFileFinder(String Season)
+	//I think we will later on try to squash solar data into spring, fall, winter, etc
+	public String [] solarFileFinder(String Season)
+	{
+		counterSolarfileFinder = 0;
+		
+		switch(Season)
 		{
-			counterSolarfileFinder = 0;
-			
-			switch(Season)
-			{
-				case "Jan" : returnSolarFileListArray[counterSolarfileFinder] = pathSolar+SolardFileFullArr[0];
-				counterSolarfileFinder++;
-				break;
-				case "Feb" : returnSolarFileListArray[counterSolarfileFinder] = pathSolar+SolardFileFullArr[1];
-				counterSolarfileFinder++;
-				break;
-				case "Mar" : returnSolarFileListArray[counterSolarfileFinder] = pathSolar+SolardFileFullArr[2];
-				counterSolarfileFinder++;
-				break;
-				case "Apr" : returnSolarFileListArray[counterSolarfileFinder] = pathSolar+SolardFileFullArr[3];
-				counterSolarfileFinder++;
-				break;
-				case "May" : returnSolarFileListArray[counterSolarfileFinder] = pathSolar+SolardFileFullArr[4];
-				counterSolarfileFinder++;
-				break;
-				case "Jun" : returnSolarFileListArray[counterSolarfileFinder] = pathSolar+SolardFileFullArr[5];
-				counterSolarfileFinder++;
-				break;
-				case "Jul" : returnSolarFileListArray[counterSolarfileFinder] = pathSolar+SolardFileFullArr[6];
-				counterSolarfileFinder++;
-				break;
-				case "Aug" : returnSolarFileListArray[counterSolarfileFinder] = pathSolar+SolardFileFullArr[7];
-				counterSolarfileFinder++;
-				break;
-				case "Sep" : returnSolarFileListArray[counterSolarfileFinder] = pathSolar+SolardFileFullArr[8];
-				counterSolarfileFinder++;
-				break;
-				case "Oct" : returnSolarFileListArray[counterSolarfileFinder] = pathSolar+SolardFileFullArr[9];
-				counterSolarfileFinder++;
-				break;
-				case "Nov" : returnSolarFileListArray[counterSolarfileFinder] = pathSolar+SolardFileFullArr[10];
-				counterSolarfileFinder++;
-				break;
-				case "Dec" : returnSolarFileListArray[counterSolarfileFinder] = pathSolar+SolardFileFullArr[11];
-				counterSolarfileFinder++;
-				break;
-				case "Anu" : returnSolarFileListArray[counterSolarfileFinder] = pathSolar+SolardFileFullArr[12];
-				counterSolarfileFinder++;
-				break;	
-			}
-			return returnSolarFileListArray;
+			case "Jan" : returnSolarFileListArray[counterSolarfileFinder] = pathSolar+SolardFileFullArr[0];
+			counterSolarfileFinder++;
+			break;
+			case "Feb" : returnSolarFileListArray[counterSolarfileFinder] = pathSolar+SolardFileFullArr[1];
+			counterSolarfileFinder++;
+			break;
+			case "Mar" : returnSolarFileListArray[counterSolarfileFinder] = pathSolar+SolardFileFullArr[2];
+			counterSolarfileFinder++;
+			break;
+			case "Apr" : returnSolarFileListArray[counterSolarfileFinder] = pathSolar+SolardFileFullArr[3];
+			counterSolarfileFinder++;
+			break;
+			case "May" : returnSolarFileListArray[counterSolarfileFinder] = pathSolar+SolardFileFullArr[4];
+			counterSolarfileFinder++;
+			break;
+			case "Jun" : returnSolarFileListArray[counterSolarfileFinder] = pathSolar+SolardFileFullArr[5];
+			counterSolarfileFinder++;
+			break;
+			case "Jul" : returnSolarFileListArray[counterSolarfileFinder] = pathSolar+SolardFileFullArr[6];
+			counterSolarfileFinder++;
+			break;
+			case "Aug" : returnSolarFileListArray[counterSolarfileFinder] = pathSolar+SolardFileFullArr[7];
+			counterSolarfileFinder++;
+			break;
+			case "Sep" : returnSolarFileListArray[counterSolarfileFinder] = pathSolar+SolardFileFullArr[8];
+			counterSolarfileFinder++;
+			break;
+			case "Oct" : returnSolarFileListArray[counterSolarfileFinder] = pathSolar+SolardFileFullArr[9];
+			counterSolarfileFinder++;
+			break;
+			case "Nov" : returnSolarFileListArray[counterSolarfileFinder] = pathSolar+SolardFileFullArr[10];
+			counterSolarfileFinder++;
+			break;
+			case "Dec" : returnSolarFileListArray[counterSolarfileFinder] = pathSolar+SolardFileFullArr[11];
+			counterSolarfileFinder++;
+			break;
+			case "Anu" : returnSolarFileListArray[counterSolarfileFinder] = pathSolar+SolardFileFullArr[12];
+			counterSolarfileFinder++;
+			break;	
 		}
-		public void displaySolarFileList()
+		return returnSolarFileListArray;
+	}
+	public void displaySolarFileList()
+	{
+		for(int counter = 0; returnSolarFileListArray[counter]!=null; counter++)
 		{
-			for(int counter = 0; returnSolarFileListArray[counter]!=null; counter++)
-			{
-				System.out.println(returnSolarFileListArray[counter]);
-			}
+			System.out.println(returnSolarFileListArray[counter]);
 		}
-
+	}
+	
+	public String [] hydroFileFinder(String Season, boolean getStreams)
+	{
+		counterHydrofileFinder = 0;
+		if (getStreams) {
+			returnHydroFileListArray[counterHydrofileFinder] = pathHydro+HydroFileFullArr[0];
+			counterHydrofileFinder++;
+			return returnHydroFileListArray;
+		}
+				
+		switch(Season)
+		{
+			case "Jan" : returnHydroFileListArray[counterHydrofileFinder] = pathHydro+HydroFileFullArr[1];
+			counterHydrofileFinder++;
+			break;
+			case "Feb" : returnHydroFileListArray[counterHydrofileFinder] = pathHydro+HydroFileFullArr[2];
+			counterHydrofileFinder++;
+			break;
+			case "Mar" : returnHydroFileListArray[counterHydrofileFinder] = pathHydro+HydroFileFullArr[3];
+			counterHydrofileFinder++;
+			break;
+			case "Apr" : returnHydroFileListArray[counterHydrofileFinder] = pathHydro+HydroFileFullArr[4];
+			counterHydrofileFinder++;
+			break;
+			case "May" : returnHydroFileListArray[counterHydrofileFinder] = pathHydro+HydroFileFullArr[5];
+			counterHydrofileFinder++;
+			break;
+			case "Jun" : returnHydroFileListArray[counterHydrofileFinder] = pathHydro+HydroFileFullArr[6];
+			counterHydrofileFinder++;
+			break;
+			case "Jul" : returnHydroFileListArray[counterHydrofileFinder] = pathHydro+HydroFileFullArr[7];
+			counterHydrofileFinder++;
+			break;
+			case "Aug" : returnHydroFileListArray[counterHydrofileFinder] = pathHydro+HydroFileFullArr[8];
+			counterHydrofileFinder++;
+			break;
+			case "Sep" : returnHydroFileListArray[counterHydrofileFinder] = pathHydro+HydroFileFullArr[9];
+			counterHydrofileFinder++;
+			break;
+			case "Oct" : returnHydroFileListArray[counterHydrofileFinder] = pathHydro+HydroFileFullArr[10];
+			counterHydrofileFinder++;
+			break;
+			case "Nov" : returnHydroFileListArray[counterHydrofileFinder] = pathHydro+HydroFileFullArr[11];
+			counterHydrofileFinder++;
+			break;
+			case "Dec" : returnHydroFileListArray[counterHydrofileFinder] = pathHydro+HydroFileFullArr[12];
+			counterHydrofileFinder++;
+			break;
+			case "Anu" : returnHydroFileListArray[counterHydrofileFinder] = pathHydro+HydroFileFullArr[13];
+			counterHydrofileFinder++;
+			break;	
+		}
+		return returnHydroFileListArray;
+	}
+	public void displayHydroFileList()
+	{
+		for(int counter = 0; returnHydroFileListArray[counter]!=null; counter++)
+		{
+			System.out.println(returnHydroFileListArray[counter]);
+		}
+	}
 }
