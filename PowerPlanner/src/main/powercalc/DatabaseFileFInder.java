@@ -274,7 +274,6 @@ public class DatabaseFileFInder {
 		if (getStreams) {
 			returnHydroFileListArray[counterHydrofileFinder] = pathHydro+HydroFileFullArr[0];
 			counterHydrofileFinder++;
-			return returnHydroFileListArray;
 		}
 				
 		switch(Season)
