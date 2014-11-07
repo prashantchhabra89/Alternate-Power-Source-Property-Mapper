@@ -112,8 +112,18 @@ function initialize() {
 	
 	map.addListener('rightclick', function(event) {
 		addMarker(event.latLng);
-
 	});
+	
+	markerBalloon.setContent("<div class=\"scrollFix\">" + 
+			"<h3>Did you know that ...</h3>" +
+			"<p><em>Right clicking on any area of the map <br/>" +
+			"will place a marker and open a similar <br/>" +
+			"window with information about the power <br/>" +
+			"generation potential in that area?</em></p>" +
+			"<p><em>For more info on all the cool things <br/>" +
+			"you can do, click the blue ? to the left!</em></p></div>");
+	markerBalloon.open(map);
+	markerBalloon.setPosition(map.getCenter());
 			
 	function addMarker(loc) {
 		marker = new google.maps.Marker({
@@ -179,15 +189,16 @@ function initialize() {
 	// this function exists to factor out some code in the previous section.
 	// numeric values are rounded to 2 digits. change this if needed.
 	function balloonText(objectHandle, lat, lng) {
-		var balloonString = "<h2>Detailed Energy Data</h2>" +
-							"<h3>Latitude: " + lat + "</h3>" + 
-							"<h3>Longitute: " + lng + "</h3>" +
-							"<p>Wind Energy: " + objectHandle.wind_raw.toFixed(2).toString() + "</p>" + 
-							"<p>Solar Energy: " + objectHandle.solar_raw.toFixed(2).toString() + "</p>" +
-							"<p>Hydro Energy: " + objectHandle.hydro_raw.toFixed(2).toString() + "</p>" +
+		var balloonString = "<div class=\"scrollFix\">" + 
+							"<h2>Detailed Energy Data (kWh)</h2>" +
+							"<h3>Latitude: " + lat + "<br/>" + 
+							"Longitute: " + lng + "</h3>" +
+							"Wind Energy: " + objectHandle.wind_raw.toFixed(2).toString() + "<br/>" + 
+							"Solar Energy: " + objectHandle.solar_raw.toFixed(2).toString() + "<br/>" +
+							"Hydro Energy: " + objectHandle.hydro_raw.toFixed(2).toString() + "<br/>" +
 							"<h4>Total Energy: " + objectHandle.total_energy.toFixed(2).toString() + "</h4>" +
 							"<p><i>Right click on the pin to remove pin.</i></p>" +
-							"<p><i>Left click on the pin to toggle this window.</i></p>";
+							"<p><i>Left click on the pin to toggle this window.</i></p></div>";
 		return balloonString;
 	}
 	
@@ -265,7 +276,6 @@ function initialize() {
 
 	return map;
 }
-
 
 /*
  * Initializes the map, heatmap, and important event listeners.
@@ -1005,11 +1015,11 @@ function getPointData(lat_point, lng_point) {
 	};
 
 	// Fake all the data!!
-	pointDataObj.wind_raw = (Math.random() > 0.1 ? 1000 * Math.random() : 0);
-	pointDataObj.solar_raw = 100 * Math.random();
-	pointDataObj.hydro_raw = (Math.random() > 0.98 ? 5000 * Math.random() : 0);
-	pointDataObj.total_energy = pointDataObj.wind_raw * 25
-			+ pointDataObj.solar_raw * 10 + pointDataObj.hydro_raw * 50;
+	pointDataObj.wind_raw = 1000 * Math.random();
+	pointDataObj.solar_raw = 10 * Math.random();
+	pointDataObj.hydro_raw = (Math.random() > 0.65 ? 5000 * Math.random() : 0);
+	pointDataObj.total_energy = pointDataObj.wind_raw
+			+ pointDataObj.solar_raw + pointDataObj.hydro_raw;
 	return pointDataObj;
 }
 

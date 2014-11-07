@@ -84,6 +84,24 @@
 			id="menu" data-theme="b">
 			<input type="text" name="placesTextSearch" id="pac-input"
 				class="controls" placeholder="Search Box">
+			<h3>How To Use</h3>
+			<p>
+				Select one of the alternative energy source types, and toggle
+				the energy potential heatmap on by selecting 'Show'
+			</p>
+			<h3>Power Sources</h3>
+			<div id="img-container">
+				<div><img src="../images/wind-icon.png"/></div>
+				<div><img src="../images/solar-icon.png"/></div>
+				<div><img src="../images/hydro-icon.png"/></div>
+			</div>
+			<p>
+				Choose from wind, solar, or hydro energy generation potentials.
+				See the areas with the greatest and the worst potential for
+				generating your own electricity. Modify the power calculations
+				to match your current - or future - solar panel, wind turbine, 
+				and/or hydro turbine setup!
+			</p>
 		</div>
 		<div data-role="panel" data-position="right" data-display="overlay"
 			id="menu2">
@@ -91,9 +109,9 @@
 			<h3>Menu h3</h3>
 		</div>
 		<div data-role="header" data-position="fixed" data-theme="b">
-			<a href="#menu"
+			<!-- <a href="#menu"
 				class="jqm-navmenu-link ui-nodisc-icon ui-btn-left ui-btn ui-icon-bars ui-btn-icon-notext ui-corner-all"
-				data-icon="bars" data-theme="b">About</a>
+				data-icon="bars" data-theme="b">About</a> -->
 
 			<h1>
 				Power <img id="logo-icon" src="images/PowerPlannerLogo-min.png"
@@ -110,6 +128,9 @@
 				<div id="wind-panel" class="wind"></div>
 				<div id="solar-panel" class="solar"></div>
 				<div id="hydro-panel" class="hydro"></div>
+				<a href="#menu">
+					<div id="question-panel" class="question"></div>
+				</a>
 			</div>
 			<div class="resources-panel" id="windResource">
 				<form class="resourceRadioButton" action="" id="windResouceRadio">
