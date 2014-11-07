@@ -182,6 +182,10 @@ function startButtonClick() {
 		var center = g_map.getCenter();
 		google.maps.event.trigger(g_map, 'resize');
 		g_map.setCenter(center);
+		markerBalloon.open(g_map);
+		markerBalloon.setPosition(g_map.getCenter());
+		
+		console.log(markerBalloon.getContent());
 	});
 }
 

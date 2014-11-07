@@ -113,17 +113,6 @@ function initialize() {
 	map.addListener('rightclick', function(event) {
 		addMarker(event.latLng);
 	});
-	
-	markerBalloon.setContent("<div class=\"scrollFix\">" + 
-			"<h3>Did you know that ...</h3>" +
-			"<p><em>Right clicking on any area of the map <br/>" +
-			"will place a marker and open a similar <br/>" +
-			"window with information about the power <br/>" +
-			"generation potential in that area?</em></p>" +
-			"<p><em>For more info on all the cool things <br/>" +
-			"you can do, click the blue ? to the left!</em></p></div>");
-	markerBalloon.open(map);
-	markerBalloon.setPosition(map.getCenter());
 			
 	function addMarker(loc) {
 		marker = new google.maps.Marker({
@@ -273,7 +262,18 @@ function initialize() {
 		var bounds = map.getBounds();
 		searchBox.setBounds(bounds);
 	});
-
+	
+	markerBalloon.setContent("<div class=\"scrollFix\">" + 
+			"<h3>Did you know that ...</h3>" +
+			"<p><em>Right clicking on any area of the map <br/>" +
+			"will place a marker and open a similar <br/>" +
+			"window with information about the power <br/>" +
+			"generation potential in that area?</em></p>" +
+			"<p><em>For more info on all the cool things <br/>" +
+			"you can do, click the blue ? to the left!</em></p></div>");
+	//markerBalloon.open(map);
+	//markerBalloon.setPosition(map.getCenter());
+	
 	return map;
 }
 

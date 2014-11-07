@@ -368,6 +368,9 @@ h4.intro-subheading {
 	div.ui-input-text {
 		width: 90% !important;
 	}
+	.inputLabel {
+		width: 96px !important;
+	}
 }
 
 /* 481px - 768px */
