@@ -32,6 +32,7 @@ body {
 	font-size: 15px;
 	font-weight: 300;
 	text-overflow: ellipsis;
+	color: #333;
 }
 #pac-input {
 	margin-top: 16px;
@@ -41,6 +42,7 @@ body {
 	margin-left: -1px;
 	padding-left: 14px; /* Regular padding-left + 1. */
 	width: 401px;
+	color: #333;
 }
 
 .controls {
@@ -61,10 +63,20 @@ body {
 .resourceContainer {
 	width: 70px;
 	position: absolute;
-	margin: 0px 0px 0px 10px;
-	height: 95px;
-	margin-top: 7%;
-	right: 0%;
+	margin: 196px 0 0 10px;
+}
+
+.resourceContainer div {
+	margin: 0.2em 0.2em;
+	border: 2px solid #999;
+	border-radius: 7px;
+	box-shadow: 0 0 2px #555;
+}
+
+.resourceContainer div:HOVER {
+	border-color: #5599DA;
+	box-shadow: 0 0 5px #1554DA;
+	cursor: pointer;
 }
 
 .show-description {
@@ -72,7 +84,8 @@ body {
 }
 
 .selected-resource {
-	border: rgb(249, 72, 112) solid;
+	/*border: rgb(249, 72, 112) solid;*/
+	border-color: #F84684;
 }
 
 .resources-panel {
@@ -91,6 +104,10 @@ body {
   transition: height .5s;
   -webkit-transition: height .5s;
   -moz-transition: height .5s;
+}
+
+#showCheckboxHydro {
+	width: 20% !important;
 }
 
 .wind {
@@ -128,6 +145,18 @@ body {
 .displayRadioButtons {
 	display: block !important;
 }
+.inputLabel {
+	float: left;
+	width: 167px !important;
+	margin-top: 0em !important;
+}
+.inputText {
+	width: 90% !important;
+}
+.ui-field-contain {
+	padding: 0em !important;
+	margin-bottom: 0em !important;
+}
 .resourceRadioButton, .radioButtonLabel {
 	font-size: 8pt;
 	width: 95% !important;
@@ -135,7 +164,9 @@ body {
  	margin-left: auto;
 	margin-right: auto;
 }
-
+.showAdvancedOptions {
+	width: 20% !important;
+}
 .resourceBox, .resourceImg {
 	margin-top: 8px;
 }
@@ -196,16 +227,18 @@ h2.intro-header {
 	text-align: center;
 }
 
-p.intro-text, h3.intro-header {
+p.intro-text, h3.intro-header, p.calc-text, h3.calc-header, p.about-text, h3.about-header {
 	font-family: 'Raleway', sans-serif;
 	font-size: 24px;
 	font-weight: 200;
 	text-shadow: initial;
-	color: rgb(253, 231, 2);
+	
 	margin-left: auto;
 	margin-right: auto;
 }
-
+p.intro-text {
+	color: rgb(253, 231, 2);
+}
 p.calc-text, h3.calc-header {
 	color: #333;
 }
@@ -223,7 +256,10 @@ h4.intro-subheading {
 	font-family: 'Raleway', sans-serif;
 	font-size: 30px;
 }
-
+.calc-background {
+	background-color: #fff;
+	margin-bottom: -4px;
+}
 .about-background {
 	text-align: center;
 	color: #fff;
@@ -262,9 +298,22 @@ h4.intro-subheading {
 
 /*FOR RESPONSIVE LAYOUT*/
 /* 0 - 252px */
-@media all and (max-width: 480px) {
+@media all and (max-width: 320px) {
+	.ui-header, .ui-title {
+		padding: 0.5em 0 !important;
+		font-size: 0.8em !important;
+	}
+}
+@media all and (min-width: 320px) {
 	h1.intro-title {
-		font-size: 70px;
+		font-size: 49px;
+		margin: 10px 0px 6px 0px;
+	}
+	h3.intro-header {
+		font-size: 48px;
+	}
+	p.intro-text {
+		font-size: 22px;
 	}
 	.show-description {
 		height: 43% !important;
@@ -272,6 +321,15 @@ h4.intro-subheading {
 	.ui-header .ui-title {
 		padding: 0.5em 0 !important;
 		font-size: 0.8em !important;
+	}
+	div.ui-input-text{
+		width: 52% !important;
+	}
+	.showAdvancedOptions {
+		width: 39% !important;
+	}
+	div.ui-input-text {
+		width: 90% !important;
 	}
 }
 
@@ -281,7 +339,13 @@ h4.intro-subheading {
 		font-size: 80px;
 	}
 	.show-description {
-		height: 30% !important;
+		height: 34% !important;
+	}
+	div.ui-input-text{
+		width: 40% !important;
+	}
+	.showAdvancedOptions {
+		width: 15% !important;
 	}
 }
 
