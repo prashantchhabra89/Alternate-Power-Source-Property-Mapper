@@ -113,19 +113,12 @@
 			</div>
 			<div class="resources-panel" id="windResource">
 				<form class="resourceRadioButton" action="" id="windResouceRadio">
-					<div class="ui-field-contain" id="opt-navbars">
-						<fieldset data-role="controlgroup" data-type="horizontal"
-							class="ui-controlgroup ui-controlgroup-horizontal ui-corner-all">
-							<legend>View:</legend>
-							<input type="radio" name="windView" id="windAnnual"
-								value="annual" checked="checked" /> <label
-								for="windAnnual">Annual</label> <input type="radio"
-								name="windView" id="windSeasonal" value="seasonal" /> <label
-								for="windSeasonal">Seasonal</label>
-						</fieldset>
-					</div>
+					
 					<div class="ui-grid-a">
 						<div class="ui-block-a inputLabel">
+							<div data-role="fieldcontain">
+								<label class="inputLabel" for="windView">View: </label>
+							</div>
 							<div data-role="fieldcontain">
 								<label class="inputLabel" for="windRotorArea">Rotor Area: </label>
 							</div>
@@ -134,6 +127,16 @@
 							</div>
 						</div>
 						<div class="ui-block-b">
+							<div class="ui-field-contain" id="opt-navbars">
+								<fieldset data-role="controlgroup" data-type="horizontal"
+									class="ui-controlgroup ui-controlgroup-horizontal ui-corner-all">
+									<input type="radio" name="windView" id="windAnnual"
+										value="annual" checked="checked" /> <label
+										for="windAnnual">Annual</label> <input type="radio"
+										name="windView" id="windSeasonal" value="seasonal" /> <label
+										for="windSeasonal">Seasonal</label>
+								</fieldset>
+							</div>
 							<div class="inputText">
 								<input type="text" name="windRotorArea" id="windRotorArea" value=""
 									placeholder="units in m2">
@@ -152,19 +155,11 @@
 			</div>
 			<div class="resources-panel" id="solarResource">
 				<form class="resourceRadioButton" action="" id="solarResouceRadio">
-					<div class="ui-field-contain" id="opt-navbars">
-						<fieldset data-role="controlgroup" data-type="horizontal"
-							class="ui-controlgroup ui-controlgroup-horizontal ui-corner-all">
-							<legend>View:</legend>
-							<input type="radio" name="solarView" id="solarAnnual"
-								value="annual" checked="checked" /> <label
-								for="solarAnnual">Annual</label> <input type="radio"
-								name="solarView" id="solarSeasonal" value="seasonal" /> <label
-								for="solarSeasonal">Seasonal</label>
-						</fieldset>
-					</div>
 					<div class="ui-grid-a">
 						<div class="ui-block-a inputLabel">
+							<div data-role="fieldcontain">
+								<label class="inputLabel" for="solarView">View: </label>
+							</div>
 							<div data-role="fieldcontain">
 								<label class="inputLabel" for="solarArea">Panel Area: </label>
 							</div>
@@ -173,6 +168,16 @@
 							</div>
 						</div>
 						<div class="ui-block-b">
+							<div class="ui-field-contain" id="opt-navbars">
+								<fieldset data-role="controlgroup" data-type="horizontal"
+									class="ui-controlgroup ui-controlgroup-horizontal ui-corner-all">
+									<input type="radio" name="solarView" id="solarAnnual"
+										value="annual" checked="checked" /> <label
+										for="solarAnnual">Annual</label> <input type="radio"
+										name="solarView" id="solarSeasonal" value="seasonal" /> <label
+										for="solarSeasonal">Seasonal</label>
+								</fieldset>
+							</div>
 							<div class="inputText">
 								<input type="text" name="solarArea" id="solarArea" value=""
 									placeholder="units in m2">
@@ -193,24 +198,26 @@
 			</div>
 			<div class="resources-panel" id="hydroResource">
 				<form class="resourceRadioButton" action="" id="hydroResourceRadio">
-					<div class="ui-field-contain" id="opt-navbars">
-						<fieldset data-role="controlgroup" data-type="horizontal"
-							class="ui-controlgroup ui-controlgroup-horizontal ui-corner-all">
-							<legend>View:</legend>
-							<input type="radio" name="hydroView" id="hydroAnnual"
-								value="annual" checked="checked" /> <label
-								for="hydroAnnual">Annual</label> <input type="radio"
-								name="hydroView" id="hydroSeasonal" value="seasonal" /> <label
-								for="hydroSeasonal">Seasonal</label>
-						</fieldset>
-					</div>
 					<div class="ui-grid-a">
 						<div class="ui-block-a inputLabel">
+							<div data-role="fieldcontain">
+								<label class="inputLabel" for="hydroView">View: </label>
+							</div>
 							<div data-role="fieldcontain">
 								<label class="inputLabel" for="hydroEfficiency">Efficiency: </label>
 							</div>
 						</div>
 						<div class="ui-block-b">
+							<div class="ui-field-contain" id="opt-navbars">
+								<fieldset data-role="controlgroup" data-type="horizontal"
+									class="ui-controlgroup ui-controlgroup-horizontal ui-corner-all">
+									<input type="radio" name="hydroView" id="hydroAnnual"
+										value="annual" checked="checked" /> <label
+										for="hydroAnnual">Annual</label> <input type="radio"
+										name="hydroView" id="hydroSeasonal" value="seasonal" /> <label
+										for="hydroSeasonal">Seasonal</label>
+								</fieldset>
+							</div>
 							<div class="inputText">
 								<input type="text" name="hydroEfficiency" id="hydroEfficiency" value=""
 									placeholder="Turbine Efficiency">
