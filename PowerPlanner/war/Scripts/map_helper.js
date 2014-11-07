@@ -29,7 +29,7 @@ var SOLAR_SCALER = 4.6;
 var HYDRO_SCALER = 1;
 var scaler = WIND_SCALER;
 
-var POINT_DEBUGGER = true; /* true = view data points instead of interpolation */
+var POINT_DEBUGGER = false; /* true = view data points instead of interpolation */
 
 // View (or zoom) state of the map; used to implement different time saving
 // measures
