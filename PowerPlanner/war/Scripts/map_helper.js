@@ -738,6 +738,9 @@ function _binData(hm_data, neLat, neLng, swLat, swLng, data_lat_offset,
 	return data_bins;
 }
 
+/*
+ * Note: this returns a potentially scaled down weight!
+ */
 function getDataWeight(hm_data, lat, lng, type) {
 	var weight_val = 0;
 	if (type == "WIND") {
@@ -748,6 +751,9 @@ function getDataWeight(hm_data, lat, lng, type) {
 		weight_val = _getDataWeightHydro(hm_data, lat, lng);
 	}
 	
+	if (weight_val > 3.5) {
+		weight_val = 3.5;
+	}
 	return weight_val;
 }
 
@@ -903,9 +909,6 @@ function _getDataWeightHydro(hm_data, lat, lng) {
 				}
 			}
 			final_weight = nearest_weight;
-			if (final_weight > 5) {
-				final_weight = 5;
-			}
 			break;
 		}
 	}
@@ -1100,10 +1103,16 @@ function getPointData(lat_point, lng_point) {
 		total_energy : 0
 	};
 
-	// Fake all the data!!
-	pointDataObj.wind_raw = 1000 * Math.random();
-	pointDataObj.solar_raw = 10 * Math.random();
-	pointDataObj.hydro_raw = (Math.random() > 0.65 ? 5000 * Math.random() : 0);
+	// Fake [all] only some of the data!!
+	pointDataObj.wind_raw = ((wind_data.length) ? 
+			_getDataWeightWind(wind_data, lat_point, lng_point)*WIND_SCALER : 
+				1000 * Math.random());
+	pointDataObj.solar_raw = ((solar_data.length) ? 
+			_getDataWeightSolar(solar_data, lat_point, lng_point)*SOLAR_SCALER :
+				10 * Math.random());
+	pointDataObj.hydro_raw = ((hydro_data.length) ?
+			_getDataWeightHydro(hydro_data, lat_point, lng_point)*HYDRO_SCALER :
+				(Math.random() > 0.65 ? 5000 * Math.random() : 0));
 	pointDataObj.total_energy = pointDataObj.wind_raw
 			+ pointDataObj.solar_raw + pointDataObj.hydro_raw;
 	return pointDataObj;
