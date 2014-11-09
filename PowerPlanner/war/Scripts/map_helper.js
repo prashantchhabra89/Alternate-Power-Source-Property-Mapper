@@ -4,6 +4,7 @@ var g_heatmap; /* The heatmap layer for the main map */
 var wind_data = []; /* The wind data for the current heatmap view */
 var solar_data = []; /* The solar data for the current heatmap view */
 var hydro_data = []; /* The hydro data for the current heatmap view */
+var streams_data = []; /* The streams data for where to draw hydro */
 
 var SMALL_VIEW = 0 /* State variable for have a small view (very zoomed in) */
 var AVE_VIEW = 1; /* State variable for having an average view */
@@ -23,7 +24,10 @@ var SOLAR_SCALING_DISTANCE = 1; /* Data point further away may have less impact 
 
 var MIN_DISPLAY_WEIGHT = 0.01; /* Don't add a point with less weight to heatmap */
 
-var scaler = 500;
+var WIND_SCALER = 500;
+var SOLAR_SCALER = 4.6;
+var HYDRO_SCALER = 2000000;
+var scaler = WIND_SCALER;
 
 var POINT_DEBUGGER = false; /* true = view data points instead of interpolation */
 
@@ -108,7 +112,6 @@ function initialize() {
 	
 	map.addListener('rightclick', function(event) {
 		addMarker(event.latLng);
-
 	});
 			
 	function addMarker(loc) {
@@ -175,15 +178,16 @@ function initialize() {
 	// this function exists to factor out some code in the previous section.
 	// numeric values are rounded to 2 digits. change this if needed.
 	function balloonText(objectHandle, lat, lng) {
-		var balloonString = "<h2>Detailed Energy Data</h2>" +
-							"<h3>Latitude: " + lat + "</h3>" + 
-							"<h3>Longitute: " + lng + "</h3>" +
-							"<p>Wind Energy: " + objectHandle.wind_raw.toFixed(2).toString() + "</p>" + 
-							"<p>Solar Energy: " + objectHandle.solar_raw.toFixed(2).toString() + "</p>" +
-							"<p>Hydro Energy: " + objectHandle.hydro_raw.toFixed(2).toString() + "</p>" +
+		var balloonString = "<div class=\"scrollFix\">" + 
+							"<h2>Detailed Energy Data (kWh)</h2>" +
+							"<h3>Latitude: " + lat + "<br/>" + 
+							"Longitute: " + lng + "</h3>" +
+							"Wind Energy: " + objectHandle.wind_raw.toFixed(2).toString() + "<br/>" + 
+							"Solar Energy: " + objectHandle.solar_raw.toFixed(2).toString() + "<br/>" +
+							"Hydro Energy: " + objectHandle.hydro_raw.toFixed(2).toString() + "<br/>" +
 							"<h4>Total Energy: " + objectHandle.total_energy.toFixed(2).toString() + "</h4>" +
 							"<p><i>Right click on the pin to remove pin.</i></p>" +
-							"<p><i>Left click on the pin to toggle this window.</i></p>";
+							"<p><i>Left click on the pin to toggle this window.</i></p></div>";
 		return balloonString;
 	}
 	
@@ -258,10 +262,20 @@ function initialize() {
 		var bounds = map.getBounds();
 		searchBox.setBounds(bounds);
 	});
-
+	
+	markerBalloon.setContent("<div class=\"scrollFix\">" + 
+			"<h3>Did you know that ...</h3>" +
+			"<p><em>Right clicking on any area of the map <br/>" +
+			"will place a marker and open a similar <br/>" +
+			"window with information about the power <br/>" +
+			"generation potential in that area?</em></p>" +
+			"<p><em>For more info on all the cool things <br/>" +
+			"you can do, click the blue ? to the left!</em></p></div>");
+	//markerBalloon.open(map);
+	//markerBalloon.setPosition(map.getCenter());
+	
 	return map;
 }
-
 
 /*
  * Initializes the map, heatmap, and important event listeners.
@@ -365,10 +379,17 @@ function _getHeatmapData(type, neLat, neLng, swLat, swLng) {
 						_filterWindData(data, usable_data, 
 								neLat + lat_offset, neLng + lng_offset, 
 								swLat - lat_offset, swLng - lng_offset);
-						scaler = 500;
+						scaler = WIND_SCALER;
 					} else if (type == "SOLAR") {
 						_filterSolarData(data, usable_data);
-						scaler = 5;
+						scaler = SOLAR_SCALER;
+					} else if (type == "HYDRO") {
+						streams_data = []; // Streams are treated specially, so empty them here
+						_filterHydroData(data, usable_data,
+								neLat + lat_offset, neLng + lng_offset, 
+								swLat - lat_offset, swLng - lng_offset);
+						scaler = HYDRO_SCALER;
+						console.log("Data Points in stream resources: " + 2 * streams_data.length);
 					}
 
 					var weight_points = [];
@@ -418,14 +439,33 @@ function _getHeatmapData(type, neLat, neLng, swLat, swLng) {
 							console.timeEnd('_interpolateData');
 						}
 					} else if (type == "HYDRO") {
-						hydro_data = hm_data;
+						for (var i = 0; i < usable_data.length; i++) {
+							addHeatmapCoord(hm_data, usable_data[i].lat, 
+									usable_data[i].lng, usable_data[i].weight / scaler);
+						}
+						if (POINT_DEBUGGER) {
+							hydro_data = hm_data;
+						} else {
+							console.time('_interpolateData');
+							hydro_data = _interpolateData(hm_data, neLat,
+									neLng, swLat, swLng, type);
+							console.timeEnd('_interpolateData');
+						}
 					}
 				}
+				else {
+					console.log("Status: " + status);
+				}
+			},
+			error : function(thing, status, error) {
+				console.log("Error!");
+				console.log(status);
+				console.log(error);
 			},
 			complete : function() {
 				updateHeatmap();
 				console.timeEnd("_getHeatmapData");
-			},
+			}
 		});
 }
 
@@ -479,6 +519,7 @@ function _filterWindData(raw_data, push_data, neLat, neLng, swLat, swLng) {
 }
 
 /*
+ * There's not enough data to worry about not keeping it.
  * TODO: Add in other metrics for calculations.
  */
 function _filterSolarData(raw_data, push_data) {
@@ -488,6 +529,31 @@ function _filterSolarData(raw_data, push_data) {
 			lng : raw_data[i].lon,
 			weight : raw_data[i].deg45
 		});
+	}
+}
+
+/*
+ * There's not enough data to worry about not keeping it.
+ * If stream info is here, add it to the stream array (if it's not already full ...
+ * we'll ignore stream data if the stream array already contains points)
+ * 
+ * TODO: Add in other metrics for calculations.
+ */
+function _filterHydroData(raw_data, push_data, neLat, neLng, swLat, swLng) {
+	for (var i = 0; i < raw_data.length; i++) {
+		if (raw_data[i].hasOwnProperty('points')) {
+			if (raw_data[i].points[0].lat > swLat && raw_data[i].points[0].lat < neLat) {
+				if (raw_data[i].points[0].lon > swLng && raw_data[i].points[0].lon < neLng) {
+					streams_data.push(raw_data[i].points);
+				}
+			}
+		} else {
+			push_data.push({
+				lat : raw_data[i].lat,
+				lng : raw_data[i].lon,
+				weight : raw_data[i].precalc
+			});
+		}
 	}
 }
 
@@ -553,7 +619,11 @@ function _interpolateData(hm_data, neLat, neLng, swLat, swLng, type) {
 	} else if (type == "SOLAR") {
 		_createInterpolation(hm_data, temp_data, lat_width, lng_width,
 				swLat - lat_offset, swLng - lng_offset, latset, lngset, 
-				offset, type);		
+				offset, type);
+	} else if (type == "HYDRO") {
+		_createInterpolation(hm_data, temp_data, lat_width, lng_width,
+				swLat - lat_offset, swLng - lng_offset, latset, lngset, 
+				offset, type);
 	}
 
 	return temp_data;
@@ -668,14 +738,22 @@ function _binData(hm_data, neLat, neLng, swLat, swLng, data_lat_offset,
 	return data_bins;
 }
 
+/*
+ * Note: this returns a potentially scaled down weight!
+ */
 function getDataWeight(hm_data, lat, lng, type) {
 	var weight_val = 0;
 	if (type == "WIND") {
 		weight_val = _getDataWeightWind(hm_data, lat, lng);
 	} else if (type == "SOLAR") {
 		weight_val = _getDataWeightSolar(hm_data, lat, lng);
+	} else if (type == "HYDRO") {
+		weight_val = _getDataWeightHydro(hm_data, lat, lng);
 	}
 	
+	if (weight_val > 3.5) {
+		weight_val = 3.5;
+	}
 	return weight_val;
 }
 
@@ -802,6 +880,75 @@ function _getDataWeightSolar(hm_data, lat, lng) {
 	return (nearest.length > 0 ? final_weight / nearest.length : 0);
 }
 
+function _getDataWeightHydro(hm_data, lat, lng) {
+	var final_weight = 0;
+	// go through each stream in the streams set
+	for (var i = 0; i < streams_data.length; i++) {
+		// TODO: In the future, account for more than two points
+		if (pointOnLine(lat, lng, streams_data[i][0], streams_data[i][1])) {
+			// if point lies *roughly* along the line of a stream, find the nearest
+			// 2 hydro stations; take a weighted average of their monitoring, and
+			// draw point with that weight
+			
+			// Right now, only looks for the one closest stations
+			var nearest_distance;
+			var nearest_weight;
+			for (var j = 0; j < hm_data.length; j++) {
+				if (j == 0) {
+					//Trivial case, the best so far is the first
+					nearest_distance = distanceTo(lat, lng, 
+							hm_data[j].location.lat(), hm_data[j].location.lng());
+					nearest_weight = hm_data[j].weight;
+				} else {
+					var next_dist = distanceTo(lat, lng, 
+							hm_data[j].location.lat(), hm_data[j].location.lng());
+					if (next_dist < nearest_distance) {
+						nearest_distance = next_dist;
+						nearest_weight = hm_data[j].weight;
+					}
+				}
+			}
+			final_weight = nearest_weight;
+			break;
+		}
+	}
+	
+	return final_weight;
+}
+
+/*
+ * Returns true if distance from the lat, lng point is less than the current diameter
+ * of the heatmap spots away from the line represented by point1, point2 (if the point
+ * lies inside the boundary formed by the points)
+ */
+function pointOnLine(lat, lng, point1, point2) {
+	var is_on_line = false;
+	
+	if (lat > Math.min(point1.lat, point2.lat) && lat < Math.max(point1.lat, point2.lat)) {
+		if (lng > Math.min(point1.lon, point2.lon) && lng < Math.max(point1.lon, point2.lon)) {
+			/*
+		 	var slope = (point2.lat - point1.lat)/(point2.lon - point1.lon);
+			var A = slope * (-1);
+			var B = 1;
+			var C = (A * point1.lon + B) * (-1);
+			
+			var numer = Math.abs(A*lng + B*lat + C);
+			var denom = Math.sqrt(Math.pow(A,2) + Math.pow(B,2));
+			
+			var distance = (numer/denom);
+			is_on_line = (distance <= 
+				MAX_DATA_WIDTH / Math.pow(2, (g_map.getZoom() - LEAST_ZOOM)) * 0.98 * 2);
+			console.log(distance);
+			console.log(MAX_DATA_WIDTH / Math.pow(2, (g_map.getZoom() - LEAST_ZOOM)) * 0.98 * 2);
+			*/
+			// The above can't get close enough to ever return true with our granularity ...
+			is_on_line = true;
+		}
+	}
+
+	return is_on_line;
+}
+
 /*
  * When binning, this safely gets you the next point you could safely draw,
  * based on where the next point would be if the view hadn't been cut into
@@ -838,11 +985,13 @@ function initHeatmap(map) {
 		radius : MAX_DATA_WIDTH / Math.pow(2, (DEFAULT_ZOOM - LEAST_ZOOM))
 				* 0.98,
 		dissipating : false,
-		opacity : 0.4,
-		gradient : [ 'rgba(0,0,0,0)', 'rgba(255,0,0,1)', 'rgba(255,63,0,1)',
-				'rgba(255,127,0,1)', 'rgba(255,191,0,1)', 'rgba(255,255,0,1)',
-				'rgba(223,255,0,1)', 'rgba(191,255,0,1)', 'rgba(159,255,0,1)',
-				'rgba(127,255,0,1)', 'rgba(63,255,0,1)', 'rgba(0,255,0,1)' ]
+		opacity : 0.5,
+		gradient : [ 'rgba(0,0,0,0)', 'rgba(0,50,100,1)', 'rgba(0,75,200,1)', 
+				        'rgba(0,127,255,1)', 'rgba(0,159,255,1)', 'rgba(0,191,255,1)',
+				        'rgba(0,223,255,1)', 'rgba(0,255,255,1)', 'rgba(20,255,191,1)',
+				        'rgba(50,255,127,1)', 'rgba(75,255,0,1)', 'rgba(120,255,0,1)',
+				        'rgba(175,255,0,1)', 'rgba(200,255,0,1)', 'rgba(255,220,0,1)',
+				        'rgba(255,180,0,1)', 'rgba(255,120,0,1)', 'rgba(255,0,0,1)']
 	});
 
 	return heatmap;
@@ -942,6 +1091,9 @@ function getArrayMin(number_array) {
  * wind_raw, solar_raw, hydro_raw, and total_energy properties.
  * 
  * All this data is fake right now.
+ * 
+ * TODO: Tie this in with getDataWeight ... it's exactly what's needed, though
+ * ajax calls will need to be handled here first.
  */
 function getPointData(lat_point, lng_point) {
 	var pointDataObj = {
@@ -951,12 +1103,18 @@ function getPointData(lat_point, lng_point) {
 		total_energy : 0
 	};
 
-	// Fake all the data!!
-	pointDataObj.wind_raw = (Math.random() > 0.1 ? 1000 * Math.random() : 0);
-	pointDataObj.solar_raw = 100 * Math.random();
-	pointDataObj.hydro_raw = (Math.random() > 0.98 ? 5000 * Math.random() : 0);
-	pointDataObj.total_energy = pointDataObj.wind_raw * 25
-			+ pointDataObj.solar_raw * 10 + pointDataObj.hydro_raw * 50;
+	// Fake [all] only some of the data!!
+	pointDataObj.wind_raw = ((wind_data.length) ? 
+			_getDataWeightWind(wind_data, lat_point, lng_point)*WIND_SCALER : 
+				1000 * Math.random());
+	pointDataObj.solar_raw = ((solar_data.length) ? 
+			_getDataWeightSolar(solar_data, lat_point, lng_point)*SOLAR_SCALER :
+				10 * Math.random());
+	pointDataObj.hydro_raw = ((hydro_data.length) ?
+			_getDataWeightHydro(hydro_data, lat_point, lng_point)*HYDRO_SCALER :
+				(Math.random() > 0.65 ? 5000 * Math.random() : 0));
+	pointDataObj.total_energy = pointDataObj.wind_raw
+			+ pointDataObj.solar_raw + pointDataObj.hydro_raw;
 	return pointDataObj;
 }
 
