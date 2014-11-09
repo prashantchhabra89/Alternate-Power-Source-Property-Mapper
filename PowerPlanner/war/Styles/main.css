@@ -257,6 +257,10 @@ p.intro-text, h3.intro-header, p.calc-text, h3.calc-header, p.about-text, h3.abo
 p.intro-text {
 	color: rgb(253, 231, 2);
 }
+p.footer-text {
+	font-size:0.8em;
+	text-align: center;
+}
 p.calc-text, h3.calc-header {
 	color: #333;
 }
