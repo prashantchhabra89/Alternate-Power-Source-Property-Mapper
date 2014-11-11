@@ -1,5 +1,5 @@
 package test.powercalc;
-import com.powerplanner.*;
+import main.powercalc.DatabaseFileFInder;
 
 public class TestDataGridFileFinder {
 	String arr[];

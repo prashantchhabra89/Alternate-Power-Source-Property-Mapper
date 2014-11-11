@@ -7,9 +7,13 @@ import java.io.IOException;
 
 import javax.servlet.http.*;
 
+import main.powercalc.DatabaseFileFInder;
+
 @SuppressWarnings("serial")
 public class PowerDBServlet extends HttpServlet {
 
+	private boolean sendStreams = true;
+	
 	/**
 	 * Post request for data. Request is expected to contain several
 	 * parameters, including:
@@ -67,6 +71,38 @@ public class PowerDBServlet extends HttpServlet {
 				jsonFiles = dbFind.solarFileFinder("Anu");
 				break;
 			}
+			System.out.println("FETCHED GRID FILES: ");
+			dbFind.displaySolarFileList();	
+		} else if (type.equals(PowerType.HYDRO.toString())) {
+			switch(season) {
+			case "dfj" :
+				dbFind.hydroFileFinder("Dec", sendStreams);
+				dbFind.hydroFileFinder("Jan", sendStreams);
+				jsonFiles = dbFind.hydroFileFinder("Feb", sendStreams);
+				break;
+			case "mam" :
+				dbFind.hydroFileFinder("Mar", sendStreams);
+				dbFind.hydroFileFinder("Apr", sendStreams);
+				jsonFiles = dbFind.hydroFileFinder("May", sendStreams);
+				break;
+			case "jja" :
+				dbFind.hydroFileFinder("Jun", sendStreams);
+				dbFind.hydroFileFinder("Jul", sendStreams);
+				jsonFiles = dbFind.hydroFileFinder("Aug", sendStreams);
+				break;
+			case "son" : 
+				dbFind.hydroFileFinder("Sep", sendStreams);
+				dbFind.hydroFileFinder("Oct", sendStreams);
+				jsonFiles = dbFind.hydroFileFinder("Nov", sendStreams);
+				break;
+			case "anu" :
+			default :
+				jsonFiles = dbFind.hydroFileFinder("Anu", sendStreams);
+				break;
+			}
+			System.out.println("FETCHED GRID FILES: ");
+			dbFind.displayHydroFileList();	
+			//sendStreams = false;
 		}
 
 		StringBuilder dataBuilder = new StringBuilder();

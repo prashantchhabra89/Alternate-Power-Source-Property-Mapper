@@ -1,3 +1,7 @@
+var windTogglePannelOn = false;
+var solarTogglePannelOn = false;
+var hydroTogglePannelOn = false;
+
 $(document).ready(function() {
 	resizeDiv();
 	$("a.start-button").click(startButtonClick);
@@ -53,47 +57,98 @@ $(document).ready(function() {
 		);
 	});
 
-	$('.wind').on('click', function() {
-		$('#windResource').toggleClass('show-description');
-		$('#solarResource').removeClass('show-description');
-		$('#hydroResource').removeClass('show-description');
-		$('#showCheckboxWind').checkboxradio("refresh");
+	//HACK: Added a delay for when the panel is fully displayed or hidden, then the radio buttons/checkbox will show
+	// to avoid creating a scroll bar. 
+	$('.wind').on('click', function() {		
+		if (windTogglePannelOn == false){
+			solarTogglePannelOn = false;
+			hydroTogglePannelOn = false;
+			hideSolarResources();
+			hideHydroResources();
+			$('#windResource').toggleClass('show-description');
+			$('#solarResource').removeClass('show-description');
+			$('#hydroResource').removeClass('show-description');
+			$('#showCheckboxWind').checkboxradio("refresh");
 
-		setTimeout(function() {
+			setTimeout(function() {
+				$('#windResouceRadio').toggleClass('displayRadioButtons');				
+			}, 500);
+			windTogglePannelOn = true;
+		}
+		else {
 			$('#windResouceRadio').toggleClass('displayRadioButtons');
-			$('#windResourceCheck').toggleClass('displayRadioButtons');
-		}, 400);
-		
-		hideSolarResources();
-		hideHydroResources();
+
+			hideSolarResources();
+			hideHydroResources();
+			windTogglePannelOn = false;
+			setTimeout(function() {
+				$('#windResource').toggleClass('show-description');
+				$('#solarResource').removeClass('show-description');
+				$('#hydroResource').removeClass('show-description');
+				$('#showCheckboxWind').checkboxradio("refresh");
+			}, 100);
+		}
+
 	});
 	$('.solar').on('click', function() {
-		$('#windResource').removeClass('show-description');
-		$('#solarResource').toggleClass('show-description');
-		$('#hydroResource').removeClass('show-description');
-		$('#showCheckboxSolar').checkboxradio("refresh");
-		
-		setTimeout(function() {
+		if (solarTogglePannelOn == false){
+			windTogglePannelOn = false;
+			hydroTogglePannelOn = false;
+			hideWindResources();
+			hideHydroResources();
+			$('#windResource').removeClass('show-description');
+			$('#solarResource').toggleClass('show-description');
+			$('#hydroResource').removeClass('show-description');
+			$('#showCheckboxSolar').checkboxradio("refresh");
+
+			setTimeout(function() {
+				$('#solarResouceRadio').toggleClass('displayRadioButtons');				
+			}, 500);
+			solarTogglePannelOn = true;
+		}
+		else {
 			$('#solarResouceRadio').toggleClass('displayRadioButtons');
-			$('#solarResourceCheck').toggleClass('displayRadioButtons');
-		}, 400);		
-		
-		hideWindResources();
-		hideHydroResources();
+
+			hideWindResources();
+			hideHydroResources();
+			solarTogglePannelOn = false;
+			setTimeout(function() {
+				$('#windResource').removeClass('show-description');
+				$('#solarResource').toggleClass('show-description');
+				$('#hydroResource').removeClass('show-description');
+				$('#showCheckboxSolar').checkboxradio("refresh");
+			}, 100);
+		}
 	});
 	$('.hydro').on('click', function() {
-		$('#windResource').removeClass('show-description');
-		$('#solarResource').removeClass('show-description');
-		$('#hydroResource').toggleClass('show-description');
-		$('#showCheckboxHydro').checkboxradio("refresh");
-		
-		setTimeout(function() {
+		if (hydroTogglePannelOn == false){
+			windTogglePannelOn = false;
+			solarTogglePannelOn = false;
+			hideWindResources();
+			hideSolarResources();
+			$('#windResource').removeClass('show-description');
+			$('#solarResource').removeClass('show-description');
+			$('#hydroResource').toggleClass('show-description');
+			$('#showCheckboxHydro').checkboxradio("refresh");
+
+			setTimeout(function() {
+				$('#hydroResourceRadio').toggleClass('displayRadioButtons');				
+			}, 500);
+			hydroTogglePannelOn = true;
+		}
+		else {
 			$('#hydroResourceRadio').toggleClass('displayRadioButtons');
-			$('#hydroResourceCheck').toggleClass('displayRadioButtons');
-		}, 400);
-		
-		hideWindResources();
-		hideSolarResources();
+
+			hideWindResources();
+			hideSolarResources();
+			hydroTogglePannelOn = false;
+			setTimeout(function() {
+				$('#windResource').removeClass('show-description');
+				$('#solarResource').removeClass('show-description');
+				$('#hydroResource').toggleClass('show-description');
+				$('#showCheckboxHydro').checkboxradio("refresh");
+			}, 100);
+		}
 	});
 });
 
@@ -127,6 +182,10 @@ function startButtonClick() {
 		var center = g_map.getCenter();
 		google.maps.event.trigger(g_map, 'resize');
 		g_map.setCenter(center);
+		markerBalloon.open(g_map);
+		markerBalloon.setPosition(g_map.getCenter());
+		
+		console.log(markerBalloon.getContent());
 	});
 }
 
