@@ -20,6 +20,7 @@
 <script
 	src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=places,visualization"></script>
 <script src="Scripts/map_helper.js"></script>
+<script src="Scripts/calculations.js"></script>
 
 </head>
 
@@ -39,50 +40,70 @@
 					href="#app" class="ui-btn ui-btn-inline start-button">Start</a>
 			</header>
 		</div>
-		<div role="main" class="ui-content ">
-			<h3 class="intro-header calc-text">Calculations</h3>
-			<p class="intro-text calc-text">The Team: Charlie Guan, Chuan Yun
-				Loe, Daniel Faulkner, Jonathan Lam, Prashant Chhabra Description: A
-				web application that puts the power into people's hands for finding
-				sites for sustainable electricity generation. This application is
-				being developed as a project for the Startup Programming class at
-				the University of Victoria.</p>
-		</div>
-		<div role="main" class="ui-content about-background">
-			<h3 class="intro-header about-text">About Us</h3>
-			<h4 class="intro-subheading">
-				<strong>Description</strong>
-			</h4>
-			<p class="intro-text">A web application that puts the power into
-				people's hands for finding sites for sustainable electricity
-				generation. This application is being developed as a project for the
-				Startup Programming class at the University of Victoria.</p>
-			<h4 class="intro-subheading">
-				<strong>The Team</strong>
-			</h4>
-			<p class="intro-text">Charlie Guan, Chuan Yun Loe, Daniel
-				Faulkner, Jonathan Lam, Prashant Chhabra</p>
-			<div class="circular jonathan"></div>
-			<div class="circular"></div>
-			<br>
-			<div class="circular"></div>
-			<div class="circular"></div>
-			<div class="circular"></div>
-		</div>
-		<!-- /content -->
-		<div data-role="footer" data-position="fixed" data-theme="b"
-			class="intro-footer">
-			<p>Copyright &copy Power Planner 2014</p>
+		<div role="main" class="ui-content calc-background">
+			<h3 class="intro-header calc-header">Calculations</h3>
+			<p class="intro-text calc-text">Ew = 1.8Av3Cp , where Ew is the
+				wind energy output in kWh<br>A is the rotor area of the wind turbine in
+				m2 (note: different brand different area) <br>p is the density of air in
+				kg/m3 (note: different height different density,
+				http://www.denysschen.com/catalogue/density.aspx) <br>v is the wind
+				speed in m/s <br>Cp is the power coefficient (note: it basically means
+				the efficiency of the wind turbine) <br>get data for highlighted from
+				http://www.windatlas.ca/en/index.php taken from
+				http://www.raeng.org.uk/publications/other/23-wind-turbine</p>
+
+			<div class="ui-content about-background">
+				<h3 class="intro-header about-header">About Us</h3>
+				<h4 class="intro-subheading">
+					<strong>Description</strong>
+				</h4>
+				<p class="about-text">A web application that puts the power into
+					people's hands for finding sites for sustainable electricity
+					generation. This application is being developed as a project for
+					the Startup Programming class at the University of Victoria.</p>
+				<h4 class="intro-subheading">
+					<strong>The Team</strong>
+				</h4>
+				<p class="about-text">Charlie Guan, Chuan Yun Loe, Daniel
+					Faulkner, Jonathan Lam, Prashant Chhabra</p>
+				<div class="circular jonathan"></div>
+				<div class="circular"></div>
+				<br>
+				<div class="circular"></div>
+				<div class="circular"></div>
+				<div class="circular"></div>
+			</div>
+			<!-- /content -->
+			<div data-role="footer" data-position="fixed" data-theme="b"
+				data-tap-toggle="false">
+				<p class="footer-text">Copyright &copy Power Planner 2014</p>
+			</div>
 		</div>
 	</div>
-
-
 	<!-- Start of app page -->
 	<div data-role="page" id="app">
 		<div data-role="panel" data-position="left" data-display="push"
 			id="menu" data-theme="b">
 			<input type="text" name="placesTextSearch" id="pac-input"
 				class="controls" placeholder="Search Box">
+			<h3>How To Use</h3>
+			<p>
+				Select one of the alternative energy source types, and toggle
+				the energy potential heatmap on by selecting 'Show'
+			</p>
+			<h3>Power Sources</h3>
+			<div id="img-container">
+				<div><img src="../images/wind-icon.png"/></div>
+				<div><img src="../images/solar-icon.png"/></div>
+				<div><img src="../images/hydro-icon.png"/></div>
+			</div>
+			<p>
+				Choose from wind, solar, or hydro energy generation potentials.
+				See the areas with the greatest and the worst potential for
+				generating your own electricity. Modify the power calculations
+				to match your current - or future - solar panel, wind turbine, 
+				and/or hydro turbine setup!
+			</p>
 		</div>
 		<div data-role="panel" data-position="right" data-display="overlay"
 			id="menu2">
@@ -90,10 +111,9 @@
 			<h3>Menu h3</h3>
 		</div>
 		<div data-role="header" data-position="fixed" data-theme="b">
-			<a href="#menu"
-				class="jqm-navmenu-link ui-nodisc-icon ui-btn-left ui-btn ui-icon-bars ui-btn-icon-notext ui-corner-all"
-				data-icon="bars" data-theme="b">About</a>
-
+			<a href="#home"
+				class="jqm-navmenu-link ui-nodisc-icon ui-btn-left ui-btn ui-icon-home ui-btn-icon-notext ui-corner-all"
+				data-icon="home" data-theme="c">About</a>
 			<h1>
 				Power <img id="logo-icon" src="images/PowerPlannerLogo-min.png"
 					data-thumb="" alt=""> Planner
@@ -109,46 +129,131 @@
 				<div id="wind-panel" class="wind"></div>
 				<div id="solar-panel" class="solar"></div>
 				<div id="hydro-panel" class="hydro"></div>
+				<a href="#menu" id="question-panel" class="question"></a>
 			</div>
 			<div class="resources-panel" id="windResource">
 				<form class="resourceRadioButton" action="" id="windResouceRadio">
-					<input type="radio" name="windPower" value="pgv" id="pgv">
-					<label for="pgv">Power generation view</label> <input type="radio"
-						name="windPower" value="wsv" id="wsv"> <label for="wsv">Wind
-						speed view</label>
-					<input type="checkbox" name="showCheckboxWind"
-						id="showCheckboxWind" data-mini="true"> <label
-						class="showAdvancedOptions" for="showCheckboxWind"> Show </label>
+					<div class="ui-grid-a">
+						<div class="ui-block-a inputLabel">
+							<div data-role="fieldcontain">
+								<label class="inputLabel" for="windView">View: </label>
+							</div>
+							<div data-role="fieldcontain">
+								<label class="inputLabel" for="windRotorArea">Rotor Area: </label>
+							</div>
+							<div data-role="fieldcontain">
+								<label class="inputLabel" for="windEfficiency">Efficiency: </label>
+							</div>
+						</div>
+						<div class="ui-block-b">
+							<div class="ui-field-contain" id="opt-navbars">
+								<fieldset data-role="controlgroup" data-type="horizontal"
+									class="ui-controlgroup ui-controlgroup-horizontal ui-corner-all">
+									<input type="radio" name="windView" id="windAnnual"
+										value="annual" checked="checked" /> <label
+										for="windAnnual">Annual</label> <input type="radio"
+										name="windView" id="windSeasonal" value="seasonal" /> <label
+										for="windSeasonal">Seasonal</label>
+								</fieldset>
+							</div>
+							<div class="inputText">
+								<input type="text" name="windRotorArea" id="windRotorArea" value=""
+									placeholder="units in m2">
+							</div>
+							<div class="inputText">
+								<input type="text" name="windEfficiency" id="windEfficiency" value=""
+									placeholder="Power Coefficient">
+							</div>
+						</div>
+					</div>
+					<!-- /grid-a -->					
+					<input type="checkbox"
+						name="showCheckboxWind" id="showCheckboxWind" data-mini="true">
+					<label class="showAdvancedOptions" for="showCheckboxWind">	Show</label>
 				</form>
 			</div>
 			<div class="resources-panel" id="solarResource">
 				<form class="resourceRadioButton" action="" id="solarResouceRadio">
-					<input type="radio" name="solarPower" value="pgv" id="pgv">
-					<label for="pgv">Power generation view</label> <input type="radio"
-						name="solarPower" value="shv" id="shv"> <label for="shv">Sunlight
-						hours view</label>
-					<input type="checkbox" name="showCheckboxSolar"
-						id="showCheckboxSolar" data-mini="true"> <label
-						class="showAdvancedOptions" for="showCheckboxSolar"> Show
-					</label>
+					<div class="ui-grid-a">
+						<div class="ui-block-a inputLabel">
+							<div data-role="fieldcontain">
+								<label class="inputLabel" for="solarView">View: </label>
+							</div>
+							<div data-role="fieldcontain">
+								<label class="inputLabel" for="solarArea">Panel Area: </label>
+							</div>
+							<div data-role="fieldcontain">
+								<label class="inputLabel" for="solarEfficiency">Efficiency: </label>
+							</div>
+						</div>
+						<div class="ui-block-b">
+							<div class="ui-field-contain" id="opt-navbars">
+								<fieldset data-role="controlgroup" data-type="horizontal"
+									class="ui-controlgroup ui-controlgroup-horizontal ui-corner-all">
+									<input type="radio" name="solarView" id="solarAnnual"
+										value="annual" checked="checked" /> <label
+										for="solarAnnual">Annual</label> <input type="radio"
+										name="solarView" id="solarSeasonal" value="seasonal" /> <label
+										for="solarSeasonal">Seasonal</label>
+								</fieldset>
+							</div>
+							<div class="inputText">
+								<input type="text" name="solarArea" id="solarArea" value=""
+									placeholder="units in m2">
+							</div>
+							<div class="inputText">
+								<input type="text" name="solarEfficiency" id="solarEfficiency" value=""
+									placeholder="Power Coefficient">
+							</div>
+						</div>
+					</div>
+					<!-- /grid-a -->
+					
+					<input type="checkbox"
+						name="showCheckboxSolar" id="showCheckboxSolar" data-mini="true">
+					<label class="showAdvancedOptions" for="showCheckboxSolar"> Show</label>
 				</form>
 			</div>
 			<div class="resources-panel" id="hydroResource">
 				<form class="resourceRadioButton" action="" id="hydroResourceRadio">
-					<input type="radio" name="hydroPower" value="pgv" id="pgv">
-					<label for="pgv">Power generation view</label> <input type="radio"
-						name="hydroPower" value="watersv" id="watersv"> <label
-						for="watersv">Water speed view</label>
-					<input type="checkbox" name="showCheckboxHydro"
-						id="showCheckboxHydro" data-mini="true"> <label
-						class="showAdvancedOptions" for="showCheckboxHydro"> Show</label>
+					<div class="ui-grid-a">
+						<div class="ui-block-a inputLabel">
+							<div data-role="fieldcontain">
+								<label class="inputLabel" for="hydroView">View: </label>
+							</div>
+							<div data-role="fieldcontain">
+								<label class="inputLabel" for="hydroEfficiency">Efficiency: </label>
+							</div>
+						</div>
+						<div class="ui-block-b">
+							<div class="ui-field-contain" id="opt-navbars">
+								<fieldset data-role="controlgroup" data-type="horizontal"
+									class="ui-controlgroup ui-controlgroup-horizontal ui-corner-all">
+									<input type="radio" name="hydroView" id="hydroAnnual"
+										value="annual" checked="checked" /> <label
+										for="hydroAnnual">Annual</label> <input type="radio"
+										name="hydroView" id="hydroSeasonal" value="seasonal" /> <label
+										for="hydroSeasonal">Seasonal</label>
+								</fieldset>
+							</div>
+							<div class="inputText">
+								<input type="text" name="hydroEfficiency" id="hydroEfficiency" value=""
+									placeholder="Turbine Efficiency">
+							</div>
+						</div>
+					</div>
+					<!-- /grid-a -->					
+					<input type="checkbox"
+						name="showCheckboxHydro" id="showCheckboxHydro" data-mini="true">
+					<label class="showAdvancedOptions" for="showCheckboxHydro">
+						Show</label>
 				</form>
 			</div>
 		</div>
 		<!-- /content -->
 		<div data-role="footer" data-position="fixed" data-theme="b"
-			class="intro-footer">
-			<p>Copyright &copy Power Planner 2014</p>
+			data-tap-toggle="false">
+			<p class="footer-text">Copyright &copy Power Planner 2014</p>
 		</div>
 	</div>
 	<!-- /page -->

@@ -5,6 +5,7 @@ var g_heatmap; /* The heatmap layer for the main map */
 var wind_data = []; /* The wind data for the current heatmap view */
 var solar_data = []; /* The solar data for the current heatmap view */
 var hydro_data = []; /* The hydro data for the current heatmap view */
+var streams_data = []; /* The streams data for where to draw hydro */
 
 /* Raw data cache */
 var wind_cache = [];
@@ -37,15 +38,21 @@ var SOLAR_SCALING_DISTANCE = 1; /* Data point further away may have less impact 
 
 var MIN_DISPLAY_WEIGHT = 0.01; /* Don't add a point with less weight to heatmap */
 
-var scaler = 500;
+var WIND_SCALER = 500;
+var SOLAR_SCALER = 4.6;
+var HYDRO_SCALER = 2000000;
+var scaler = WIND_SCALER;
 
 var POINT_DEBUGGER = false; /* true = view data points instead of interpolation */
 
-// View (or zoom) state of the map; used to implement different time saving
-// measures
+//View (or zoom) state of the map; used to implement different time saving
+//measures
 var view_state = (DEFAULT_ZOOM <= CHANGETO_WIDE_VIEW ? 
-			(DEFAULT_ZOOM <= CHANGETO_OVER_VIEW ? OVER_VIEW : WIDE_VIEW) : 
+		(DEFAULT_ZOOM <= CHANGETO_OVER_VIEW ? OVER_VIEW : WIDE_VIEW) : 
 			(DEFAULT_ZOOM <= CHANGETO_AVE_VIEW ? AVE_VIEW : SMALL_VIEW));
+
+var markerBalloon // this is the balloon for the marker.
+//var marker // this is the marker dropped by right click
 
 /*
  * This example adds a search box to a map, using the Google Place Autocomplete
@@ -72,23 +79,153 @@ function initialize() {
 		} ]
 	});
 
+	// *********************************************************************************************
+	// ********************************** Code by Charlie ******************************************
+	// *********************************************************************************************
+	// ******* The terms "info window", "balloon" and "bubble" are used interchangeably. ***********
+
+	// the following adds an info window (bubble) to the map upon right click. 
+	// Until now, the marker is not created yet.
+	// Yes, we created a bubble first, then we created a marker.
+	// markerBalloon is declared global.
+	markerBalloon = new google.maps.InfoWindow();
+
+	// Code for get rid of top-left bug. Doesn't affect functions.
+	// Explanation:
+	// When an info window is created, it is not tied with any marker.
+	// When it is first tied with a marker, and the function "marker.open(position)" is called, 
+	// the info window will be shown at the top left corner instead of at "position" parameter
+	// for a very brief moment with its proper content. Wouldn't be a big problem if the bubble
+	// doesn't contain a lot of information to display; but in our case, the bubble has several lines,
+	// so that can be a problem. (Real big bubble flashes at an inappropriate place)
+	// This behavior is probably not designed by google on purpose. I would say this is a bug from google;
+	// however there is a solution.
+
+	// Solution is here: before tying our bubble to the proper marker created by a right click, 
+	// we first tie our bubble with a temporary marker called "testMarker". 
+	// Then we tell the bubble to open at position "null", so the bubble is not actually shown with
+	// testMarker. But since the bubble is tied with a marker already, re-tying it with another one
+	// won't cause the "top left flash" bug anymore. 
+
+	// create a temporary marker.
+	testMarker = new google.maps.Marker({
+		position:map.getCenter(),
+		map : map,
+		icon : "http://www.google.com/intl/en_us/mapfiles/ms/micons/red-dot.png"		
+	});
+	// tie our balloon with the temporary marker.
+	markerBalloon.setContent("1");
+	markerBalloon.open(map, testMarker);
+
+	// don't show our test marker.
+	testMarker.setVisible(false);
+	// call .open() function, but with position = null, so we call open() and purposely show nothing.
+	// after this, the balloon won't be shown at top left for a brief moment anymore.
+	markerBalloon.open(null);
+	// end of the top-left thing.
+
+	map.addListener('rightclick', function(event) {
+		addMarker(event.latLng);
+	});
+
+	function addMarker(loc) {
+		marker = new google.maps.Marker({
+			position : loc,
+			map : map,
+			icon : "http://www.google.com/intl/en_us/mapfiles/ms/micons/red-dot.png"		
+		});
+
+		// the object handle returned from the current fake function.
+		var fakeObject = getPointData(marker.getPosition().lat(), marker.getPosition().lng());		
+		// note that the numeric value returned are rounded to 3 digits. Change this if needed.
+		var latPosition = marker.getPosition().lat().toFixed(3).toString();
+		var lngPosition = marker.getPosition().lng().toFixed(3).toString();
+
+		// this is the bubble displayed when pin is dropped
+		// the function balloonText() is called to get the string displayed in the balloon.
+		markerBalloon.setContent(balloonText(fakeObject, latPosition, lngPosition));	
+		markerBalloon.bindTo('position', marker, 'position');
+		markerBalloon.open(map, marker);
+
+		// this is the bubble displayed when pin is left-clicked.
+		// left click to toggle the bubble.
+		// if you left click another pin, the bubble on that pin will show up.
+		marker.addListener('click', function() {
+			// if the current balloon is closed
+			if (markerBalloon.getContent()=="") {
+				markerBalloon.setContent(balloonText(fakeObject, latPosition, lngPosition));
+				markerBalloon.bindTo('position', this, 'position');
+				markerBalloon.open(map, this);	
+			} else {
+				// clicking a different pin, show a bubble for that pin.
+				if (markerBalloon.getPosition().lat() != this.getPosition().lat()
+						|| markerBalloon.getPosition().lng() != this.getPosition().lng()) {
+					markerBalloon.setContent(balloonText(fakeObject, latPosition, lngPosition));
+					markerBalloon.bindTo('position', this, 'position');
+					markerBalloon.open(map, this);	
+				} else {
+					// we are clicking the same pin. close the bubble.
+					markerBalloon.setContent("");
+					markerBalloon.setPosition(null);
+					markerBalloon.open(null, null);
+				}
+			}										
+		});
+
+		// right click on a marker to remove the pin.
+		// if that pin has a bubble showing right now, close that bubble as well.
+		marker.addListener('rightclick', function() {
+			// didn't actually delete or close the marker, just set it to invisible.
+			this.setVisible(false);
+
+			// test if we are right clicking the pin with opening bubble.
+			// if we are, close the bubble. If we are not, don't do anything.
+			if (markerBalloon.getPosition().lat() == this.getPosition().lat()
+					&& markerBalloon.getPosition().lng() == this.getPosition().lng()) {
+				markerBalloon.setContent("");
+				markerBalloon.close();
+			}
+		});
+	}
+
+	// the function to return the string to be displayed in the balloon.
+	// this function exists to factor out some code in the previous section.
+	// numeric values are rounded to 2 digits. change this if needed.
+	function balloonText(objectHandle, lat, lng) {
+		var balloonString = "<div class=\"scrollFix\">" + 
+		"<h2>Detailed Energy Data (kWh)</h2>" +
+		"<h3>Latitude: " + lat + "<br/>" + 
+		"Longitute: " + lng + "</h3>" +
+		"Wind Energy: " + objectHandle.wind_raw.toFixed(2).toString() + "<br/>" + 
+		"Solar Energy: " + objectHandle.solar_raw.toFixed(2).toString() + "<br/>" +
+		"Hydro Energy: " + objectHandle.hydro_raw.toFixed(2).toString() + "<br/>" +
+		"<h4>Total Energy: " + objectHandle.total_energy.toFixed(2).toString() + "</h4>" +
+		"<p><i>Right click on the pin to remove pin.</i></p>" +
+		"<p><i>Left click on the pin to toggle this window.</i></p></div>";
+		return balloonString;
+	}
+
+	// ********************************************************************************************************
+	// ********************************** End of Charlie's Code ***********************************************
+	// ********************************************************************************************************
+
 	var defaultBounds = new google.maps.LatLngBounds(new google.maps.LatLng(
 			48.4647, -123.3085), new google.maps.LatLng(48.4647, -123.3085));
 	map.fitBounds(defaultBounds);
 
 	// Create the search box and link it to the UI element.
 	var input = /** @type {HTMLInputElement} */
-	(document.getElementById('pac-input'));
+		(document.getElementById('pac-input'));
 	var inputIntro = /** @type {HTMLInputElement} */
-	(document.getElementById('pac-input-intro'));
+		(document.getElementById('pac-input-intro'));
 	map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
 
 	var searchBox = new google.maps.places.SearchBox(
-	/** @type {HTMLInputElement} */
-	(input));
+			/** @type {HTMLInputElement} */
+			(input));
 	var searchBoxIntro = new google.maps.places.SearchBox(
-	/** @type {HTMLInputElement} */
-	(inputIntro));
+			/** @type {HTMLInputElement} */
+			(inputIntro));
 
 	// [START region_getplaces]
 	// Listen for the event fired when the user selects an item from the
@@ -108,11 +245,11 @@ function initialize() {
 		var bounds = new google.maps.LatLngBounds();
 		for (var i = 0, place; place = places[i]; i++) {
 			var image = {
-				url : place.icon,
-				size : new google.maps.Size(71, 71),
-				origin : new google.maps.Point(0, 0),
-				anchor : new google.maps.Point(17, 34),
-				scaledSize : new google.maps.Size(25, 25)
+					url : place.icon,
+					size : new google.maps.Size(71, 71),
+					origin : new google.maps.Point(0, 0),
+					anchor : new google.maps.Point(17, 34),
+					scaledSize : new google.maps.Size(25, 25)
 			};
 
 			// Create a marker for each place.
@@ -140,6 +277,17 @@ function initialize() {
 		searchBox.setBounds(bounds);
 	});
 
+	markerBalloon.setContent("<div class=\"scrollFix\">" + 
+			"<h3>Did you know that ...</h3>" +
+			"<p><em>Right clicking on any area of the map <br/>" +
+			"will place a marker and open a similar <br/>" +
+			"window with information about the power <br/>" +
+			"generation potential in that area?</em></p>" +
+			"<p><em>For more info on all the cool things <br/>" +
+	"you can do, click the blue ? to the left!</em></p></div>");
+	//markerBalloon.open(map);
+	//markerBalloon.setPosition(map.getCenter());
+
 	return map;
 }
 
@@ -154,13 +302,13 @@ function mapLoader() {
 
 	google.maps.event.addListener(g_map, 'dragend', _eventHeatmapDataToggler);
 	google.maps.event.addListener(g_map, 'zoom_changed', function() {
-			zoom = g_map.getZoom();
-			view_state = (zoom <= CHANGETO_WIDE_VIEW ? 
-							(zoom <= CHANGETO_OVER_VIEW ? OVER_VIEW: WIDE_VIEW) : 
-								(zoom <= CHANGETO_AVE_VIEW ? AVE_VIEW : SMALL_VIEW));
-					console.log("View state: " + view_state);
-					_eventHeatmapDataToggler();
-					});
+		zoom = g_map.getZoom();
+		view_state = (zoom <= CHANGETO_WIDE_VIEW ? 
+				(zoom <= CHANGETO_OVER_VIEW ? OVER_VIEW: WIDE_VIEW) : 
+					(zoom <= CHANGETO_AVE_VIEW ? AVE_VIEW : SMALL_VIEW));
+		console.log("View state: " + view_state);
+		_eventHeatmapDataToggler();
+	});
 }
 
 /*
@@ -168,8 +316,8 @@ function mapLoader() {
  */
 function _eventHeatmapDataToggler() {
 	toggleHeatmapData($("#showCheckboxWind").is(':checked'), $(
-			"#showCheckboxSolar").is(':checked'), $("#showCheckboxHydro").is(
-			':checked'));
+	"#showCheckboxSolar").is(':checked'), $("#showCheckboxHydro").is(
+	':checked'));
 }
 
 /*
@@ -216,7 +364,7 @@ function _getHeatmapData(type, neLat, neLng, swLat, swLng) {
 	wind_data = [];
 	solar_data = [];
 	hydro_data = [];
-	
+
 	// requested grid
 	var neLat_w_off = (neLat + lat_offset);
 	var neLng_w_off = (neLng + lng_offset);
@@ -231,12 +379,14 @@ function _getHeatmapData(type, neLat, neLng, swLat, swLng) {
 	console.log("nelng: " + neLng_w_off);
 	console.log("swlat: " + swLat_w_off);
 	console.log("swlng: " + swLng_w_off);
-	
+
 	// Check whether cache has the requested data
 	var in_cache = false;
 	if (type == "WIND") {
 		// Check whether calculated data is available in cache
-		if (wind_data_bounds.neLat >= neLat_w_off && wind_data_bounds.nelng >= neLng_w_off
+		if (wind_cache.length == 0) {
+			in_cache = false;
+		} else if (wind_data_bounds.neLat >= neLat_w_off && wind_data_bounds.nelng >= neLng_w_off
 				&& wind_data_bounds.swlat <= swLat_w_off && wind_data_bounds.swlng <= swLng_w_off
 				&& wind_data_bounds.neLat >= nwLat_w_off && wind_data_bounds.swlng <= nwLng_w_off
 				&& wind_data_bounds.swlat <= seLat_w_off && wind_data_bounds.nelng >= seLng_w_off) {
@@ -282,6 +432,10 @@ function _getHeatmapData(type, neLat, neLng, swLat, swLng) {
 		if(solar_cache.length > 0) {
 			in_cache = true;
 		}
+	} else if (type == "HYDRO") {
+		if(hydro_cache.length > 0) {
+			in_cache = true;
+		}
 	}
 
 	if(in_cache) {
@@ -301,31 +455,31 @@ function _getHeatmapData(type, neLat, neLng, swLat, swLng) {
 					if (((neLat_w_off >= wind_cache[i].grid.swLat && neLat_w_off <= wind_cache[i].grid.neLat)
 							||(swLat_w_off >= wind_cache[i].grid.swLat && swLat_w_off <= wind_cache[i].grid.neLat))
 							&&((neLng_w_off >= wind_cache[i].grid.swLng && neLng_w_off <= wind_cache[i].grid.neLng)
-							||(swLng_w_off >= wind_cache[i].grid.swLng && swLng_w_off <= wind_cache[i].grid.neLng))) {
+									||(swLng_w_off >= wind_cache[i].grid.swLng && swLng_w_off <= wind_cache[i].grid.neLng))) {
 						new_data = new_data.concat(wind_cache[i]);
 					} 
 					//if one of the corner of our cache grid falls inside requested grid
 					else if (((wind_cache[i].grid.neLat >= swLat_w_off && wind_cache[i].grid.neLat <= neLat_w_off)
 							||(wind_cache[i].grid.swLat >= swLat_w_off && wind_cache[i].grid.swLat <= neLat_w_off))
 							&&((wind_cache[i].grid.neLng >= swLng_w_off && wind_cache[i].grid.neLng <= neLng_w_off)
-							||(wind_cache[i].grid.swLng >= swLng_w_off && wind_cache[i].grid.swLng <= neLng_w_off))) {
+									||(wind_cache[i].grid.swLng >= swLng_w_off && wind_cache[i].grid.swLng <= neLng_w_off))) {
 						new_data = new_data.concat(wind_cache[i]);
 					}
 					//if there is overlap of the cache and requested grid, but no corners fall in the other
 					else if (((wind_cache[i].grid.swLat < swLat_w_off && wind_cache[i].grid.neLat > neLat_w_off)
 							&&(wind_cache[i].grid.swLng > swLng_w_off && wind_cache[i].grid.neLng < neLng_w_off))
 							||((wind_cache[i].grid.swLat > swLat_w_off && wind_cache[i].grid.neLat < neLat_w_off)
-							&&(wind_cache[i].grid.swLng < swLng_w_off && wind_cache[i].grid.neLng > neLng_w_off))) {
+									&&(wind_cache[i].grid.swLng < swLng_w_off && wind_cache[i].grid.neLng > neLng_w_off))) {
 						new_data = new_data.concat(wind_cache[i]);
 					}
 				}
-				
+
 				usable_data = [];
 				_filterWindData(new_data, usable_data, 
 						neLat_w_off, neLng_w_off, 
 						swLat_w_off, swLng_w_off);
-				scaler = 500;
-				
+				scaler = WIND_SCALER;
+
 				var weight_points = [];
 				for (var i = 0; i < usable_data.length; i++) {
 					weight_points.push(usable_data[i].weight);
@@ -339,12 +493,12 @@ function _getHeatmapData(type, neLat, neLng, swLat, swLng) {
 				console.log("Top val: " + topval);
 				console.log("Bottom val: " + botval);
 				console.log("Zoom: " + g_map.getZoom());
-				
+
 				var hm_data = [];
 				for (var i = 0; i < usable_data.length; i++) {
 					addHeatmapCoord(hm_data, usable_data[i].lat,
 							usable_data[i].lng, usable_data[i].weight
-									/ scaler);
+							/ scaler);
 				}
 				if (POINT_DEBUGGER) {
 					wind_data = hm_data;
@@ -357,97 +511,206 @@ function _getHeatmapData(type, neLat, neLng, swLat, swLng) {
 				updateHeatmap();
 			}
 		} else if (type == "SOLAR") {
-			updateHeatmap();
+			if (solar_data.length > 0) {
+				updateHeatmap();
+			} else {
+				usable_data = [];
+				_filterSolarData(solar_data, usable_data);
+				scaler = SOLAR_SCALER;
+				
+				var weight_points = [];
+				for (var i = 0; i < usable_data.length; i++) {
+					weight_points.push(usable_data[i].weight);
+				}
+				var topval = getArrayMax(weight_points);
+				var botval = getArrayMin(weight_points);
+				// scaler = topval;
+				console.log("Data Points on Screen: "
+						+ usable_data.length);
+				console.log("Scaler: " + scaler);
+				console.log("Top val: " + topval);
+				console.log("Bottom val: " + botval);
+				console.log("Zoom: " + g_map.getZoom());
+
+				var hm_data = [];
+				for (var i = 0; i < usable_data.length; i++) {
+					addHeatmapCoord(hm_data, usable_data[i].lat,
+							usable_data[i].lng, 2.5 * 
+							((Math.pow(10, usable_data[i].weight)
+									- Math.pow(10, botval))
+									/ Math.pow(10, scaler)));
+				}
+				if (POINT_DEBUGGER) {
+					solar_data = hm_data;
+				} else {
+					console.time('_interpolateData');
+					solar_data = _interpolateData(hm_data, neLat,
+							neLng, swLat, swLng, type);
+					console.timeEnd('_interpolateData');
+				}
+				updateHeatmap();
+			}
+			
+		} else if (type == "HYDRO") {
+			if (hydro_data.length > 0) {
+				updateHeatmap();
+			} else {
+				usable_data = [];
+				streams_data = []; // Streams are treated specially, so empty them here
+				_filterHydroData(hydro_data, usable_data,
+						neLat_w_off, neLng_w_off, 
+						swLat_w_off, swLng_w_off);
+				scaler = HYDRO_SCALER;
+				console.log("Data Points in stream resources: " + 2 * streams_data.length);
+				
+				var weight_points = [];
+				for (var i = 0; i < usable_data.length; i++) {
+					weight_points.push(usable_data[i].weight);
+				}
+				var topval = getArrayMax(weight_points);
+				var botval = getArrayMin(weight_points);
+				// scaler = topval;
+				console.log("Data Points on Screen: "
+						+ usable_data.length);
+				console.log("Scaler: " + scaler);
+				console.log("Top val: " + topval);
+				console.log("Bottom val: " + botval);
+				console.log("Zoom: " + g_map.getZoom());
+
+				var hm_data = [];
+				for (var i = 0; i < usable_data.length; i++) {
+					addHeatmapCoord(hm_data, usable_data[i].lat, 
+							usable_data[i].lng, usable_data[i].weight / scaler);
+				}
+				if (POINT_DEBUGGER) {
+					hydro_data = hm_data;
+				} else {
+					console.time('_interpolateData');
+					hydro_data = _interpolateData(hm_data, neLat,
+							neLng, swLat, swLng, type);
+					console.timeEnd('_interpolateData');
+				}
+				updateHeatmap();
+			}
 		}
 	} else {
 		$.ajax({
-				// url : '/powerplanner',
-				url : '/powerdb',
-				type : 'POST',
-				data : {
-					type : type,
-					neLat : neLat_w_off,
-					neLng : neLng_w_off,
-					swLat : swLat_w_off,
-					swLng : swLng_w_off,
-					season : "anu"
-				},
-				dataType : 'json',
-				success : function(data, status) {
-					if (status) {
-						console.log("Total Data Points: " + data.length);
-						// console.log(data);
-	
-						usable_data = [];
-						if (type == "WIND") {
-							// Cache all points
-							wind_cache = _.union(wind_cache,data);
-							_filterWindData(data, usable_data, 
-									neLat_w_off, neLng_w_off, 
-									swLat_w_off, swLng_w_off);
-							scaler = 500;
-						} else if (type == "SOLAR") {
-							// Cache all points
-							solar_cache = _.union(solar_cache,data);
-							_filterSolarData(data, usable_data);
-							scaler = 5;
-						}
-	
-						var weight_points = [];
-						for (var i = 0; i < usable_data.length; i++) {
-							weight_points.push(usable_data[i].weight);
-						}
-						var topval = getArrayMax(weight_points);
-						var botval = getArrayMin(weight_points);
-						// scaler = topval;
-						console.log("Data Points on Screen: "
-								+ usable_data.length);
-						console.log("Scaler: " + scaler);
-						console.log("Top val: " + topval);
-						console.log("Bottom val: " + botval);
-						console.log("Zoom: " + g_map.getZoom());
-	
-						var hm_data = [];
-							
-						if (type == "WIND") {
-							for (var i = 0; i < usable_data.length; i++) {
-								addHeatmapCoord(hm_data, usable_data[i].lat,
-										usable_data[i].lng, usable_data[i].weight
-												/ scaler);
-							}
-							if (POINT_DEBUGGER) {
-								wind_data = hm_data;
-							} else {
-								console.time('_interpolateData');
-								wind_data = _interpolateData(hm_data, neLat,
-										neLng, swLat, swLng, type);
-								console.timeEnd('_interpolateData');
-							}
-						} else if (type == "SOLAR") {
-							for (var i = 0; i < usable_data.length; i++) {
-								addHeatmapCoord(hm_data, usable_data[i].lat,
-										usable_data[i].lng, 2.5 * 
-												((Math.pow(10, usable_data[i].weight)
-												- Math.pow(10, botval))
-												/ Math.pow(10, scaler)));
-							}
-							if (POINT_DEBUGGER) {
-								solar_data = hm_data;
-							} else {
-								console.time('_interpolateData');
-								solar_data = _interpolateData(hm_data, neLat,
-										neLng, swLat, swLng, type);
-								console.timeEnd('_interpolateData');
-							}
-						} else if (type == "HYDRO") {
-							hydro_data = hm_data;
-						}
+			// url : '/powerplanner',
+			url : '/powerdb',
+			type : 'POST',
+			data : {
+				type : type,
+				neLat : neLat_w_off,
+				neLng : neLng_w_off,
+				swLat : swLat_w_off,
+				swLng : swLng_w_off,
+				season : "anu"
+			},
+			dataType : 'json',
+			success : function(data, status) {
+				if (status) {
+					console.log("Total Data Points: " + data.length);
+					// console.log(data);
+
+					usable_data = [];
+					if (type == "WIND") {
+						// Cache all points
+						wind_cache = _.union(wind_cache,data);
+						_filterWindData(data, usable_data, 
+								neLat_w_off, neLng_w_off, 
+								swLat_w_off, swLng_w_off);
+						scaler = WIND_SCALER;
+					} else if (type == "SOLAR") {
+						// Cache all points
+						solar_cache = _.union(solar_cache,data);
+						_filterSolarData(data, usable_data);
+						scaler = SOLAR_SCALER;
+					} else if (type == "HYDRO") {
+						streams_data = []; // Streams are treated specially, so empty them here
+						hydro_cache = _.union(hydro_cache,data);
+						_filterHydroData(data, usable_data,
+								neLat + lat_offset, neLng + lng_offset, 
+								swLat - lat_offset, swLng - lng_offset);
+						scaler = HYDRO_SCALER;
+						console.log("Data Points in stream resources: " + 2 * streams_data.length);
 					}
-				},
-				complete : function() {
-					updateHeatmap();
-				},
-			});
+				}
+
+				var weight_points = [];
+				for (var i = 0; i < usable_data.length; i++) {
+					weight_points.push(usable_data[i].weight);
+				}
+				var topval = getArrayMax(weight_points);
+				var botval = getArrayMin(weight_points);
+				// scaler = topval;
+				console.log("Data Points on Screen: "
+						+ usable_data.length);
+				console.log("Scaler: " + scaler);
+				console.log("Top val: " + topval);
+				console.log("Bottom val: " + botval);
+				console.log("Zoom: " + g_map.getZoom());
+
+				var hm_data = [];
+
+				if (type == "WIND") {
+					for (var i = 0; i < usable_data.length; i++) {
+						addHeatmapCoord(hm_data, usable_data[i].lat,
+								usable_data[i].lng, usable_data[i].weight
+								/ scaler);
+					}
+					if (POINT_DEBUGGER) {
+						wind_data = hm_data;
+					} else {
+						console.time('_interpolateData');
+						wind_data = _interpolateData(hm_data, neLat,
+								neLng, swLat, swLng, type);
+						console.timeEnd('_interpolateData');
+					}
+				} else if (type == "SOLAR") {
+					for (var i = 0; i < usable_data.length; i++) {
+						addHeatmapCoord(hm_data, usable_data[i].lat,
+								usable_data[i].lng, 2.5 * 
+								((Math.pow(10, usable_data[i].weight)
+										- Math.pow(10, botval))
+										/ Math.pow(10, scaler)));
+					}
+					if (POINT_DEBUGGER) {
+						solar_data = hm_data;
+					} else {
+						console.time('_interpolateData');
+						solar_data = _interpolateData(hm_data, neLat,
+								neLng, swLat, swLng, type);
+						console.timeEnd('_interpolateData');
+					}
+				} else if (type == "HYDRO") {
+					for (var i = 0; i < usable_data.length; i++) {
+						addHeatmapCoord(hm_data, usable_data[i].lat, 
+								usable_data[i].lng, usable_data[i].weight / scaler);
+					}
+					if (POINT_DEBUGGER) {
+						hydro_data = hm_data;
+					} else {
+						console.time('_interpolateData');
+						hydro_data = _interpolateData(hm_data, neLat,
+								neLng, swLat, swLng, type);
+						console.timeEnd('_interpolateData');
+					}
+				}
+			}
+			else {
+				console.log("Status: " + status);
+			}
+		}
+	},
+	error : function(thing, status, error) {
+		console.log("Error!");
+		console.log(status);
+		console.log(error);
+	},
+	complete : function() {
+		updateHeatmap();
+	},
+});
 	}
 	console.timeEnd("_getHeatmapData");
 }
@@ -514,6 +777,7 @@ function _filterWindData(raw_data, push_data, neLat, neLng, swLat, swLng) {
 }
 
 /*
+ * There's not enough data to worry about not keeping it.
  * TODO: Add in other metrics for calculations.
  */
 function _filterSolarData(raw_data, push_data) {
@@ -523,6 +787,31 @@ function _filterSolarData(raw_data, push_data) {
 			lng : raw_data[i].lon,
 			weight : raw_data[i].deg45
 		});
+	}
+}
+
+/*
+ * There's not enough data to worry about not keeping it.
+ * If stream info is here, add it to the stream array (if it's not already full ...
+ * we'll ignore stream data if the stream array already contains points)
+ * 
+ * TODO: Add in other metrics for calculations.
+ */
+function _filterHydroData(raw_data, push_data, neLat, neLng, swLat, swLng) {
+	for (var i = 0; i < raw_data.length; i++) {
+		if (raw_data[i].hasOwnProperty('points')) {
+			if (raw_data[i].points[0].lat > swLat && raw_data[i].points[0].lat < neLat) {
+				if (raw_data[i].points[0].lon > swLng && raw_data[i].points[0].lon < neLng) {
+					streams_data.push(raw_data[i].points);
+				}
+			}
+		} else {
+			push_data.push({
+				lat : raw_data[i].lat,
+				lng : raw_data[i].lon,
+				weight : raw_data[i].precalc
+			});
+		}
 	}
 }
 
@@ -571,8 +860,8 @@ function _interpolateData(hm_data, neLat, neLng, swLat, swLng, type) {
 				for (var latbin = 0; latbin < BIN_SIZE; latbin++) {
 					var hm_bin = data_bins[latbin][lngbin].concat(
 							data_bins[latbin][lngbin + 1]).concat(
-							data_bins[latbin + 1][lngbin]).concat(
-							data_bins[latbin + 1][lngbin + 1]);
+									data_bins[latbin + 1][lngbin]).concat(
+											data_bins[latbin + 1][lngbin + 1]);
 					var next_inter = _createInterpolation(hm_bin, temp_data,
 							lat_increment, lng_increment, lat_start, lng_start,
 							latset, lngset, offset, type);
@@ -588,7 +877,11 @@ function _interpolateData(hm_data, neLat, neLng, swLat, swLng, type) {
 	} else if (type == "SOLAR") {
 		_createInterpolation(hm_data, temp_data, lat_width, lng_width,
 				swLat - lat_offset, swLng - lng_offset, latset, lngset, 
-				offset, type);		
+				offset, type);
+	} else if (type == "HYDRO") {
+		_createInterpolation(hm_data, temp_data, lat_width, lng_width,
+				swLat - lat_offset, swLng - lng_offset, latset, lngset, 
+				offset, type);
 	}
 
 	return temp_data;
@@ -703,14 +996,22 @@ function _binData(hm_data, neLat, neLng, swLat, swLng, data_lat_offset,
 	return data_bins;
 }
 
+/*
+ * Note: this returns a potentially scaled down weight!
+ */
 function getDataWeight(hm_data, lat, lng, type) {
 	var weight_val = 0;
 	if (type == "WIND") {
 		weight_val = _getDataWeightWind(hm_data, lat, lng);
 	} else if (type == "SOLAR") {
 		weight_val = _getDataWeightSolar(hm_data, lat, lng);
+	} else if (type == "HYDRO") {
+		weight_val = _getDataWeightHydro(hm_data, lat, lng);
 	}
-	
+
+	if (weight_val > 3.5) {
+		weight_val = 3.5;
+	}
 	return weight_val;
 }
 
@@ -770,7 +1071,7 @@ function _getDataWeightWind(hm_data, lat, lng) {
 function _getDataWeightSolar(hm_data, lat, lng) {
 	var nearest = [];
 	var nearest_distance = [];
-	
+
 	var data_bins = [ [], [], [], [] ];
 
 	for (var i = 0; i < hm_data.length; i++) {
@@ -788,7 +1089,7 @@ function _getDataWeightSolar(hm_data, lat, lng) {
 			}
 		}
 	}
-	
+
 	// Find nearest point in each bin (or find nothing if empty bin)
 	for (var i = 0; i < data_bins.length; i++) {
 		for (var j = 0; j < data_bins[i].length; j++) {
@@ -800,10 +1101,10 @@ function _getDataWeightSolar(hm_data, lat, lng) {
 			} else {
 				var dist_to_j = distanceTo(lat, lng, data_bins[i][j].location
 						.lat(), data_bins[i][j].location.lng())
-				if (dist_to_j < nearest_distance[i]) {
-					nearest[i] = data_bins[i][j];
-					nearest_distance[i] = dist_to_j;
-				}
+						if (dist_to_j < nearest_distance[i]) {
+							nearest[i] = data_bins[i][j];
+							nearest_distance[i] = dist_to_j;
+						}
 			}
 		}
 	}
@@ -814,27 +1115,96 @@ function _getDataWeightSolar(hm_data, lat, lng) {
 				" Lng: " + nearest[i].location.lng() + " Distance: " +
 				nearest_distance[i]);
 	}
-	*/
-	
+	 */
+
 	var final_weight = 0;
 	if (nearest.length > 0) {
 		var dist_sum = nearest_distance.reduce(function(a, b) {
 			return a + b;
 		});
-		
+
 		for (var i = 0; i < nearest.length; i++) {
 			var dist_scaling = Math.pow(SOLAR_SCALING_DISTANCE / nearest_distance[i],
 					4 - nearest.length + 1);
 			if (dist_scaling > 1) {
 				dist_scaling = 1;
 			}
-			
+
 			final_weight += (nearest[i].weight * (1 - nearest_distance[i] / dist_sum)
 					* dist_scaling);
 		}
 	}
-	
+
 	return (nearest.length > 0 ? final_weight / nearest.length : 0);
+}
+
+function _getDataWeightHydro(hm_data, lat, lng) {
+	var final_weight = 0;
+	// go through each stream in the streams set
+	for (var i = 0; i < streams_data.length; i++) {
+		// TODO: In the future, account for more than two points
+		if (pointOnLine(lat, lng, streams_data[i][0], streams_data[i][1])) {
+			// if point lies *roughly* along the line of a stream, find the nearest
+			// 2 hydro stations; take a weighted average of their monitoring, and
+			// draw point with that weight
+
+			// Right now, only looks for the one closest stations
+			var nearest_distance;
+			var nearest_weight;
+			for (var j = 0; j < hm_data.length; j++) {
+				if (j == 0) {
+					//Trivial case, the best so far is the first
+					nearest_distance = distanceTo(lat, lng, 
+							hm_data[j].location.lat(), hm_data[j].location.lng());
+					nearest_weight = hm_data[j].weight;
+				} else {
+					var next_dist = distanceTo(lat, lng, 
+							hm_data[j].location.lat(), hm_data[j].location.lng());
+					if (next_dist < nearest_distance) {
+						nearest_distance = next_dist;
+						nearest_weight = hm_data[j].weight;
+					}
+				}
+			}
+			final_weight = nearest_weight;
+			break;
+		}
+	}
+
+	return final_weight;
+}
+
+/*
+ * Returns true if distance from the lat, lng point is less than the current diameter
+ * of the heatmap spots away from the line represented by point1, point2 (if the point
+ * lies inside the boundary formed by the points)
+ */
+function pointOnLine(lat, lng, point1, point2) {
+	var is_on_line = false;
+
+	if (lat > Math.min(point1.lat, point2.lat) && lat < Math.max(point1.lat, point2.lat)) {
+		if (lng > Math.min(point1.lon, point2.lon) && lng < Math.max(point1.lon, point2.lon)) {
+			/*
+		 	var slope = (point2.lat - point1.lat)/(point2.lon - point1.lon);
+			var A = slope * (-1);
+			var B = 1;
+			var C = (A * point1.lon + B) * (-1);
+
+			var numer = Math.abs(A*lng + B*lat + C);
+			var denom = Math.sqrt(Math.pow(A,2) + Math.pow(B,2));
+
+			var distance = (numer/denom);
+			is_on_line = (distance <= 
+				MAX_DATA_WIDTH / Math.pow(2, (g_map.getZoom() - LEAST_ZOOM)) * 0.98 * 2);
+			console.log(distance);
+			console.log(MAX_DATA_WIDTH / Math.pow(2, (g_map.getZoom() - LEAST_ZOOM)) * 0.98 * 2);
+			 */
+			// The above can't get close enough to ever return true with our granularity ...
+			is_on_line = true;
+		}
+	}
+
+	return is_on_line;
 }
 
 /*
@@ -871,13 +1241,15 @@ function initHeatmap(map) {
 		maxIntensity : 1,
 		map : map,
 		radius : MAX_DATA_WIDTH / Math.pow(2, (DEFAULT_ZOOM - LEAST_ZOOM))
-				* 0.98,
+		* 0.98,
 		dissipating : false,
-		opacity : 0.4,
-		gradient : [ 'rgba(0,0,0,0)', 'rgba(255,0,0,1)', 'rgba(255,63,0,1)',
-				'rgba(255,127,0,1)', 'rgba(255,191,0,1)', 'rgba(255,255,0,1)',
-				'rgba(223,255,0,1)', 'rgba(191,255,0,1)', 'rgba(159,255,0,1)',
-				'rgba(127,255,0,1)', 'rgba(63,255,0,1)', 'rgba(0,255,0,1)' ]
+		opacity : 0.5,
+		gradient : [ 'rgba(0,0,0,0)', 'rgba(0,50,100,1)', 'rgba(0,75,200,1)', 
+		             'rgba(0,127,255,1)', 'rgba(0,159,255,1)', 'rgba(0,191,255,1)',
+		             'rgba(0,223,255,1)', 'rgba(0,255,255,1)', 'rgba(20,255,191,1)',
+		             'rgba(50,255,127,1)', 'rgba(75,255,0,1)', 'rgba(120,255,0,1)',
+		             'rgba(175,255,0,1)', 'rgba(200,255,0,1)', 'rgba(255,220,0,1)',
+		             'rgba(255,180,0,1)', 'rgba(255,120,0,1)', 'rgba(255,0,0,1)']
 	});
 
 	return heatmap;
@@ -977,21 +1349,30 @@ function getArrayMin(number_array) {
  * wind_raw, solar_raw, hydro_raw, and total_energy properties.
  * 
  * All this data is fake right now.
+ * 
+ * TODO: Tie this in with getDataWeight ... it's exactly what's needed, though
+ * ajax calls will need to be handled here first.
  */
 function getPointData(lat_point, lng_point) {
 	var pointDataObj = {
-		wind_raw : 0,
-		solar_raw : 0,
-		hydro_raw : 0,
-		total_energy : 0
+			wind_raw : 0,
+			solar_raw : 0,
+			hydro_raw : 0,
+			total_energy : 0
 	};
 
-	// Fake all the data!!
-	pointDataObj.wind_raw = (Math.random() > 0.1 ? 1000 * Math.random() : 0);
-	pointDataObj.solar_raw = 100 * Math.random();
-	pointDataObj.hydro_raw = (Math.random() > 0.98 ? 5000 * Math.random() : 0);
-	pointDataObj.total_energy = pointDataObj.wind_raw * 25
-			+ pointDataObj.solar_raw * 10 + pointDataObj.hydro_raw * 50;
+	// Fake [all] only some of the data!!
+	pointDataObj.wind_raw = ((wind_data.length) ? 
+			_getDataWeightWind(wind_data, lat_point, lng_point)*WIND_SCALER : 
+				1000 * Math.random());
+	pointDataObj.solar_raw = ((solar_data.length) ? 
+			_getDataWeightSolar(solar_data, lat_point, lng_point)*SOLAR_SCALER :
+				10 * Math.random());
+	pointDataObj.hydro_raw = ((hydro_data.length) ?
+			_getDataWeightHydro(hydro_data, lat_point, lng_point)*HYDRO_SCALER :
+				(Math.random() > 0.65 ? 5000 * Math.random() : 0));
+	pointDataObj.total_energy = pointDataObj.wind_raw
+	+ pointDataObj.solar_raw + pointDataObj.hydro_raw;
 	return pointDataObj;
 }
 
