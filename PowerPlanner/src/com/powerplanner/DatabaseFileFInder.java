@@ -145,7 +145,7 @@ public class DatabaseFileFInder {
 		{
 			if(!(item.contains(season)))
 			{
-		continue;
+				continue;
 			}
 			Pattern boundaryP = Pattern.compile("^([-]?\\d+)_([-]?\\d+)_([-]?\\d+)_([-]?\\d+)_.*$");
 			Matcher boundaryM = boundaryP.matcher(item);

@@ -81,8 +81,25 @@ public class PowerDBServlet extends HttpServlet {
 				String newData = new String(buffer, "UTF-8");
 				jfIn.close();
 				if (newData.length() > 1) {
-					dataBuilder.append(newData.substring(1, newData.length() - 1));
-					dataBuilder.append(",");
+					if (type.equals(PowerType.WIND.toString())) {
+						dataBuilder.append("{\"grid\":{\"nelat\":");  
+						dataBuilder.append(jsonFile.substring(0, 1));
+						dataBuilder.append(",\"neLng\":");
+						dataBuilder.append(jsonFile.substring(3, 6));
+						dataBuilder.append(",\"swLat\":");
+						dataBuilder.append(jsonFile.substring(8, 9));
+						dataBuilder.append(",\"swLng\":");
+						dataBuilder.append(jsonFile.substring(11, 14));
+						dataBuilder.append(",\"sea\":");
+						dataBuilder.append(jsonFile.substring(16, 18));
+						
+						dataBuilder.append("},\"data\":");
+						dataBuilder.append(newData);
+						dataBuilder.append("},");
+					} else if (type.equals(PowerType.SOLAR.toString())) {
+						dataBuilder.append(newData.substring(1, newData.length() - 1));
+						dataBuilder.append(",");
+					}
 				}
 			}
 		}
