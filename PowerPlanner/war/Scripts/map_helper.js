@@ -17,7 +17,7 @@ var wind_data_bounds = {
 		neLat: 0,
 		neLng: -180,
 		swLat: 90,
-		swLng: 0
+		swLng: 180
 };
 
 var SMALL_VIEW = 0 /* State variable for have a small view (very zoomed in) */
@@ -38,7 +38,7 @@ var SOLAR_SCALING_DISTANCE = 1; /* Data point further away may have less impact 
 
 var MIN_DISPLAY_WEIGHT = 0.01; /* Don't add a point with less weight to heatmap */
 
-var WIND_SCALER = 500;
+var WIND_SCALER = 12;
 var SOLAR_SCALER = 4.6;
 var HYDRO_SCALER = 2000000;
 var scaler = WIND_SCALER;
@@ -634,83 +634,81 @@ function _getHeatmapData(type, neLat, neLng, swLat, swLng) {
 						scaler = HYDRO_SCALER;
 						console.log("Data Points in stream resources: " + 2 * streams_data.length);
 					}
-				}
 
-				var weight_points = [];
-				for (var i = 0; i < usable_data.length; i++) {
-					weight_points.push(usable_data[i].weight);
-				}
-				var topval = getArrayMax(weight_points);
-				var botval = getArrayMin(weight_points);
-				// scaler = topval;
-				console.log("Data Points on Screen: "
-						+ usable_data.length);
-				console.log("Scaler: " + scaler);
-				console.log("Top val: " + topval);
-				console.log("Bottom val: " + botval);
-				console.log("Zoom: " + g_map.getZoom());
+					var weight_points = [];
+					for (var i = 0; i < usable_data.length; i++) {
+						weight_points.push(usable_data[i].weight);
+					}
+					var topval = getArrayMax(weight_points);
+					var botval = getArrayMin(weight_points);
+					// scaler = topval;
+					console.log("Data Points on Screen: "
+							+ usable_data.length);
+					console.log("Scaler: " + scaler);
+					console.log("Top val: " + topval);
+					console.log("Bottom val: " + botval);
+					console.log("Zoom: " + g_map.getZoom());
 
-				var hm_data = [];
+					var hm_data = [];
 
-				if (type == "WIND") {
-					for (var i = 0; i < usable_data.length; i++) {
-						addHeatmapCoord(hm_data, usable_data[i].lat,
-								usable_data[i].lng, usable_data[i].weight
-								/ scaler);
-					}
-					if (POINT_DEBUGGER) {
-						wind_data = hm_data;
-					} else {
-						console.time('_interpolateData');
-						wind_data = _interpolateData(hm_data, neLat,
-								neLng, swLat, swLng, type);
-						console.timeEnd('_interpolateData');
-					}
-				} else if (type == "SOLAR") {
-					for (var i = 0; i < usable_data.length; i++) {
-						addHeatmapCoord(hm_data, usable_data[i].lat,
-								usable_data[i].lng, 2.5 * 
-								((Math.pow(10, usable_data[i].weight)
-										- Math.pow(10, botval))
-										/ Math.pow(10, scaler)));
-					}
-					if (POINT_DEBUGGER) {
-						solar_data = hm_data;
-					} else {
-						console.time('_interpolateData');
-						solar_data = _interpolateData(hm_data, neLat,
-								neLng, swLat, swLng, type);
-						console.timeEnd('_interpolateData');
-					}
-				} else if (type == "HYDRO") {
-					for (var i = 0; i < usable_data.length; i++) {
-						addHeatmapCoord(hm_data, usable_data[i].lat, 
-								usable_data[i].lng, usable_data[i].weight / scaler);
-					}
-					if (POINT_DEBUGGER) {
-						hydro_data = hm_data;
-					} else {
-						console.time('_interpolateData');
-						hydro_data = _interpolateData(hm_data, neLat,
-								neLng, swLat, swLng, type);
-						console.timeEnd('_interpolateData');
+					if (type == "WIND") {
+						for (var i = 0; i < usable_data.length; i++) {
+							addHeatmapCoord(hm_data, usable_data[i].lat,
+									usable_data[i].lng, usable_data[i].weight
+									/ scaler);
+						}
+						if (POINT_DEBUGGER) {
+							wind_data = hm_data;
+						} else {
+							console.time('_interpolateData');
+							wind_data = _interpolateData(hm_data, neLat,
+									neLng, swLat, swLng, type);
+							console.timeEnd('_interpolateData');
+						}
+					} else if (type == "SOLAR") {
+						for (var i = 0; i < usable_data.length; i++) {
+							addHeatmapCoord(hm_data, usable_data[i].lat,
+									usable_data[i].lng, 2.5 * 
+									((Math.pow(10, usable_data[i].weight)
+											- Math.pow(10, botval))
+											/ Math.pow(10, scaler)));
+						}
+						if (POINT_DEBUGGER) {
+							solar_data = hm_data;
+						} else {
+							console.time('_interpolateData');
+							solar_data = _interpolateData(hm_data, neLat,
+									neLng, swLat, swLng, type);
+							console.timeEnd('_interpolateData');
+						}
+					} else if (type == "HYDRO") {
+						for (var i = 0; i < usable_data.length; i++) {
+							addHeatmapCoord(hm_data, usable_data[i].lat, 
+									usable_data[i].lng, usable_data[i].weight / scaler);
+						}
+						if (POINT_DEBUGGER) {
+							hydro_data = hm_data;
+						} else {
+							console.time('_interpolateData');
+							hydro_data = _interpolateData(hm_data, neLat,
+									neLng, swLat, swLng, type);
+							console.timeEnd('_interpolateData');
+						}
 					}
 				}
+				else {
+					console.log("Status: " + status);
+				}
+			},
+			error : function(thing, status, error) {
+				console.log("Error!");
+				console.log(status);
+				console.log(error);
+			},
+			complete : function() {
+				updateHeatmap();
 			}
-			else {
-				console.log("Status: " + status);
-			}
-		}
-	},
-	error : function(thing, status, error) {
-		console.log("Error!");
-		console.log(status);
-		console.log(error);
-	},
-	complete : function() {
-		updateHeatmap();
-	},
-});
+		});
 	}
 	console.timeEnd("_getHeatmapData");
 }

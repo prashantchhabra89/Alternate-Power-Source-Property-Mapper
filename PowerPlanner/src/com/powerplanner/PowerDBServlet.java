@@ -4,6 +4,8 @@ import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.servlet.http.*;
 
@@ -118,16 +120,33 @@ public class PowerDBServlet extends HttpServlet {
 				jfIn.close();
 				if (newData.length() > 1) {
 					if (type.equals(PowerType.WIND.toString())) {
+						double file_neLat = 0.0;
+						double file_swLat = 0.0;
+						double file_neLng = 0.0;
+						double file_swLng = 0.0;
+						String file_season = "";
+						
+						Pattern boundaryP = Pattern.compile("^[^\\d]*([-]?\\d+)_([-]?\\d+)_([-]?\\d+)_([-]?\\d+)_(\\w)+.*$");
+						Matcher boundaryM = boundaryP.matcher(jsonFile);
+						if (!boundaryM.matches()) {
+							continue;
+						} else {
+							file_neLat = Double.parseDouble(boundaryM.group(1));
+							file_swLat = Double.parseDouble(boundaryM.group(3));
+							file_neLng = Double.parseDouble(boundaryM.group(2));
+							file_swLng = Double.parseDouble(boundaryM.group(4));
+							file_season = boundaryM.group(5);
+						}
 						dataBuilder.append("{\"grid\":{\"nelat\":");  
-						dataBuilder.append(jsonFile.substring(0, 1));
+						dataBuilder.append(file_neLat);
 						dataBuilder.append(",\"neLng\":");
-						dataBuilder.append(jsonFile.substring(3, 6));
+						dataBuilder.append(file_neLng);
 						dataBuilder.append(",\"swLat\":");
-						dataBuilder.append(jsonFile.substring(8, 9));
+						dataBuilder.append(file_swLat);
 						dataBuilder.append(",\"swLng\":");
-						dataBuilder.append(jsonFile.substring(11, 14));
+						dataBuilder.append(file_swLng);
 						dataBuilder.append(",\"sea\":");
-						dataBuilder.append(jsonFile.substring(16, 18));
+						dataBuilder.append("\"" + file_season + "\"");
 						
 						dataBuilder.append("},\"data\":");
 						dataBuilder.append(newData);
