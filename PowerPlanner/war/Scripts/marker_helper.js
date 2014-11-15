@@ -117,7 +117,8 @@ function showHelpMarker() {
 			"window with information about the power <br/>" +
 			"generation potential in that area?</em></p>" +
 			"<p><em>For more info on all the cool things <br/>" +
-	"you can do, click the blue ? to the left!</em></p></div>");
+			"you can do, click the blue question mark <br/>" +
+			"to the left!</em></p></div>");
 }
 
 // the function to return the string to be displayed in the balloon.
