@@ -7,19 +7,6 @@ var solar_data = []; /* The solar data for the current heatmap view */
 var hydro_data = []; /* The hydro data for the current heatmap view */
 var streams_data = []; /* The streams data for where to draw hydro */
 
-/* Raw data cache */
-var wind_cache = [];
-var solar_cache = [];
-var hydro_cache = [];
-
-/* Calculated wind data's boundary */
-var wind_data_bounds = {
-		neLat: 0,
-		neLng: -180,
-		swLat: 90,
-		swLng: 180
-};
-
 var SMALL_VIEW = 0 /* State variable for have a small view (very zoomed in) */
 var AVE_VIEW = 1; /* State variable for having an average view */
 var WIDE_VIEW = 2; /* State variable for having a wide view (zoomed out) */
@@ -168,155 +155,48 @@ function _getHeatmapData(type, neLat, neLng, swLat, swLng) {
 	var neLng_w_off = (neLng + lng_offset);
 	var swLat_w_off = (swLat - lat_offset);
 	var swLng_w_off = (swLng - lng_offset);
-	var nwLat_w_off = swLat_w_off;
-	var nwLng_w_off = neLng_w_off;
-	var seLat_w_off = neLat_w_off;
-	var seLng_w_off = swLng_w_off;
 
 	console.log("nelat: " + neLat_w_off);
 	console.log("nelng: " + neLng_w_off);
 	console.log("swlat: " + swLat_w_off);
 	console.log("swlng: " + swLng_w_off);
 
-	// Check whether cache has the requested data
-	var in_cache = false;
-	if (type == "WIND") {
-		// Check whether calculated data is available in cache
-		if (wind_cache.length == 0) {
-			in_cache = false;
-		} else if (wind_data_bounds.neLat >= neLat_w_off && wind_data_bounds.nelng >= neLng_w_off
-				&& wind_data_bounds.swlat <= swLat_w_off && wind_data_bounds.swlng <= swLng_w_off
-				&& wind_data_bounds.neLat >= nwLat_w_off && wind_data_bounds.swlng <= nwLng_w_off
-				&& wind_data_bounds.swlat <= seLat_w_off && wind_data_bounds.nelng >= seLng_w_off) {
-			in_cache = true;
-		} 
-		// If calculated data not in cache, search raw data cache 
-		else {
-			for (var i = 0; i < wind_cache.length; i++) {
-				if(wind_cache[i].grid.nelat > neLat_w_off 
-						&& wind_cache[i].grid.neLng > neLng_w_off
-						&& wind_cache[i].grid.swLat <= neLat_w_off
-						&& wind_cache[i].grid.swLng <= neLng_w_off) {
-					for (var j = 0; j < wind_cache.length; j++) {
-						if(wind_cache[j].grid.nelat > swLat_w_off 
-								&& wind_cache[j].grid.neLng > swLng_w_off
-								&& wind_cache[j].grid.swLat <= swLat_w_off
-								&& wind_cache[j].grid.swLng <= swLng_w_off) {
-							for (var k = 0; k < wind_cache.length; k++) {
-								if(wind_cache[k].grid.nelat > nwLat_w_off 
-										&& wind_cache[k].grid.neLng > nwLng_w_off
-										&& wind_cache[k].grid.swLat <= nwLat_w_off
-										&& wind_cache[k].grid.swLng <= nwLng_w_off) {
-									for (var l = 0; l < wind_cache.length; l++) {
-										if(wind_cache[l].grid.nelat > seLat_w_off 
-												&& wind_cache[l].grid.neLng > seLng_w_off
-												&& wind_cache[l].grid.swLat <= seLat_w_off
-												&& wind_cache[l].grid.swLng <= seLng_w_off) {	
-											in_cache = true;
-											break;
-										}
-									}
-									break;
-								}
-							}
-							break;
-						}
-					}
-					break;
-				}
-			}
-		}
-	} else if (type == "SOLAR") {
-		if(solar_cache.length > 0) {
-			in_cache = true;
-		}
-	} else if (type == "HYDRO") {
-		if(hydro_cache.length > 0) {
-			in_cache = true;
-		}
-	}
-
-	if(in_cache) {
-		console.time("_getHeatmapData");
-		if (type == "WIND") {
-			// If calculated data is available, just use it
-			if (wind_data_bounds.neLat >= neLat_w_off && wind_data_bounds.nelng >= neLng_w_off
-					&& wind_data_bounds.swlat <= swLat_w_off && wind_data_bounds.swlng <= swLng_w_off
-					&& wind_data_bounds.neLat >= nwLat_w_off && wind_data_bounds.swlng <= nwLng_w_off
-					&& wind_data_bounds.swlat <= seLat_w_off && wind_data_bounds.nelng >= seLng_w_off) {
-				updateHeatmap();
-			} 
-			// If calculated data not available, grab from raw data cache and calculate it
-			else {
-				var new_data = [];
-				for (var i = 0; i < wind_cache.length; i++) {
-					// if one of the corner of requested grid falls inside our cache grid
-					if (((neLat_w_off >= wind_cache[i].grid.swLat && neLat_w_off <= wind_cache[i].grid.neLat)
-							||(swLat_w_off >= wind_cache[i].grid.swLat && swLat_w_off <= wind_cache[i].grid.neLat))
-							&&((neLng_w_off >= wind_cache[i].grid.swLng && neLng_w_off <= wind_cache[i].grid.neLng)
-									||(swLng_w_off >= wind_cache[i].grid.swLng && swLng_w_off <= wind_cache[i].grid.neLng))) {
-						new_data = new_data.concat(wind_cache[i]);
-					} 
-					//if one of the corner of our cache grid falls inside requested grid
-					else if (((wind_cache[i].grid.neLat >= swLat_w_off && wind_cache[i].grid.neLat <= neLat_w_off)
-							||(wind_cache[i].grid.swLat >= swLat_w_off && wind_cache[i].grid.swLat <= neLat_w_off))
-							&&((wind_cache[i].grid.neLng >= swLng_w_off && wind_cache[i].grid.neLng <= neLng_w_off)
-									||(wind_cache[i].grid.swLng >= swLng_w_off && wind_cache[i].grid.swLng <= neLng_w_off))) {
-						new_data = new_data.concat(wind_cache[i]);
-					}
-					//if there is overlap of the cache and requested grid, but no corners fall in the other
-					else if (((wind_cache[i].grid.swLat < swLat_w_off && wind_cache[i].grid.neLat > neLat_w_off)
-							&&(wind_cache[i].grid.swLng > swLng_w_off && wind_cache[i].grid.neLng < neLng_w_off))
-							||((wind_cache[i].grid.swLat > swLat_w_off && wind_cache[i].grid.neLat < neLat_w_off)
-									&&(wind_cache[i].grid.swLng < swLng_w_off && wind_cache[i].grid.neLng > neLng_w_off))) {
-						new_data = new_data.concat(wind_cache[i]);
-					}
-				}
+	console.time("_getHeatmapData");
+	$.ajax({
+		url : '/powerdb',
+		type : 'POST',
+		data : {
+			type : type,
+			neLat : neLat_w_off,
+			neLng : neLng_w_off,
+			swLat : swLat_w_off,
+			swLng : swLng_w_off,
+			season : "anu"
+		},
+		dataType : 'json',
+		success : function(data, status) {
+			if (status) {
+				console.log("Total Data Points: " + data.length);
+				// console.log(data);
 
 				usable_data = [];
-				_filterWindData(new_data, usable_data, 
-						neLat_w_off, neLng_w_off, 
-						swLat_w_off, swLng_w_off);
-				scaler = WIND_SCALER;
-
-				var weight_points = [];
-				for (var i = 0; i < usable_data.length; i++) {
-					weight_points.push(usable_data[i].weight);
+				if (type == "WIND") {
+					_filterWindData(data, usable_data, 
+							neLat_w_off, neLng_w_off, 
+							swLat_w_off, swLng_w_off);
+					scaler = WIND_SCALER;
+				} else if (type == "SOLAR") {
+					_filterSolarData(data, usable_data);
+					scaler = SOLAR_SCALER;
+				} else if (type == "HYDRO") {
+					streams_data = []; // Streams are treated specially, so empty them here
+					_filterHydroData(data, usable_data,
+							neLat + lat_offset, neLng + lng_offset, 
+							swLat - lat_offset, swLng - lng_offset);
+					scaler = HYDRO_SCALER;
+					console.log("Data Points in stream resources: " + 2 * streams_data.length);
 				}
-				var topval = getArrayMax(weight_points);
-				var botval = getArrayMin(weight_points);
 
-				console.log("Data Points on Screen: "
-						+ usable_data.length);
-				console.log("Scaler: " + scaler);
-				console.log("Top val: " + topval);
-				console.log("Bottom val: " + botval);
-				console.log("Zoom: " + g_map.getZoom());
-
-				var hm_data = [];
-				for (var i = 0; i < usable_data.length; i++) {
-					addHeatmapCoord(hm_data, usable_data[i].lat,
-							usable_data[i].lng, usable_data[i].weight
-							/ scaler);
-				}
-				if (POINT_DEBUGGER) {
-					wind_data = hm_data;
-				} else {
-					console.time('_interpolateData');
-					wind_data = _interpolateData(hm_data, neLat,
-							neLng, swLat, swLng, type);
-					console.timeEnd('_interpolateData');
-				}
-				updateHeatmap();
-			}
-		} else if (type == "SOLAR") {
-			if (solar_data.length > 0) {
-				updateHeatmap();
-			} else {
-				usable_data = [];
-				_filterSolarData(solar_data, usable_data);
-				scaler = SOLAR_SCALER;
-				
 				var weight_points = [];
 				for (var i = 0; i < usable_data.length; i++) {
 					weight_points.push(usable_data[i].weight);
@@ -332,185 +212,66 @@ function _getHeatmapData(type, neLat, neLng, swLat, swLng) {
 				console.log("Zoom: " + g_map.getZoom());
 
 				var hm_data = [];
-				for (var i = 0; i < usable_data.length; i++) {
-					addHeatmapCoord(hm_data, usable_data[i].lat,
-							usable_data[i].lng, 2.5 * 
-							((Math.pow(10, usable_data[i].weight)
-									- Math.pow(10, botval))
-									/ Math.pow(10, scaler)));
-				}
-				if (POINT_DEBUGGER) {
-					solar_data = hm_data;
-				} else {
-					console.time('_interpolateData');
-					solar_data = _interpolateData(hm_data, neLat,
-							neLng, swLat, swLng, type);
-					console.timeEnd('_interpolateData');
-				}
-				updateHeatmap();
-			}
-			
-		} else if (type == "HYDRO") {
-			if (hydro_data.length > 0) {
-				updateHeatmap();
-			} else {
-				usable_data = [];
-				streams_data = []; // Streams are treated specially, so empty them here
-				_filterHydroData(hydro_data, usable_data,
-						neLat_w_off, neLng_w_off, 
-						swLat_w_off, swLng_w_off);
-				scaler = HYDRO_SCALER;
-				console.log("Data Points in stream resources: " + 2 * streams_data.length);
-				
-				var weight_points = [];
-				for (var i = 0; i < usable_data.length; i++) {
-					weight_points.push(usable_data[i].weight);
-				}
-				var topval = getArrayMax(weight_points);
-				var botval = getArrayMin(weight_points);
-				// scaler = topval;
-				console.log("Data Points on Screen: "
-						+ usable_data.length);
-				console.log("Scaler: " + scaler);
-				console.log("Top val: " + topval);
-				console.log("Bottom val: " + botval);
-				console.log("Zoom: " + g_map.getZoom());
 
-				var hm_data = [];
-				for (var i = 0; i < usable_data.length; i++) {
-					addHeatmapCoord(hm_data, usable_data[i].lat, 
-							usable_data[i].lng, usable_data[i].weight / scaler);
-				}
-				if (POINT_DEBUGGER) {
-					hydro_data = hm_data;
-				} else {
-					console.time('_interpolateData');
-					hydro_data = _interpolateData(hm_data, neLat,
-							neLng, swLat, swLng, type);
-					console.timeEnd('_interpolateData');
-				}
-				updateHeatmap();
-			}
-		}
-		console.timeEnd("_getHeatmapData");
-	} else {
-		console.time("_getHeatmapData");
-		$.ajax({
-			url : '/powerdb',
-			type : 'POST',
-			data : {
-				type : type,
-				neLat : neLat_w_off,
-				neLng : neLng_w_off,
-				swLat : swLat_w_off,
-				swLng : swLng_w_off,
-				season : "anu"
-			},
-			dataType : 'json',
-			success : function(data, status) {
-				if (status) {
-					console.log("Total Data Points: " + data.length);
-					// console.log(data);
-
-					usable_data = [];
-					if (type == "WIND") {
-						// Cache all points
-						wind_cache = _.union(wind_cache,data);
-						_filterWindData(data, usable_data, 
-								neLat_w_off, neLng_w_off, 
-								swLat_w_off, swLng_w_off);
-						scaler = WIND_SCALER;
-					} else if (type == "SOLAR") {
-						// Cache all points
-						solar_cache = _.union(solar_cache,data);
-						_filterSolarData(data, usable_data);
-						scaler = SOLAR_SCALER;
-					} else if (type == "HYDRO") {
-						streams_data = []; // Streams are treated specially, so empty them here
-						hydro_cache = _.union(hydro_cache,data);
-						_filterHydroData(data, usable_data,
-								neLat + lat_offset, neLng + lng_offset, 
-								swLat - lat_offset, swLng - lng_offset);
-						scaler = HYDRO_SCALER;
-						console.log("Data Points in stream resources: " + 2 * streams_data.length);
-					}
-
-					var weight_points = [];
+				if (type == "WIND") {
 					for (var i = 0; i < usable_data.length; i++) {
-						weight_points.push(usable_data[i].weight);
+						addHeatmapCoord(hm_data, usable_data[i].lat,
+								usable_data[i].lng, usable_data[i].weight
+								/ scaler);
 					}
-					var topval = getArrayMax(weight_points);
-					var botval = getArrayMin(weight_points);
-					// scaler = topval;
-					console.log("Data Points on Screen: "
-							+ usable_data.length);
-					console.log("Scaler: " + scaler);
-					console.log("Top val: " + topval);
-					console.log("Bottom val: " + botval);
-					console.log("Zoom: " + g_map.getZoom());
-
-					var hm_data = [];
-
-					if (type == "WIND") {
-						for (var i = 0; i < usable_data.length; i++) {
-							addHeatmapCoord(hm_data, usable_data[i].lat,
-									usable_data[i].lng, usable_data[i].weight
-									/ scaler);
-						}
-						if (POINT_DEBUGGER) {
-							wind_data = hm_data;
-						} else {
-							console.time('_interpolateData');
-							wind_data = _interpolateData(hm_data, neLat,
-									neLng, swLat, swLng, type);
-							console.timeEnd('_interpolateData');
-						}
-					} else if (type == "SOLAR") {
-						for (var i = 0; i < usable_data.length; i++) {
-							addHeatmapCoord(hm_data, usable_data[i].lat,
-									usable_data[i].lng, 2.5 * 
-									((Math.pow(10, usable_data[i].weight)
-											- Math.pow(10, botval))
-											/ Math.pow(10, scaler)));
-						}
-						if (POINT_DEBUGGER) {
-							solar_data = hm_data;
-						} else {
-							console.time('_interpolateData');
-							solar_data = _interpolateData(hm_data, neLat,
-									neLng, swLat, swLng, type);
-							console.timeEnd('_interpolateData');
-						}
-					} else if (type == "HYDRO") {
-						for (var i = 0; i < usable_data.length; i++) {
-							addHeatmapCoord(hm_data, usable_data[i].lat, 
-									usable_data[i].lng, usable_data[i].weight / scaler);
-						}
-						if (POINT_DEBUGGER) {
-							hydro_data = hm_data;
-						} else {
-							console.time('_interpolateData');
-							hydro_data = _interpolateData(hm_data, neLat,
-									neLng, swLat, swLng, type);
-							console.timeEnd('_interpolateData');
-						}
+					if (POINT_DEBUGGER) {
+						wind_data = hm_data;
+					} else {
+						console.time('_interpolateData');
+						wind_data = _interpolateData(hm_data, neLat,
+								neLng, swLat, swLng, type);
+						console.timeEnd('_interpolateData');
+					}
+				} else if (type == "SOLAR") {
+					for (var i = 0; i < usable_data.length; i++) {
+						addHeatmapCoord(hm_data, usable_data[i].lat,
+								usable_data[i].lng, 2.5 * 
+								((Math.pow(10, usable_data[i].weight)
+										- Math.pow(10, botval))
+										/ Math.pow(10, scaler)));
+					}
+					if (POINT_DEBUGGER) {
+						solar_data = hm_data;
+					} else {
+						console.time('_interpolateData');
+						solar_data = _interpolateData(hm_data, neLat,
+								neLng, swLat, swLng, type);
+						console.timeEnd('_interpolateData');
+					}
+				} else if (type == "HYDRO") {
+					for (var i = 0; i < usable_data.length; i++) {
+						addHeatmapCoord(hm_data, usable_data[i].lat, 
+								usable_data[i].lng, usable_data[i].weight / scaler);
+					}
+					if (POINT_DEBUGGER) {
+						hydro_data = hm_data;
+					} else {
+						console.time('_interpolateData');
+						hydro_data = _interpolateData(hm_data, neLat,
+								neLng, swLat, swLng, type);
+						console.timeEnd('_interpolateData');
 					}
 				}
-				else {
-					console.log("Status: " + status);
-				}
-			},
-			error : function(thing, status, error) {
-				console.log("Error!");
-				console.log(status);
-				console.log(error);
-			},
-			complete : function() {
-				updateHeatmap();
-				console.timeEnd("_getHeatmapData");
 			}
-		});
-	}
+			else {
+				console.log("Status: " + status);
+			}
+		},
+		error : function(thing, status, error) {
+			console.log("Error!");
+			console.log(status);
+			console.log(error);
+		},
+		complete : function() {
+			updateHeatmap();
+			console.timeEnd("_getHeatmapData");
+		}
+	});
 }
 
 /*
@@ -549,26 +310,14 @@ function getLngOffset(eastLng, westLng) {
  * TODO: Add in other metrics for calculations.
  */
 function _filterWindData(raw_data, push_data, neLat, neLng, swLat, swLng) {
-	for (var grid = 0; grid < raw_data.length; grid++) {
-		// Record what is in the wind_data
-		if (wind_data_bounds.neLat < raw_data[grid].grid.neLat 
-				&& wind_data_bounds.neLng < raw_data[grid].grid.neLng) {
-			wind_data_bounds.neLat = raw_data[grid].grid.neLat;
-			wind_data_bounds.neLng = raw_data[grid].grid.neLng;
-		} else if (wind_data_bounds.swLat > raw_data[grid].grid.swLat 
-				&& wind_data_bounds.swLng > raw_data[grid].grid.swLng) {
-			wind_data_bounds.swLat = raw_data[grid].grid.swLat;
-			wind_data_bounds.swLng = raw_data[grid].grid.swLng;
-		}
-		for (var i = 0; i < raw_data[grid].data.length; i++) {
-			if (raw_data[grid].data[i].lat > swLat && raw_data[grid].data[i].lat < neLat) {
-				if (raw_data[grid].data[i].lon > swLng && raw_data[grid].data[i].lon < neLng) {
-					push_data.push({
-						lat : raw_data[grid].data[i].lat,
-						lng : raw_data[grid].data[i].lon,
-						weight : windPow(raw_data[grid].data[i].pre15,0.34,290)
-					});
-				}
+	for (var i = 0; i < raw_data.length; i++) {
+		if (raw_data[i].lat > swLat && raw_data[i].lat < neLat) {
+			if (raw_data[i].lon > swLng && raw_data[i].lon < neLng) {
+				push_data.push({
+					lat : raw_data[i].lat,
+					lng : raw_data[i].lon,
+					weight : windPow(raw_data[i].pre15,0.34,290)
+				});
 			}
 		}
 	}
