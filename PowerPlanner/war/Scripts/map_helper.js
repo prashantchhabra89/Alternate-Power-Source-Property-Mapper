@@ -224,7 +224,6 @@ function toggleHeatmapData(showWind, showSolar, showHydro) {
  * HYDRO. Triggers a heatmap update upon server response.
  */
 function _getHeatmapData(type, neLat, neLng, swLat, swLng) {
-	console.time("_getHeatmapData");
 	var lat_offset = getLatOffset(neLat, swLat);
 	var lng_offset = getLngOffset(neLng, swLng);
 	wind_data = [];
@@ -305,6 +304,8 @@ function _getHeatmapData(type, neLat, neLng, swLat, swLng) {
 	}
 
 	if(in_cache) {
+		console.log("Cache hit!");
+		console.time("_getHeatmapData");
 		if (type == "WIND") {
 			// If calculated data is available, just use it
 			if (wind_data_bounds.neLat >= neLat_w_off && wind_data_bounds.nelng >= neLng_w_off
@@ -459,9 +460,10 @@ function _getHeatmapData(type, neLat, neLng, swLat, swLng) {
 				updateHeatmap();
 			}
 		}
+		console.timeEnd("_getHeatmapData");
 	} else {
+		console.time("_getHeatmapData");
 		$.ajax({
-			// url : '/powerplanner',
 			url : '/powerdb',
 			type : 'POST',
 			data : {
@@ -573,10 +575,10 @@ function _getHeatmapData(type, neLat, neLng, swLat, swLng) {
 			},
 			complete : function() {
 				updateHeatmap();
+				console.timeEnd("_getHeatmapData");
 			}
 		});
 	}
-	console.timeEnd("_getHeatmapData");
 }
 
 /*
@@ -1107,7 +1109,7 @@ function initHeatmap(map) {
 		radius : MAX_DATA_WIDTH / Math.pow(2, (DEFAULT_ZOOM - LEAST_ZOOM))
 		* 0.98,
 		dissipating : false,
-		opacity : 0.5,
+		opacity : 0.4,
 		gradient : [ 'rgba(0,0,0,0)', 'rgba(0,50,100,1)', 'rgba(0,75,200,1)', 
 		             'rgba(0,127,255,1)', 'rgba(0,159,255,1)', 'rgba(0,191,255,1)',
 		             'rgba(0,223,255,1)', 'rgba(0,255,255,1)', 'rgba(20,255,191,1)',

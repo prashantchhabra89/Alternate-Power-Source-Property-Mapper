@@ -136,4 +136,3 @@ function _balloonText(objectHandle, lat, lng) {
 	"<p><i>Left click on the pin to toggle this window.</i></p></div>";
 	return balloonString;
 }
-
