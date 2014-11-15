@@ -137,7 +137,7 @@ public class PowerDBServlet extends HttpServlet {
 							file_swLng = Double.parseDouble(boundaryM.group(4));
 							file_season = boundaryM.group(5);
 						}
-						dataBuilder.append("{\"grid\":{\"nelat\":");  
+						dataBuilder.append("{\"grid\":{\"neLat\":");  
 						dataBuilder.append(file_neLat);
 						dataBuilder.append(",\"neLng\":");
 						dataBuilder.append(file_neLng);

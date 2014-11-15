@@ -325,9 +325,9 @@ function _eventHeatmapDataToggler() {
  * types on and off.
  */
 function toggleHeatmapData(showWind, showSolar, showHydro) {
-	wind_data = [];
-	solar_data = [];
-	hydro_data = [];
+	//wind_data = [];
+	//solar_data = [];
+	//hydro_data = [];
 
 	var neLat = getNELatitude(g_map);
 	var neLng = getNELongitude(g_map);
@@ -361,56 +361,64 @@ function _getHeatmapData(type, neLat, neLng, swLat, swLng) {
 	console.time("_getHeatmapData");
 	var lat_offset = getLatOffset(neLat, swLat);
 	var lng_offset = getLngOffset(neLng, swLng);
-	wind_data = [];
-	solar_data = [];
-	hydro_data = [];
+	//wind_data = [];
+	//solar_data = [];
+	//hydro_data = [];
 
 	// requested grid
 	var neLat_w_off = (neLat + lat_offset);
 	var neLng_w_off = (neLng + lng_offset);
 	var swLat_w_off = (swLat - lat_offset);
 	var swLng_w_off = (swLng - lng_offset);
-	var nwLat_w_off = swLat_w_off;
-	var nwLng_w_off = neLng_w_off;
-	var seLat_w_off = neLat_w_off;
-	var seLng_w_off = swLng_w_off;
+	var nwLat_w_off = neLat_w_off;
+	var nwLng_w_off = swLng_w_off;
+	var seLat_w_off = swLat_w_off;
+	var seLng_w_off = neLng_w_off;
 
-	console.log("nelat: " + neLat_w_off);
-	console.log("nelng: " + neLng_w_off);
-	console.log("swlat: " + swLat_w_off);
-	console.log("swlng: " + swLng_w_off);
+	console.log("neLat: " + neLat_w_off);
+	console.log("neLng: " + neLng_w_off);
+	console.log("swLat: " + swLat_w_off);
+	console.log("swLng: " + swLng_w_off);
 
 	// Check whether cache has the requested data
 	var in_cache = false;
+	console.log("CHECKING CACHE");
 	if (type == "WIND") {
+		console.log("CHECKING CACHE 2");
 		// Check whether calculated data is available in cache
 		if (wind_cache.length == 0) {
 			in_cache = false;
-		} else if (wind_data_bounds.neLat >= neLat_w_off && wind_data_bounds.nelng >= neLng_w_off
-				&& wind_data_bounds.swlat <= swLat_w_off && wind_data_bounds.swlng <= swLng_w_off
-				&& wind_data_bounds.neLat >= nwLat_w_off && wind_data_bounds.swlng <= nwLng_w_off
-				&& wind_data_bounds.swlat <= seLat_w_off && wind_data_bounds.nelng >= seLng_w_off) {
+		} else if (wind_data_bounds.neLat >= neLat_w_off && wind_data_bounds.neLng >= neLng_w_off
+				&& wind_data_bounds.swLat <= swLat_w_off && wind_data_bounds.swLng <= swLng_w_off) {
+				//&& wind_data_bounds.neLat >= nwLat_w_off && wind_data_bounds.swLng <= nwLng_w_off
+				//&& wind_data_bounds.swLat <= seLat_w_off && wind_data_bounds.neLng >= seLng_w_off) {
+			console.log("CHECKING IN CALC");
 			in_cache = true;
 		} 
 		// If calculated data not in cache, search raw data cache 
 		else {
+			console.log("CHECKING NOT IN CALC");
+			console.log(wind_data_bounds.neLat + " " + neLat_w_off);
+			console.log(wind_data_bounds.neLng + " " + neLng_w_off);
+			console.log(wind_data_bounds.swLat + " " + swLat_w_off);
+			console.log(wind_data_bounds.swLng + " " + swLng_w_off);
 			for (var i = 0; i < wind_cache.length; i++) {
-				if(wind_cache[i].grid.nelat > neLat_w_off 
+				if(wind_cache[i].grid.neLat > neLat_w_off 
 						&& wind_cache[i].grid.neLng > neLng_w_off
 						&& wind_cache[i].grid.swLat <= neLat_w_off
 						&& wind_cache[i].grid.swLng <= neLng_w_off) {
 					for (var j = 0; j < wind_cache.length; j++) {
-						if(wind_cache[j].grid.nelat > swLat_w_off 
+						if(wind_cache[j].grid.neLat > swLat_w_off 
 								&& wind_cache[j].grid.neLng > swLng_w_off
 								&& wind_cache[j].grid.swLat <= swLat_w_off
 								&& wind_cache[j].grid.swLng <= swLng_w_off) {
 							for (var k = 0; k < wind_cache.length; k++) {
-								if(wind_cache[k].grid.nelat > nwLat_w_off 
+								if(wind_cache[k].grid.neLat > nwLat_w_off 
 										&& wind_cache[k].grid.neLng > nwLng_w_off
 										&& wind_cache[k].grid.swLat <= nwLat_w_off
 										&& wind_cache[k].grid.swLng <= nwLng_w_off) {
 									for (var l = 0; l < wind_cache.length; l++) {
-										if(wind_cache[l].grid.nelat > seLat_w_off 
+										if(wind_cache[l].grid.neLat > seLat_w_off 
 												&& wind_cache[l].grid.neLng > seLng_w_off
 												&& wind_cache[l].grid.swLat <= seLat_w_off
 												&& wind_cache[l].grid.swLng <= seLng_w_off) {	
@@ -439,16 +447,19 @@ function _getHeatmapData(type, neLat, neLng, swLat, swLng) {
 	}
 
 	if(in_cache) {
+		console.log("IN CACHE");
 		if (type == "WIND") {
 			// If calculated data is available, just use it
-			if (wind_data_bounds.neLat >= neLat_w_off && wind_data_bounds.nelng >= neLng_w_off
-					&& wind_data_bounds.swlat <= swLat_w_off && wind_data_bounds.swlng <= swLng_w_off
-					&& wind_data_bounds.neLat >= nwLat_w_off && wind_data_bounds.swlng <= nwLng_w_off
-					&& wind_data_bounds.swlat <= seLat_w_off && wind_data_bounds.nelng >= seLng_w_off) {
+			if (wind_data_bounds.neLat >= neLat_w_off && wind_data_bounds.neLng >= neLng_w_off
+					&& wind_data_bounds.swLat <= swLat_w_off && wind_data_bounds.swLng <= swLng_w_off
+					&& wind_data_bounds.neLat >= nwLat_w_off && wind_data_bounds.swLng <= nwLng_w_off
+					&& wind_data_bounds.swLat <= seLat_w_off && wind_data_bounds.neLng >= seLng_w_off) {
 				updateHeatmap();
+				console.log("IN CALC");
 			} 
 			// If calculated data not available, grab from raw data cache and calculate it
 			else {
+				console.log("NOT IN CALC");
 				var new_data = [];
 				for (var i = 0; i < wind_cache.length; i++) {
 					// if one of the corner of requested grid falls inside our cache grid
@@ -751,12 +762,27 @@ function getLngOffset(eastLng, westLng) {
 function _filterWindData(raw_data, push_data, neLat, neLng, swLat, swLng) {
 	for (var grid = 0; grid < raw_data.length; grid++) {
 		// Record what is in the wind_data
-		if (wind_data_bounds.neLat < raw_data[grid].grid.neLat 
-				&& wind_data_bounds.neLng < raw_data[grid].grid.neLng) {
+		if (wind_data_bounds.neLat == 0 && wind_data_bounds.neLng == -180
+				&& wind_data_bounds.swLat == 90 && wind_data_bounds.swLng == 180) {
 			wind_data_bounds.neLat = raw_data[grid].grid.neLat;
 			wind_data_bounds.neLng = raw_data[grid].grid.neLng;
+			wind_data_bounds.swLat = raw_data[grid].grid.swLat;
+			wind_data_bounds.swLng = raw_data[grid].grid.swLng;
+			console.log(wind_data_bounds.neLat + " " + raw_data[grid].grid.neLat);
+			console.log(wind_data_bounds.neLng + " " + raw_data[grid].grid.neLng);
+			console.log(wind_data_bounds.swLat + " " + raw_data[grid].grid.swLat);
+			console.log(wind_data_bounds.swLng + " " + raw_data[grid].grid.swLng);
+		}
+		else if (wind_data_bounds.neLat < raw_data[grid].grid.neLat 
+				&& wind_data_bounds.neLng < raw_data[grid].grid.neLng) {
+			console.log(wind_data_bounds.neLat + " " + raw_data[grid].grid.neLat);
+			console.log(wind_data_bounds.neLng + " " + raw_data[grid].grid.neLng);
+			wind_data_bounds.neLat = raw_data[grid].grid.neLat;
+			wind_data_bounds.neLng = raw_data[grid].grid.neLng;	
 		} else if (wind_data_bounds.swLat > raw_data[grid].grid.swLat 
 				&& wind_data_bounds.swLng > raw_data[grid].grid.swLng) {
+			console.log(wind_data_bounds.swLat + " " + raw_data[grid].grid.swLat);
+			console.log(wind_data_bounds.swLng + " " + raw_data[grid].grid.swLng);
 			wind_data_bounds.swLat = raw_data[grid].grid.swLat;
 			wind_data_bounds.swLng = raw_data[grid].grid.swLng;
 		}
