@@ -38,7 +38,7 @@ var SOLAR_SCALING_DISTANCE = 1; /* Data point further away may have less impact 
 var MIN_DISPLAY_WEIGHT = 0.01; /* Don't add a point with less weight to heatmap */
 
 var WIND_SCALER = 12;
-var SOLAR_SCALER = 4.6;
+var SOLAR_SCALER = 3.3;
 var HYDRO_SCALER = 2000000;
 var scaler = WIND_SCALER;
 
