@@ -11,12 +11,12 @@ var wind_cache = [];
 var solar_cache = [];
 var hydro_cache = [];
 
-/* Calculated wind data's boundary */
+/* calculated wind data's boundary */
 var wind_data_bounds = {
-		neLat: 0,
-		neLng: -180,
-		swLat: 90,
-		swLng: 180
+				neLat: 0,
+				neLng: -180,
+				swLat: 90,
+				swLng: 180
 };
 
 var SMALL_VIEW = 0 /* State variable for have a small view (very zoomed in) */
@@ -50,17 +50,12 @@ var view_state = (DEFAULT_ZOOM <= CHANGETO_WIDE_VIEW ?
 		(DEFAULT_ZOOM <= CHANGETO_OVER_VIEW ? OVER_VIEW : WIDE_VIEW) : 
 			(DEFAULT_ZOOM <= CHANGETO_AVE_VIEW ? AVE_VIEW : SMALL_VIEW));
 
-var markerBalloon // this is the balloon for the marker.
-//var marker // this is the marker dropped by right click
-
 /*
  * This example adds a search box to a map, using the Google Place Autocomplete
  * feature. People can enter geographical searches. The search box will return a
  * pick list containing a mix of places and predicted search terms.
  */
-function initialize() {
-
-	var markers = [];
+function initializeMap() {
 	var map = new google.maps.Map(document.getElementById('googleMap'), {
 		mapTypeId : google.maps.MapTypeId.ROADMAP,
 		zoom : DEFAULT_ZOOM,
@@ -78,81 +73,6 @@ function initialize() {
 		} ]
 	});
 
-	// Initialize the right click marker listeners
-	initializeMarkers(map);
-	
-	var defaultBounds = new google.maps.LatLngBounds(new google.maps.LatLng(
-			48.4647, -123.3085), new google.maps.LatLng(48.4647, -123.3085));
-	map.fitBounds(defaultBounds);
-
-	// Create the search box and link it to the UI element.
-	var input = /** @type {HTMLInputElement} */
-	(document.getElementById('pac-input'));
-	var inputIntro = /** @type {HTMLInputElement} */
-	(document.getElementById('pac-input-intro'));
-	map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
-
-	var searchBox = new google.maps.places.SearchBox(
-	/** @type {HTMLInputElement} */
-	(input));
-	var searchBoxIntro = new google.maps.places.SearchBox(
-	/** @type {HTMLInputElement} */
-	(inputIntro));
-
-	// [START region_getplaces]
-	// Listen for the event fired when the user selects an item from the
-	// pick list. Retrieve the matching places for that item.
-	google.maps.event.addListener(searchBox, 'places_changed', function() {
-		var places = searchBox.getPlaces();
-
-		if (places.length == 0) {
-			return;
-		}
-		for (var i = 0, marker; marker = markers[i]; i++) {
-			marker.setMap(null);
-		}
-
-		// For each place, get the icon, place name, and location.
-		markers = [];
-		var bounds = new google.maps.LatLngBounds();
-		for (var i = 0, place; place = places[i]; i++) {
-			var image = {
-					url : place.icon,
-					size : new google.maps.Size(71, 71),
-					origin : new google.maps.Point(0, 0),
-					anchor : new google.maps.Point(17, 34),
-					scaledSize : new google.maps.Size(25, 25)
-			};
-
-			// Create a marker for each place.
-			var marker = new google.maps.Marker({
-				map : map,
-				icon : image,
-				title : place.name,
-				position : place.geometry.location
-			});
-
-			markers.push(marker);
-
-			bounds.extend(place.geometry.location);
-		}
-
-		map.fitBounds(bounds);
-	});
-	// [END region_getplaces]
-
-	// Bias the SearchBox results towards places that are within the bounds of
-	// the
-	// current map's viewport.
-	google.maps.event.addListener(map, 'bounds_changed', function() {
-		var bounds = map.getBounds();
-		searchBox.setBounds(bounds);
-	});
-
-	showHelpMarker();
-	//markerBalloon.open(map);
-	//markerBalloon.setPosition(map.getCenter());
-
 	return map;
 }
 
@@ -160,12 +80,19 @@ function initialize() {
  * Initializes the map, heatmap, and important event listeners.
  */
 function mapLoader() {
-	g_map = initialize();
+	g_map = initializeMap();
 	g_heatmap = initHeatmap(g_map);
+	
+	initializeMarkers(g_map);
+	showHelpMarker();
+	searchBoxIntro = initializeSearchBox(g_map, false, 'pac-input-intro');
+	searchBox = initializeSearchBox(g_map, true, 'pac-input');
 
 	attachHeatmap(g_heatmap, g_map);
 
+	// Load heatmap data when map is dragged
 	google.maps.event.addListener(g_map, 'dragend', _eventHeatmapDataToggler);
+	// Modify zoom state overhead when map is zoomed; load heatmap data
 	google.maps.event.addListener(g_map, 'zoom_changed', function() {
 		zoom = g_map.getZoom();
 		view_state = (zoom <= CHANGETO_WIDE_VIEW ? 
@@ -173,6 +100,12 @@ function mapLoader() {
 					(zoom <= CHANGETO_AVE_VIEW ? AVE_VIEW : SMALL_VIEW));
 		console.log("View state: " + view_state);
 		_eventHeatmapDataToggler();
+	});
+	// Bias the SearchBox results towards places that are within the bounds of
+	// the current map's viewport.
+	google.maps.event.addListener(g_map, 'bounds_changed', function() {
+		var bounds = g_map.getBounds();
+		searchBox.setBounds(bounds);
 	});
 }
 
@@ -223,6 +156,7 @@ function toggleHeatmapData(showWind, showSolar, showHydro) {
  * HYDRO. Triggers a heatmap update upon server response.
  */
 function _getHeatmapData(type, neLat, neLng, swLat, swLng) {
+	console.time("_getHeatmapData");
 	var lat_offset = getLatOffset(neLat, swLat);
 	var lng_offset = getLngOffset(neLng, swLng);
 
@@ -296,7 +230,6 @@ function _getHeatmapData(type, neLat, neLng, swLat, swLng) {
 
 	if(in_cache) {
 		console.log("IN CACHE");
-		console.time("_getHeatmapData");
 		if (type == "WIND") {
 			console.log("ACCESSING WIND CACHE");
 			var new_data = [];
@@ -435,10 +368,9 @@ function _getHeatmapData(type, neLat, neLng, swLat, swLng) {
 			}
 			updateHeatmap();
 		}
-		console.timeEnd("_getHeatmapData");
 	} else {
-		console.time("_getHeatmapData");
 		$.ajax({
+			// url : '/powerplanner',
 			url : '/powerdb',
 			type : 'POST',
 			data : {
@@ -550,10 +482,10 @@ function _getHeatmapData(type, neLat, neLng, swLat, swLng) {
 			},
 			complete : function() {
 				updateHeatmap();
-				console.timeEnd("_getHeatmapData");
 			}
 		});
 	}
+	console.timeEnd("_getHeatmapData");
 }
 
 /*

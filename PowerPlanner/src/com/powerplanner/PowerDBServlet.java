@@ -16,6 +16,11 @@ public class PowerDBServlet extends HttpServlet {
 
 	private boolean sendStreams = true;
 	
+	public void doGet(HttpServletRequest req, HttpServletResponse resp)
+			throws IOException {
+		
+	}
+	
 	/**
 	 * Post request for data. Request is expected to contain several
 	 * parameters, including:
