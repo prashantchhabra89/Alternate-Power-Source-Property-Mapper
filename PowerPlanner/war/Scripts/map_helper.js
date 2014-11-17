@@ -1,3 +1,47 @@
+/******************************************************************************
+ * Looking for a function or a global var? Here's a list of what's elsewhere!
+ * - (the minus symbol) indicates a function
+ * = (the equals symbol) indicates a global var
+ * 
+ * cache_helper.js
+ * = wind_cache
+ * = solar_cache
+ * = hydro_cache
+ * = wind_data_bounds
+ * - checkCache(neLat, neLng, swLat, swLng, type)
+ * - fetchFromCache(neLat, neLng, swLat, swLng, type)
+ * - addToCache(new_data, type)
+ * 
+ * calculations.js
+ * - windPow(precalc, eff, area)
+ * - solarPow(raw, eff, area, loss)
+ * - hydroPow(precalc, eff, heightdiff)
+ * 
+ * data_common_functions.js
+ * - updateData(new_data, neLat, neLng, swLat, swLng, type)
+ * - set_scaler(type)
+ * - apply_scaler(raw_weight, offset, type)
+ * - _filterData(raw_data, push_data, neLat, neLng, swLat, swLng, type)
+ * - _interpolateData(hm_data, neLat, neLng, swLat, swLng, type)
+ * - _createInterpolation(hm_data, fill_data, lat_width, lng_width,
+ * 						  lat_start, lng_start, latset, lngset, offset, type)
+ * - _binData(hm_data, neLat, neLng, swLat, swLng, data_lat_offset, data_lng_offset)
+ * - _getNextStart(curr_start, end_point, increment)
+ * - getDataWeight(hm_data, lat, lng, type)
+ * - getPointData(lat_point, lng_point)
+ * 
+ * location_helper.js
+ * - initializeSearchBox(map, pushToMap, element_id)
+ * 
+ * marker_helper.js
+ * = markerBalloon
+ * - initializeMarkers(map)
+ * - addMarker(map, loc)
+ * - showHelpMarker()
+ * - _balloonText(objectHandle, lat, lng)
+ * 
+ *****************************************************************************/
+
 var g_map; /* The main map */
 var g_heatmap; /* The heatmap layer for the main map */
 
@@ -5,19 +49,6 @@ var wind_data = []; /* The wind data for the current heatmap view */
 var solar_data = []; /* The solar data for the current heatmap view */
 var hydro_data = []; /* The hydro data for the current heatmap view */
 var streams_data = []; /* The streams data for where to draw hydro */
-
-/* Raw data cache */
-var wind_cache = [];
-var solar_cache = [];
-var hydro_cache = [];
-
-/* calculated wind data's boundary */
-var wind_data_bounds = {
-				neLat: 0,
-				neLng: -180,
-				swLat: 90,
-				swLng: 180
-};
 
 var SMALL_VIEW = 0 /* State variable for have a small view (very zoomed in) */
 var AVE_VIEW = 1; /* State variable for having an average view */
@@ -177,65 +208,13 @@ function _getHeatmapData(type, neLat, neLng, swLat, swLng) {
 	console.log("swLng: " + swLng_w_off);
 
 	// Check whether cache has the requested data
-	var in_cache = false;
-	console.log("CHECKING CACHE");
-	if (type == "WIND") {
-		// Check whether data is available in cache
-		if (wind_cache.length > 0) {
-			console.log("CHECKING WIND CACHE");
-			
-			for (var lat = swLat_floor; lat <= neLat_floor; lat++) {
-				if (typeof wind_cache[lat] != 'undefined') {
-					for (var lng = swLng_floor; lng <= neLng_floor; lng++) {
-						if (typeof wind_cache[lat][lng] != 'undefined') {
-							in_cache = true;
-						} else {
-							in_cache = false;
-							break;
-						}
-					}
-				} else {
-					in_cache = false;
-					break;
-				}
-				if (!in_cache) {
-					break;
-				}
-			}
-		}
-	} else if (type == "SOLAR") {
-		console.log("CHECKING SOLAR CACHE");
-		if(solar_cache.length > 0) {
-			in_cache = true;
-		}
-	} else if (type == "HYDRO") {
-		console.log("CHECKING HYDRO CACHE");
-		if(hydro_cache.length > 0) {
-			in_cache = true;
-		}
-	}
-
+	var in_cache = checkCache(neLat_w_off, neLng_w_off, swLat_w_off, swLng_w_off, type);
+	
 	if(in_cache) {
 		console.log("IN CACHE");
-		if (type == "WIND") {
-			console.log("ACCESSING WIND CACHE");
-			var new_data = [];
-			for (var lat = swLat_floor; lat <= neLat_floor; lat++) {
-				for (var lng = swLng_floor; lng <= neLng_floor; lng++) {
-					new_data = new_data.concat(wind_cache[lat][lng]);
-				}
-			}
-			updateData(new_data, neLat, neLng, swLat, swLng, type);
-			updateHeatmap();
-		} else if (type == "SOLAR") {
-			console.log("ACCESSING SOLAR CACHE");
-			updateData(solar_cache, neLat, neLng, swLat, swLng, type);
-			updateHeatmap();			
-		} else if (type == "HYDRO") {
-			console.log("ACCESSING HYDRO CACHE");
-			updateData(hydro_cache, neLat, neLng, swLat, swLng, type);
-			updateHeatmap();
-		}
+		var new_data = fetchFromCache(neLat_w_off, neLng_w_off, swLat_w_off, swLng_w_off, type);
+		updateData(new_data, neLat, neLng, swLat, swLng, type);
+		updateHeatmap();
 		console.timeEnd("_getHeatmapData");
 	} else {
 		$.ajax({
@@ -254,23 +233,9 @@ function _getHeatmapData(type, neLat, neLng, swLat, swLng) {
 			success : function(data, status) {
 				if (status) {
 					console.log("Total Data Points: " + data.length);
-					// console.log(data);
 
 					// Cache all points
-					if (type == "WIND") {
-						// do binning here
-						for(var i = 0; i < data.length; i++) {
-							if(typeof wind_cache[data[i].grid.swLat] == 'undefined') {
-								wind_cache[data[i].grid.swLat] = [];
-							}
-							wind_cache[data[i].grid.swLat][data[i].grid.swLng] = data[i];
-						}
-						// wind_cache = _.union(wind_cache,data);
-					} else if (type == "SOLAR") {
-						solar_cache = _.union(solar_cache,data);
-					} else if (type == "HYDRO") {
-						hydro_cache = _.union(hydro_cache,data);
-					}
+					addToCache(data, type);
 
 					updateData(data, neLat, neLng, swLat, swLng, type);
 				}
