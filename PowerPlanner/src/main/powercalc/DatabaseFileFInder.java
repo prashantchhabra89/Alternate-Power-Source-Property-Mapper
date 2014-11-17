@@ -4,19 +4,21 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class DatabaseFileFInder {
-	private String [] windFileFullArr = new String[100];
-	private String [] SolardFileFullArr = new String[13];
-	private String [] HydroFileFullArr = new String[14];
+	private String [] windFileFullArr_anu = new String[630];
+	private String [] windFileFullArr_djf = new String[630];
+	private String [] windFileFullArr_jja = new String[630];
+	private String [] windFileFullArr_mam = new String[630];
+	private String [] windFileFullArr_son = new String[630];
+	private String [] SolardFileFullArr = new String[5];
+	private String [] HydroFileFullArr = new String[6];
 	private Double latitude1;
 	private Double latitude2;
 	private Double longitude1;
 	private Double longitude2;
-	private String returnWindFileListArray[] = new String[100];
-	private String returnSolarFileListArray[] = new String[13];
-	private String returnHydroFileListArray[] = new String[14];
+	private String returnWindFileListArray[] = new String[3150];
+	private String returnSolarFileListArray[] = new String[1];
+	private String returnHydroFileListArray[] = new String[2];
 	private int counterWindfileFinder;
-	private int counterSolarfileFinder;
-	private int counterHydrofileFinder;
 	private String pathWind;
 	private String pathSolar;
 	private String pathHydro;
@@ -26,147 +28,50 @@ public class DatabaseFileFInder {
 		pathWind = "WEB-INF/Database/Wind/";
 		pathSolar = "WEB-INF/Database/Solar/";
 		pathHydro = "WEB-INF/Database/Hydro/";
-		windFileFullArr[0] = "48_-106_42_-112_anu.json";
-		windFileFullArr[1] = "48_-106_42_-112_djf.json";
-		windFileFullArr[2] = "48_-106_42_-112_jja.json";
-		windFileFullArr[3] = "48_-106_42_-112_mam.json";
-		windFileFullArr[4] = "48_-106_42_-112_son.json";
-		windFileFullArr[5] = "48_-112_42_-118_anu.json";
-		windFileFullArr[6] = "48_-112_42_-118_djf.json";
-		windFileFullArr[7] = "48_-112_42_-118_jja.json";
-		windFileFullArr[8] = "48_-112_42_-118_mam.json";
-		windFileFullArr[9] = "48_-112_42_-118_son.json";
-		windFileFullArr[10] = "48_-118_42_-124_anu.json";
-		windFileFullArr[11] = "48_-118_42_-124_djf.json";
-		windFileFullArr[12] = "48_-118_42_-124_jja.json";
-		windFileFullArr[13] = "48_-118_42_-124_mam.json";
-		windFileFullArr[14] = "48_-118_42_-124_son.json";
-		windFileFullArr[15] = "48_-124_42_-130_anu.json";
-		windFileFullArr[16] = "48_-124_42_-130_djf.json";
-		windFileFullArr[17] = "48_-124_42_-130_jja.json";
-		windFileFullArr[18] = "48_-124_42_-130_mam.json";
-		windFileFullArr[19] = "48_-124_42_-130_son.json";
-		windFileFullArr[20] = "48_-130_42_-136_anu.json";
-		windFileFullArr[21] = "48_-130_42_-136_djf.json";
-		windFileFullArr[22] = "48_-130_42_-136_jja.json";
-		windFileFullArr[23] = "48_-130_42_-136_mam.json";
-		windFileFullArr[24] = "48_-130_42_-136_son.json";
-		windFileFullArr[25] = "53_-106_48_-112_anu.json";
-		windFileFullArr[26] = "53_-106_48_-112_djf.json";
-		windFileFullArr[27] = "53_-106_48_-112_jja.json";
-		windFileFullArr[28] = "53_-106_48_-112_mam.json";
-		windFileFullArr[29] = "53_-106_48_-112_son.json";
-		windFileFullArr[30] = "53_-112_48_-118_anu.json";
-		windFileFullArr[31] = "53_-112_48_-118_djf.json";
-		windFileFullArr[32] = "53_-112_48_-118_jja.json";
-		windFileFullArr[33] = "53_-112_48_-118_mam.json";
-		windFileFullArr[34] = "53_-112_48_-118_son.json";
-		windFileFullArr[35] = "53_-118_48_-124_anu.json";
-		windFileFullArr[36] = "53_-118_48_-124_djf.json";
-		windFileFullArr[37] = "53_-118_48_-124_jja.json";
-		windFileFullArr[38] = "53_-118_48_-124_mam.json";
-		windFileFullArr[39] = "53_-118_48_-124_son.json";
-		windFileFullArr[40] = "53_-124_48_-130_anu.json";
-		windFileFullArr[41] = "53_-124_48_-130_djf.json";
-		windFileFullArr[42] = "53_-124_48_-130_jja.json";
-		windFileFullArr[43] = "53_-124_48_-130_mam.json";
-		windFileFullArr[44] = "53_-124_48_-130_son.json";
-		windFileFullArr[45] = "53_-130_48_-136_anu.json";
-		windFileFullArr[46] = "53_-130_48_-136_djf.json";
-		windFileFullArr[47] = "53_-130_48_-136_jja.json";
-		windFileFullArr[48] = "53_-130_48_-136_mam.json";
-		windFileFullArr[49] = "53_-130_48_-136_son.json";
-		windFileFullArr[50] = "58_-106_53_-112_anu.json";
-		windFileFullArr[51] = "58_-106_53_-112_djf.json";
-		windFileFullArr[52] = "58_-106_53_-112_jja.json";
-		windFileFullArr[53] = "58_-106_53_-112_mam.json";
-		windFileFullArr[54] = "58_-106_53_-112_son.json";
-		windFileFullArr[55] = "58_-112_53_-118_anu.json";
-		windFileFullArr[56] = "58_-112_53_-118_djf.json";
-		windFileFullArr[57] = "58_-112_53_-118_jja.json";
-		windFileFullArr[58] = "58_-112_53_-118_mam.json";
-		windFileFullArr[59] = "58_-112_53_-118_son.json";
-		windFileFullArr[60] = "58_-118_53_-124_anu.json";
-		windFileFullArr[61] = "58_-118_53_-124_djf.json";
-		windFileFullArr[62] = "58_-118_53_-124_jja.json";
-		windFileFullArr[63] = "58_-118_53_-124_mam.json";
-		windFileFullArr[64] = "58_-118_53_-124_son.json";
-		windFileFullArr[65] = "58_-124_53_-130_anu.json";
-		windFileFullArr[66] = "58_-124_53_-130_djf.json";
-		windFileFullArr[67] = "58_-124_53_-130_jja.json";
-		windFileFullArr[68] = "58_-124_53_-130_mam.json";
-		windFileFullArr[69] = "58_-124_53_-130_son.json";
-		windFileFullArr[70] = "58_-130_53_-136_anu.json";
-		windFileFullArr[71] = "58_-130_53_-136_djf.json";
-		windFileFullArr[72] = "58_-130_53_-136_jja.json";
-		windFileFullArr[73] = "58_-130_53_-136_mam.json";
-		windFileFullArr[74] = "58_-130_53_-136_son.json";
-		windFileFullArr[75] = "63_-106_58_-112_anu.json";
-		windFileFullArr[76] = "63_-106_58_-112_djf.json";
-		windFileFullArr[77] = "63_-106_58_-112_jja.json";
-		windFileFullArr[78] = "63_-106_58_-112_mam.json";
-		windFileFullArr[79] = "63_-106_58_-112_son.json";
-		windFileFullArr[80] = "63_-112_58_-118_anu.json";
-		windFileFullArr[81] = "63_-112_58_-118_djf.json";
-		windFileFullArr[82] = "63_-112_58_-118_jja.json";
-		windFileFullArr[83] = "63_-112_58_-118_mam.json";
-		windFileFullArr[84] = "63_-112_58_-118_son.json";
-		windFileFullArr[85] = "63_-118_58_-124_anu.json";
-		windFileFullArr[86] = "63_-118_58_-124_djf.json";
-		windFileFullArr[87] = "63_-118_58_-124_jja.json";
-		windFileFullArr[88] = "63_-118_58_-124_mam.json";
-		windFileFullArr[89] = "63_-118_58_-124_son.json";
-		windFileFullArr[90] = "63_-124_58_-130_anu.json";
-		windFileFullArr[91] = "63_-124_58_-130_djf.json";
-		windFileFullArr[92] = "63_-124_58_-130_jja.json";
-		windFileFullArr[93] = "63_-124_58_-130_mam.json";
-		windFileFullArr[94] = "63_-124_58_-130_son.json";
-		windFileFullArr[95] = "63_-130_58_-136_anu.json";
-		windFileFullArr[96] = "63_-130_58_-136_djf.json";
-		windFileFullArr[97] = "63_-130_58_-136_jja.json";
-		windFileFullArr[98] = "63_-130_58_-136_mam.json";
-		windFileFullArr[99] = "63_-130_58_-136_son.json";
+		for(int i = 0; i < 21; i++) {
+			for(int j = 0; j < 30; j++) {
+				windFileFullArr_anu[i*30 + j] = String.valueOf(43+i) + "_" + String.valueOf(-135+j)
+						+ "_" + String.valueOf(42+i) + "_" + String.valueOf(-136+j) + "_anu.json";
+				windFileFullArr_djf[i*30 + j] = String.valueOf(43+i) + "_" + String.valueOf(-135+j)
+						+ "_" + String.valueOf(42+i) + "_" + String.valueOf(-136+j) + "_djf.json";
+				windFileFullArr_jja[i*30 + j] = String.valueOf(43+i) + "_" + String.valueOf(-135+j)
+						+ "_" + String.valueOf(42+i) + "_" + String.valueOf(-136+j) + "_jja.json";
+				windFileFullArr_mam[i*30 + j] = String.valueOf(43+i) + "_" + String.valueOf(-135+j)
+						+ "_" + String.valueOf(42+i) + "_" + String.valueOf(-136+j) + "_mam.json";
+				windFileFullArr_son[i*30 + j] = String.valueOf(43+i) + "_" + String.valueOf(-135+j)
+						+ "_" + String.valueOf(42+i) + "_" + String.valueOf(-136+j) + "_son.json";
+			}
+		}
 		
-		SolardFileFullArr[0] = "Solar_1.json";
-		SolardFileFullArr[1] = "Solar_2.json";
-		SolardFileFullArr[2] = "Solar_3.json";
-		SolardFileFullArr[3] = "Solar_4.json";
-		SolardFileFullArr[4] = "Solar_5.json";
-		SolardFileFullArr[5] = "Solar_6.json";
-		SolardFileFullArr[6] = "Solar_7.json";
-		SolardFileFullArr[7] = "Solar_8.json";
-		SolardFileFullArr[8] = "Solar_9.json";
-		SolardFileFullArr[9] = "Solar_10.json";
-		SolardFileFullArr[10] = "Solar_11.json";
-		SolardFileFullArr[11] = "Solar_12.json";
-	    SolardFileFullArr[12] = "Solar_13.json";
+		SolardFileFullArr[0] = "Solar_anu.json";
+		SolardFileFullArr[1] = "Solar_djf.json";
+		SolardFileFullArr[2] = "Solar_mam.json";
+		SolardFileFullArr[3] = "Solar_jja.json";
+		SolardFileFullArr[4] = "Solar_son.json";
 	    
 	    HydroFileFullArr[0] = "Stream_1.json";
-	    HydroFileFullArr[1] = "Hydro_1.json";
-	    HydroFileFullArr[2] = "Hydro_2.json";
-	    HydroFileFullArr[3] = "Hydro_3.json";
-	    HydroFileFullArr[4] = "Hydro_4.json";
-	    HydroFileFullArr[5] = "Hydro_5.json";
-	    HydroFileFullArr[6] = "Hydro_6.json";
-	    HydroFileFullArr[7] = "Hydro_7.json";
-	    HydroFileFullArr[8] = "Hydro_8.json";
-	    HydroFileFullArr[9] = "Hydro_9.json";
-	    HydroFileFullArr[10] = "Hydro_10.json";
-	    HydroFileFullArr[11] = "Hydro_11.json";
-	    HydroFileFullArr[12] = "Hydro_12.json";
-	    HydroFileFullArr[13] = "Hydro_13.json";
+	    HydroFileFullArr[1] = "Hydro_anu.json";
+	    HydroFileFullArr[2] = "Hydro_djf.json";
+	    HydroFileFullArr[3] = "Hydro_mam.json";
+	    HydroFileFullArr[4] = "Hydro_jja.json";
+	    HydroFileFullArr[5] = "Hydro_son.json";
 	}
 	
     //supplied season name should be anu,djf,jja,son,mam
 	public String[] windFileFinder(Double neLat, Double neLon, Double swLat, Double swLon, String season)
 	{
 		counterWindfileFinder = 0;
-		for(String item : windFileFullArr)
+		String [] handler = null;
+		switch(season) {
+		case "anu": handler = windFileFullArr_anu; break;
+		case "djf": handler = windFileFullArr_djf; break;
+		case "jja": handler = windFileFullArr_jja; break;
+		case "mam": handler = windFileFullArr_mam; break;
+		case "son": handler = windFileFullArr_son; break;
+		default: return null;
+		}
+		for(String item : handler)
 		{
-			if(!(item.contains(season)))
-			{
-		continue;
-			}
 			Pattern boundaryP = Pattern.compile("^([-]?\\d+)_([-]?\\d+)_([-]?\\d+)_([-]?\\d+)_.*$");
 			Matcher boundaryM = boundaryP.matcher(item);
 			if (!boundaryM.matches()) {
@@ -213,116 +118,44 @@ public class DatabaseFileFInder {
 	//season name should be Jan, Feb ,etc..
 	//I think we will later on try to squash solar data into spring, fall, winter, etc
 	public String [] solarFileFinder(String Season)
-	{
-		counterSolarfileFinder = 0;
-		
+	{	
 		switch(Season)
-		{
-			case "Jan" : returnSolarFileListArray[counterSolarfileFinder] = pathSolar+SolardFileFullArr[0];
-			counterSolarfileFinder++;
-			break;
-			case "Feb" : returnSolarFileListArray[counterSolarfileFinder] = pathSolar+SolardFileFullArr[1];
-			counterSolarfileFinder++;
-			break;
-			case "Mar" : returnSolarFileListArray[counterSolarfileFinder] = pathSolar+SolardFileFullArr[2];
-			counterSolarfileFinder++;
-			break;
-			case "Apr" : returnSolarFileListArray[counterSolarfileFinder] = pathSolar+SolardFileFullArr[3];
-			counterSolarfileFinder++;
-			break;
-			case "May" : returnSolarFileListArray[counterSolarfileFinder] = pathSolar+SolardFileFullArr[4];
-			counterSolarfileFinder++;
-			break;
-			case "Jun" : returnSolarFileListArray[counterSolarfileFinder] = pathSolar+SolardFileFullArr[5];
-			counterSolarfileFinder++;
-			break;
-			case "Jul" : returnSolarFileListArray[counterSolarfileFinder] = pathSolar+SolardFileFullArr[6];
-			counterSolarfileFinder++;
-			break;
-			case "Aug" : returnSolarFileListArray[counterSolarfileFinder] = pathSolar+SolardFileFullArr[7];
-			counterSolarfileFinder++;
-			break;
-			case "Sep" : returnSolarFileListArray[counterSolarfileFinder] = pathSolar+SolardFileFullArr[8];
-			counterSolarfileFinder++;
-			break;
-			case "Oct" : returnSolarFileListArray[counterSolarfileFinder] = pathSolar+SolardFileFullArr[9];
-			counterSolarfileFinder++;
-			break;
-			case "Nov" : returnSolarFileListArray[counterSolarfileFinder] = pathSolar+SolardFileFullArr[10];
-			counterSolarfileFinder++;
-			break;
-			case "Dec" : returnSolarFileListArray[counterSolarfileFinder] = pathSolar+SolardFileFullArr[11];
-			counterSolarfileFinder++;
-			break;
-			case "Anu" : returnSolarFileListArray[counterSolarfileFinder] = pathSolar+SolardFileFullArr[12];
-			counterSolarfileFinder++;
-			break;	
+		{	
+			case "anu" : returnSolarFileListArray[0] = pathSolar+SolardFileFullArr[0];	break;
+			case "djf" : returnSolarFileListArray[0] = pathSolar+SolardFileFullArr[1];	break;
+			case "mam" : returnSolarFileListArray[0] = pathSolar+SolardFileFullArr[2];	break;
+			case "jja" : returnSolarFileListArray[0] = pathSolar+SolardFileFullArr[3];	break;
+			case "son" : returnSolarFileListArray[0] = pathSolar+SolardFileFullArr[4]; break;
 		}
 		return returnSolarFileListArray;
 	}
 	public void displaySolarFileList()
 	{
-		for(int counter = 0; returnSolarFileListArray[counter]!=null; counter++)
-		{
-			System.out.println(returnSolarFileListArray[counter]);
-		}
+		System.out.println(returnSolarFileListArray[0]);
 	}
 	
 	public String [] hydroFileFinder(String Season, boolean getStreams)
 	{
-		counterHydrofileFinder = 0;
+		int fileCounter = 0;
 		if (getStreams) {
-			returnHydroFileListArray[counterHydrofileFinder] = pathHydro+HydroFileFullArr[0];
-			counterHydrofileFinder++;
+			returnHydroFileListArray[fileCounter] = pathHydro+HydroFileFullArr[0];
+			fileCounter++;
 		}
 				
 		switch(Season)
 		{
-			case "Jan" : returnHydroFileListArray[counterHydrofileFinder] = pathHydro+HydroFileFullArr[1];
-			counterHydrofileFinder++;
-			break;
-			case "Feb" : returnHydroFileListArray[counterHydrofileFinder] = pathHydro+HydroFileFullArr[2];
-			counterHydrofileFinder++;
-			break;
-			case "Mar" : returnHydroFileListArray[counterHydrofileFinder] = pathHydro+HydroFileFullArr[3];
-			counterHydrofileFinder++;
-			break;
-			case "Apr" : returnHydroFileListArray[counterHydrofileFinder] = pathHydro+HydroFileFullArr[4];
-			counterHydrofileFinder++;
-			break;
-			case "May" : returnHydroFileListArray[counterHydrofileFinder] = pathHydro+HydroFileFullArr[5];
-			counterHydrofileFinder++;
-			break;
-			case "Jun" : returnHydroFileListArray[counterHydrofileFinder] = pathHydro+HydroFileFullArr[6];
-			counterHydrofileFinder++;
-			break;
-			case "Jul" : returnHydroFileListArray[counterHydrofileFinder] = pathHydro+HydroFileFullArr[7];
-			counterHydrofileFinder++;
-			break;
-			case "Aug" : returnHydroFileListArray[counterHydrofileFinder] = pathHydro+HydroFileFullArr[8];
-			counterHydrofileFinder++;
-			break;
-			case "Sep" : returnHydroFileListArray[counterHydrofileFinder] = pathHydro+HydroFileFullArr[9];
-			counterHydrofileFinder++;
-			break;
-			case "Oct" : returnHydroFileListArray[counterHydrofileFinder] = pathHydro+HydroFileFullArr[10];
-			counterHydrofileFinder++;
-			break;
-			case "Nov" : returnHydroFileListArray[counterHydrofileFinder] = pathHydro+HydroFileFullArr[11];
-			counterHydrofileFinder++;
-			break;
-			case "Dec" : returnHydroFileListArray[counterHydrofileFinder] = pathHydro+HydroFileFullArr[12];
-			counterHydrofileFinder++;
-			break;
-			case "Anu" : returnHydroFileListArray[counterHydrofileFinder] = pathHydro+HydroFileFullArr[13];
-			counterHydrofileFinder++;
-			break;	
+			case "anu" : returnHydroFileListArray[fileCounter] = pathHydro+HydroFileFullArr[1]; break;
+			case "djf" : returnHydroFileListArray[fileCounter] = pathHydro+HydroFileFullArr[2]; break;
+			case "mam" : returnHydroFileListArray[fileCounter] = pathHydro+HydroFileFullArr[3]; break;
+			case "jja" : returnHydroFileListArray[fileCounter] = pathHydro+HydroFileFullArr[4]; break;
+			case "son" : returnHydroFileListArray[fileCounter] = pathHydro+HydroFileFullArr[5]; break;
 		}
 		return returnHydroFileListArray;
 	}
 	public void displayHydroFileList()
 	{
-		for(int counter = 0; returnHydroFileListArray[counter]!=null; counter++)
+		for(int counter = 0; counter < returnHydroFileListArray.length 
+				&& returnHydroFileListArray[counter] != null; counter++)
 		{
 			System.out.println(returnHydroFileListArray[counter]);
 		}

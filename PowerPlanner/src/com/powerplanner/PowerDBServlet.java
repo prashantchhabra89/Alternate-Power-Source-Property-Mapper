@@ -52,61 +52,11 @@ public class PowerDBServlet extends HttpServlet {
 			System.out.println("FETCHED GRID FILES: ");
 			dbFind.displayWindReturnarr();			
 		} else if (type.equals(PowerType.SOLAR.toString())) {
-			switch(season) {
-			case "dfj" :
-				dbFind.solarFileFinder("Dec");
-				dbFind.solarFileFinder("Jan");
-				jsonFiles = dbFind.solarFileFinder("Feb");
-				break;
-			case "mam" :
-				dbFind.solarFileFinder("Mar");
-				dbFind.solarFileFinder("Apr");
-				jsonFiles = dbFind.solarFileFinder("May");
-				break;
-			case "jja" :
-				dbFind.solarFileFinder("Jun");
-				dbFind.solarFileFinder("Jul");
-				jsonFiles = dbFind.solarFileFinder("Aug");
-				break;
-			case "son" : 
-				dbFind.solarFileFinder("Sep");
-				dbFind.solarFileFinder("Oct");
-				jsonFiles = dbFind.solarFileFinder("Nov");
-				break;
-			case "anu" :
-			default :
-				jsonFiles = dbFind.solarFileFinder("Anu");
-				break;
-			}
+			jsonFiles = dbFind.solarFileFinder(season);
 			System.out.println("FETCHED GRID FILES: ");
 			dbFind.displaySolarFileList();	
 		} else if (type.equals(PowerType.HYDRO.toString())) {
-			switch(season) {
-			case "dfj" :
-				dbFind.hydroFileFinder("Dec", sendStreams);
-				dbFind.hydroFileFinder("Jan", sendStreams);
-				jsonFiles = dbFind.hydroFileFinder("Feb", sendStreams);
-				break;
-			case "mam" :
-				dbFind.hydroFileFinder("Mar", sendStreams);
-				dbFind.hydroFileFinder("Apr", sendStreams);
-				jsonFiles = dbFind.hydroFileFinder("May", sendStreams);
-				break;
-			case "jja" :
-				dbFind.hydroFileFinder("Jun", sendStreams);
-				dbFind.hydroFileFinder("Jul", sendStreams);
-				jsonFiles = dbFind.hydroFileFinder("Aug", sendStreams);
-				break;
-			case "son" : 
-				dbFind.hydroFileFinder("Sep", sendStreams);
-				dbFind.hydroFileFinder("Oct", sendStreams);
-				jsonFiles = dbFind.hydroFileFinder("Nov", sendStreams);
-				break;
-			case "anu" :
-			default :
-				jsonFiles = dbFind.hydroFileFinder("Anu", sendStreams);
-				break;
-			}
+			jsonFiles = dbFind.hydroFileFinder(season, sendStreams);
 			System.out.println("FETCHED GRID FILES: ");
 			dbFind.displayHydroFileList();	
 			//sendStreams = false;
