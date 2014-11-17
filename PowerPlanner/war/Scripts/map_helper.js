@@ -39,7 +39,7 @@ var MIN_DISPLAY_WEIGHT = 0.01; /* Don't add a point with less weight to heatmap 
 
 var WIND_SCALER = 12;
 var SOLAR_SCALER = 3.3;
-var HYDRO_SCALER = 2000000;
+var HYDRO_SCALER = 500;
 var scaler = WIND_SCALER;
 
 var POINT_DEBUGGER = false; /* true = view data points instead of interpolation */
@@ -375,7 +375,7 @@ function _filterHydroData(raw_data, push_data, neLat, neLng, swLat, swLng) {
 			push_data.push({
 				lat : raw_data[i].lat,
 				lng : raw_data[i].lon,
-				weight : raw_data[i].precalc
+				weight : hydroPow(raw_data[i].precalc,0.9,15)
 			});
 		}
 	}
