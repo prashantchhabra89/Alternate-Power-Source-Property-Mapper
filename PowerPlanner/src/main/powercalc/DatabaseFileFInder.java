@@ -4,14 +4,18 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class DatabaseFileFInder {
-	private String [] windFileFullArr = new String[100];
+	private String [] windFileFullArr_anu = new String[630];
+	private String [] windFileFullArr_djf = new String[630];
+	private String [] windFileFullArr_jja = new String[630];
+	private String [] windFileFullArr_mam = new String[630];
+	private String [] windFileFullArr_son = new String[630];
 	private String [] SolardFileFullArr = new String[13];
 	private String [] HydroFileFullArr = new String[14];
 	private Double latitude1;
 	private Double latitude2;
 	private Double longitude1;
 	private Double longitude2;
-	private String returnWindFileListArray[] = new String[100];
+	private String returnWindFileListArray[] = new String[3150];
 	private String returnSolarFileListArray[] = new String[13];
 	private String returnHydroFileListArray[] = new String[14];
 	private int counterWindfileFinder;
@@ -26,6 +30,22 @@ public class DatabaseFileFInder {
 		pathWind = "WEB-INF/Database/Wind/";
 		pathSolar = "WEB-INF/Database/Solar/";
 		pathHydro = "WEB-INF/Database/Hydro/";
+		for(int i = 0; i < 21; i++) {
+			for(int j = 0; j < 30; j++) {
+				windFileFullArr_anu[i*30 + j] = String.valueOf(43+i) + "_" + String.valueOf(-135+j)
+						+ "_" + String.valueOf(42+i) + "_" + String.valueOf(-136+j) + "_anu.json";
+				windFileFullArr_djf[i*30 + j] = String.valueOf(43+i) + "_" + String.valueOf(-135+j)
+						+ "_" + String.valueOf(42+i) + "_" + String.valueOf(-136+j) + "_djf.json";
+				windFileFullArr_jja[i*30 + j] = String.valueOf(43+i) + "_" + String.valueOf(-135+j)
+						+ "_" + String.valueOf(42+i) + "_" + String.valueOf(-136+j) + "_jja.json";
+				windFileFullArr_mam[i*30 + j] = String.valueOf(43+i) + "_" + String.valueOf(-135+j)
+						+ "_" + String.valueOf(42+i) + "_" + String.valueOf(-136+j) + "_mam.json";
+				windFileFullArr_son[i*30 + j] = String.valueOf(43+i) + "_" + String.valueOf(-135+j)
+						+ "_" + String.valueOf(42+i) + "_" + String.valueOf(-136+j) + "_son.json";
+			}
+		}
+		
+		/*
 		windFileFullArr[0] = "48_-106_42_-112_anu.json";
 		windFileFullArr[1] = "48_-106_42_-112_djf.json";
 		windFileFullArr[2] = "48_-106_42_-112_jja.json";
@@ -126,6 +146,7 @@ public class DatabaseFileFInder {
 		windFileFullArr[97] = "63_-130_58_-136_jja.json";
 		windFileFullArr[98] = "63_-130_58_-136_mam.json";
 		windFileFullArr[99] = "63_-130_58_-136_son.json";
+		*/
 		
 		SolardFileFullArr[0] = "Solar_1.json";
 		SolardFileFullArr[1] = "Solar_2.json";
@@ -161,12 +182,17 @@ public class DatabaseFileFInder {
 	public String[] windFileFinder(Double neLat, Double neLon, Double swLat, Double swLon, String season)
 	{
 		counterWindfileFinder = 0;
-		for(String item : windFileFullArr)
+		String [] handler = null;
+		switch(season) {
+		case "anu": handler = windFileFullArr_anu; break;
+		case "djf": handler = windFileFullArr_djf; break;
+		case "jja": handler = windFileFullArr_jja; break;
+		case "mam": handler = windFileFullArr_mam; break;
+		case "son": handler = windFileFullArr_son; break;
+		default: return null;
+		}
+		for(String item : handler)
 		{
-			if(!(item.contains(season)))
-			{
-		continue;
-			}
 			Pattern boundaryP = Pattern.compile("^([-]?\\d+)_([-]?\\d+)_([-]?\\d+)_([-]?\\d+)_.*$");
 			Matcher boundaryM = boundaryP.matcher(item);
 			if (!boundaryM.matches()) {
