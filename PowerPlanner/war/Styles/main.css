@@ -81,6 +81,7 @@ body {
 
 .show-description {
   height: 35% !important;
+  display: inline;
 }
 
 .selected-resource {
@@ -100,16 +101,32 @@ body {
   bottom: 0;
   margin: 0;
   height: 0px;
-  width:100%;
+  width: 89%;
   transition: height .5s;
   -webkit-transition: height .5s;
   -moz-transition: height .5s;
+  right: 0px;
 }
 
 #showCheckboxHydro {
 	width: 20% !important;
 }
 
+.windHeading, .solarHeading, .hydroHeading{
+	display:none;
+}
+.windToggleHeading{
+	background-color: #54f654 !important;
+	text-shadow: none !important;
+}
+.solarToggleHeading{
+	background-color: #f3f85d !important;
+	text-shadow: none !important;
+}
+.hydroToggleHeading{
+	background-color: #5dc0f8 !important;
+	text-shadow: none !important;
+}
 .wind {
 	background: url(../images/wind-icon.png) no-repeat bottom center scroll !important;
 	width: 55px !important;
@@ -338,14 +355,47 @@ h4.intro-subheading {
 }
 
 /*FOR RESPONSIVE LAYOUT*/
-/* 0 - 252px */
-@media all and (max-width: 320px) {
-	.ui-header, .ui-title {
+/* 0 - 320px */
+@media all and (max-width: 416px) {
+	.app-header {
 		padding: 0.5em 0 !important;
 		font-size: 0.8em !important;
 	}
+	.resourceContainer {
+		width: 70px;
+		position: absolute;
+		margin: 53px 0 0 10px;
+	}
+	.wind {
+	background: url(../images/wind-icon-small.png) no-repeat bottom center scroll !important;
+	width: 39px !important;
+	height: 39px !important;
+	float: left;
+	}
+	.solar {
+		background: url(../images/solar-icon-small.png) no-repeat bottom center scroll !important;
+		width: 39px !important;
+		height: 39px !important;
+		float: left;	
+	}
+	.hydro {
+		background: url(../images/hydro-icon-small.png) no-repeat bottom center scroll !important;
+		width: 39px !important;
+		height: 39px !important;	
+		float: left;
+	}
+	.question {
+		background: url(../images/question-icon-small.png) no-repeat bottom center scroll !important;
+		width: 39px !important;
+		height: 39px !important;
+		float: left;
+	}
+	.resources-panel {
+	  width:100%;
+	}
+	
 }
-@media all and (min-width: 320px) {
+@media all and (min-width: 416px) {
 	h1.intro-title {
 		font-size: 49px;
 		margin: 10px 0px 6px 0px;
@@ -358,8 +408,9 @@ h4.intro-subheading {
 	}
 	.show-description {
 		height: 43% !important;
+		display: inline;
 	}
-	.ui-header .ui-title {
+	.app-header {
 		padding: 0.5em 0 !important;
 		font-size: 0.8em !important;
 	}
@@ -375,6 +426,9 @@ h4.intro-subheading {
 	.inputLabel {
 		width: 96px !important;
 	}
+	.resources-panel {
+	  width:75%;
+	}
 }
 
 /* 481px - 768px */
@@ -383,7 +437,8 @@ h4.intro-subheading {
 		font-size: 80px;
 	}
 	.show-description {
-		height: 34% !important;
+		height: 45% !important;
+		display: inline;
 	}
 	div.ui-input-text{
 		width: 40% !important;
@@ -391,12 +446,18 @@ h4.intro-subheading {
 	.showAdvancedOptions {
 		width: 15% !important;
 	}
+	.resources-panel {
+	  width:85%;
+	}
 }
 
 /* 769px - 1024px */
 @media only screen and (min-width: 1024px) {
 	h1.intro-title {
 		font-size: 100px;
+	}
+	.resources-panel {
+	  width:85%;
 	}
 }
 

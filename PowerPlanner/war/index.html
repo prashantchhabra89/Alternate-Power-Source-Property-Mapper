@@ -83,7 +83,7 @@
 	<!-- Start of app page -->
 	<div data-role="page" id="app">
 		<div data-role="panel" data-position="left" data-display="push"
-			id="menu" data-theme="b">
+			id="questionPanel" data-theme="b">
 			<input type="text" name="placesTextSearch" id="pac-input"
 				class="controls" placeholder="Search Box">
 			<h3>How To Use</h3>
@@ -93,9 +93,9 @@
 			</p>
 			<h3>Power Sources</h3>
 			<div id="img-container">
-				<div><img src="../images/wind-icon.png"/></div>
-				<div><img src="../images/solar-icon.png"/></div>
-				<div><img src="../images/hydro-icon.png"/></div>
+				<div id="wind-panel" class="wind"></div>
+				<div id="solar-panel" class="solar"></div>
+				<div id="hydro-panel" class="hydro"></div>
 			</div>
 			<p>
 				Choose from wind, solar, or hydro energy generation potentials.
@@ -105,35 +105,47 @@
 				and/or hydro turbine setup!
 			</p>
 		</div>
-		<div data-role="panel" data-position="right" data-display="overlay"
-			id="menu2">
-			<h2>Menu2 h2</h2>
-			<h3>Menu h3</h3>
+		<div data-role="panel" data-position="right" data-display="push" data-theme="b"
+			id="pdfPanel">
+			<h2>PDF Export</h2>
+			<fieldset data-role="controlgroup">
+			    <!--<legend>Title:</legend>-->
+			    <input type="checkbox" name="pdfShowAll" id="pdfShowAll" checked="">
+			    <label for="pdfShowAll">Show All</label>
+			    <input type="checkbox" name="pdfShowCord" id="pdfShowCord">
+			    <label for="pdfShowCord">Show marker Coordinates</label>
+			    <input type="checkbox" name="pdfShowWindCol" id="pdfShowWindCol">
+			    <label for="pdfShowWindCol">Show Wind Column</label>
+			</fieldset>
+			<button class="ui-shadow ui-btn ui-corner-all">Export</button>
 		</div>
 		<div data-role="header" data-position="fixed" data-theme="b">
 			<a href="#home"
 				class="jqm-navmenu-link ui-nodisc-icon ui-btn-left ui-btn ui-icon-home ui-btn-icon-notext ui-corner-all"
 				data-icon="home" data-theme="c">About</a>
 
-			<h1>
+			<h1 class="app-header">
 				Power <img id="logo-icon" src="images/PowerPlannerLogo-min.png"
 					data-thumb="" alt=""> Planner
 			</h1>
-			<a href="#menu2"
-				class="jqm-navmenu-link ui-nodisc-icon ui-btn-right ui-btn ui-icon-gear ui-btn-icon-notext ui-corner-all"
-				data-icon="gear" data-theme="b">About</a>
+			<a href="#pdfPanel" data-icon="action" data-theme="b">PDF</a>
+			
 		</div>
 		<!-- /header -->
 		<div role="main" class="ui-content">
 			<div class="ui-block-a gMap" id="googleMap"></div>
 			<div class="resourceContainer">
-				<div id="wind-panel" class="wind"></div>
-				<div id="solar-panel" class="solar"></div>
-				<div id="hydro-panel" class="hydro"></div>
-				<a href="#menu" id="question-panel" class="question"></a>
+				<div id="wind-panel" class="wind windToggleButton"></div>
+				<div id="solar-panel" class="solar solarToggleButton"></div>
+				<div id="hydro-panel" class="hydro hydroToggleButton"></div>
+				<a href="#questionPanel" id="question-panel" class="question"></a>
 			</div>
 			<div class="resources-panel" id="windResource">
-				<form class="resourceRadioButton" action="" id="windResouceRadio">
+				<h1 class="ui-collapsible-heading windHeading windToggleButton" id="windHeading">
+					<a href="#" class="ui-collapsible-heading-toggle ui-btn ui-icon-carat-d ui-btn-icon-right ui-btn-c windToggleHeading">Wind
+					</a>
+				</h1>
+				<form class="resourceRadioButton" action="" id="windResouceRadio">					
 					<div class="ui-grid-a">
 						<div class="ui-block-a inputLabel">
 							<div data-role="fieldcontain">
@@ -150,7 +162,7 @@
 							<div class="ui-field-contain" id="opt-navbars">
 								<fieldset data-role="controlgroup" data-type="horizontal"
 									class="ui-controlgroup ui-controlgroup-horizontal ui-corner-all">
-									<input type="radio" name="windView" id="windAnnual"
+									<input class="ui-mini" type="radio" name="windView" id="windAnnual"
 										value="annual" checked="checked" /> <label
 										for="windAnnual">Annual</label> <input type="radio"
 										name="windView" id="windSeasonal" value="seasonal" /> <label
@@ -174,8 +186,11 @@
 				</form>
 			</div>
 			<div class="resources-panel" id="solarResource">
+				<h1 class="ui-collapsible-heading solarHeading solarToggleButton" id="solarHeading">
+					<a href="#" class="ui-collapsible-heading-toggle ui-btn ui-icon-carat-d ui-btn-icon-right ui-btn-c solarToggleHeading">Solar
+					</a>
+				</h1>
 				<form class="resourceRadioButton" action="" id="solarResouceRadio">
-
 					<div class="ui-grid-a">
 						<div class="ui-block-a inputLabel">
 							<div data-role="fieldcontain">
@@ -217,6 +232,10 @@
 				</form>
 			</div>
 			<div class="resources-panel" id="hydroResource">
+				<h1 class="ui-collapsible-heading hydroHeading hydroToggleButton" id="hydroHeading">
+					<a href="#" class="ui-collapsible-heading-toggle ui-btn ui-icon-carat-d ui-btn-icon-right ui-btn-c hydroToggleHeading">Hydro
+					</a>
+				</h1>
 				<form class="resourceRadioButton" action="" id="hydroResourceRadio">
 					<div class="ui-grid-a">
 						<div class="ui-block-a inputLabel">
