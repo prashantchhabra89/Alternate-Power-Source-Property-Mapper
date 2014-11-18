@@ -272,12 +272,45 @@ function _getNextStart(curr_start, end_point, increment) {
 }
 
 /*
+ * Returns true if distance from the lat, lng point is less than the current diameter
+ * of the heatmap spots away from the line represented by point1, point2 (if the point
+ * lies inside the boundary formed by the points)
+ */
+function pointOnLine(lat, lng, point1, point2) {
+	var is_on_line = false;
+
+	if (lat > Math.min(point1.lat, point2.lat) && lat < Math.max(point1.lat, point2.lat)) {
+		if (lng > Math.min(point1.lon, point2.lon) && lng < Math.max(point1.lon, point2.lon)) {
+			/*
+		 	var slope = (point2.lat - point1.lat)/(point2.lon - point1.lon);
+			var A = slope * (-1);
+			var B = 1;
+			var C = (A * point1.lon + B) * (-1);
+
+			var numer = Math.abs(A*lng + B*lat + C);
+			var denom = Math.sqrt(Math.pow(A,2) + Math.pow(B,2));
+
+			var distance = (numer/denom);
+			is_on_line = (distance <= 
+				MAX_DATA_WIDTH / Math.pow(2, (g_map.getZoom() - LEAST_ZOOM)) * 0.98 * 2);
+			console.log(distance);
+			console.log(MAX_DATA_WIDTH / Math.pow(2, (g_map.getZoom() - LEAST_ZOOM)) * 0.98 * 2);
+			 */
+			// The above can't get close enough to ever return true with our granularity ...
+			is_on_line = true;
+		}
+	}
+
+	return is_on_line;
+}
+
+/*
  * Note: this returns a potentially scaled down weight!
  */
 function getDataWeight(hm_data, lat, lng, type) {
 	var weight_val = 0;
 	if (type == "WIND") {
-		weight_val = _getDataWeightWind(hm_data, lat, lng);
+		weight_val = _getDataWeightWind(hm_data, lat, lng, false);
 	} else if (type == "SOLAR") {
 		weight_val = _getDataWeightSolar(hm_data, lat, lng);
 	} else if (type == "HYDRO") {
@@ -311,7 +344,7 @@ function getPointData(lat_point, lng_point) {
 
 	// Fake [all] only some of the data!!
 	pointDataObj.wind_raw = ((wind_data.length) ? 
-			_getDataWeightWind(wind_data, lat_point, lng_point)*WIND_SCALER : 
+			_getDataWeightWind(wind_data, lat_point, lng_point, true)*WIND_SCALER : 
 				1000 * Math.random());
 	pointDataObj.solar_raw = ((solar_data.length) ? 
 			_getDataWeightSolar(solar_data, lat_point, lng_point)*SOLAR_SCALER :

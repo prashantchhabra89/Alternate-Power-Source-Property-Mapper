@@ -27,6 +27,7 @@
  * 						  lat_start, lng_start, latset, lngset, offset, type)
  * - _binData(hm_data, neLat, neLng, swLat, swLng, data_lat_offset, data_lng_offset)
  * - _getNextStart(curr_start, end_point, increment)
+ * - pointOnLine(lat, lng, point1, point2)
  * - getDataWeight(hm_data, lat, lng, type)
  * - getPointData(lat_point, lng_point)
  * 
@@ -39,6 +40,18 @@
  * - addMarker(map, loc)
  * - showHelpMarker()
  * - _balloonText(objectHandle, lat, lng)
+ * 
+ * wind_data.js
+ * - _filterWindData(raw_data, push_data, neLat, neLng, swLat, swLng)
+ * - _getDataWeightWind(hm_data, lat, lng)
+ * 
+ * solar_data.js
+ * - _filterSolarData(raw_data, push_data)
+ * - _getDataWeightSolar(hm_data, lat, lng)
+ * 
+ * hydro_data.js
+ * - _filterHydroData(raw_data, push_data, neLat, neLng, swLat, swLng)
+ * - _getDataWeightHydro(hm_data, lat, lng)
  * 
  *****************************************************************************/
 
@@ -63,7 +76,7 @@ var MAX_ZOOM = 15; /* Farthest in the user can zoom */
 var DEFAULT_ZOOM = 14; /* Starting zoom level */
 var MAX_DATA_WIDTH = 0.32; /* Width of interpolating points (LEAST_ZOOM = 8) */
 
-var WEIGHT_SCALING_DISTANCE = 0.06651; /* Data point further away has less impact */
+var WEIGHT_SCALING_DISTANCE = 1; /* Data point further away has less impact */
 var SOLAR_SCALING_DISTANCE = 1; /* Data point further away may have less impact */
 
 var MIN_DISPLAY_WEIGHT = 0.01; /* Don't add a point with less weight to heatmap */
@@ -286,256 +299,6 @@ function getLngOffset(eastLng, westLng) {
 		lng_offset = lng_offset / 8;
 	}
 	return lng_offset;
-}
-
-/*
- * TODO: Add in other metrics for calculations.
- */
-function _filterWindData(raw_data, push_data, neLat, neLng, swLat, swLng) {
-	for (var grid = 0; grid < raw_data.length; grid++) {
-		for (var i = 0; i < raw_data[grid].data.length; i++) {
-			if (raw_data[grid].data[i].lat > swLat && raw_data[grid].data[i].lat < neLat) {
-				if (raw_data[grid].data[i].lon > swLng && raw_data[grid].data[i].lon < neLng) {
-					push_data.push({
-						lat : raw_data[grid].data[i].lat,
-						lng : raw_data[grid].data[i].lon,
-						weight : windPow(raw_data[grid].data[i].pre15,0.34,290)
-					});
-				}
-			}
-		}
-	}
-}
-
-/*
- * There's not enough data to worry about not keeping it.
- * TODO: Add in other metrics for calculations.
- */
-function _filterSolarData(raw_data, push_data) {
-	for (var i = 0; i < raw_data.length; i++) {
-		push_data.push({
-			lat : raw_data[i].lat,
-			lng : raw_data[i].lon,
-			weight : solarPow(raw_data[i].deg45,0.9,1,0.75)
-		});
-	}
-}
-
-/*
- * There's not enough data to worry about not keeping it.
- * If stream info is here, add it to the stream array (if it's not already full ...
- * we'll ignore stream data if the stream array already contains points)
- * 
- * TODO: Add in other metrics for calculations.
- */
-function _filterHydroData(raw_data, push_data, neLat, neLng, swLat, swLng) {
-	for (var i = 0; i < raw_data.length; i++) {
-		if (raw_data[i].hasOwnProperty('points')) {
-			if (raw_data[i].points[0].lat > swLat && raw_data[i].points[0].lat < neLat) {
-				if (raw_data[i].points[0].lon > swLng && raw_data[i].points[0].lon < neLng) {
-					streams_data.push(raw_data[i].points);
-				}
-			}
-		} else {
-			push_data.push({
-				lat : raw_data[i].lat,
-				lng : raw_data[i].lon,
-				weight : hydroPow(raw_data[i].precalc,0.9,15)
-			});
-		}
-	}
-}
-
-/*
- * Gets the data weight for a given point on the map by applying a weighted
- * average to the four nearest data points (or if fewer than four data points,
- * using all the ones available).
- */
-function _getDataWeightWind(hm_data, lat, lng) {
-	var nearest = [];
-	var nearest_distance = [];
-
-	for (var i = 0; i < hm_data.length; i++) {
-		if (nearest.length < 4) {
-			// Trivial case; populate the first 4 nearest
-			nearest.push(hm_data[i]);
-			nearest_distance.push(distanceTo(lat, lng, hm_data[i].location
-					.lat(), hm_data[i].location.lng()));
-		} else {
-			var dist_to_i = distanceTo(lat, lng, hm_data[i].location.lat(),
-					hm_data[i].location.lng());
-			var furthest_near_point = getArrayMax(nearest_distance);
-			if (dist_to_i < furthest_near_point) {
-				for (var j = 0; j < nearest_distance.length; j++) {
-					if (nearest_distance[j] == furthest_near_point) {
-						nearest[j] = hm_data[i];
-						nearest_distance[j] = dist_to_i;
-						break;
-					}
-				}
-			}
-		}
-	}
-
-	var final_weight = 0;
-	if (nearest.length > 0) {
-		var dist_sum = nearest_distance.reduce(function(a, b) {
-			return a + b;
-		});
-
-		for (var i = 0; i < nearest.length; i++) {
-			var dist_scaling = Math.pow(WEIGHT_SCALING_DISTANCE
-					/ nearest_distance[i], 4);
-			if (dist_scaling > 1) {
-				dist_scaling = 1;
-			}
-			final_weight += (nearest[i].weight
-					* (1 - nearest_distance[i] / dist_sum) * dist_scaling);
-			// final_weight += ((1 - (nearest_distance[i] / dist_sum))
-			// * (nearest[i].weight / weight_max));
-		}
-
-	}
-	return (nearest.length > 0 ? final_weight / nearest.length : 0);
-}
-
-function _getDataWeightSolar(hm_data, lat, lng) {
-	var nearest = [];
-	var nearest_distance = [];
-
-	var data_bins = [ [], [], [], [] ];
-
-	for (var i = 0; i < hm_data.length; i++) {
-		if (lat >= hm_data[i].location.lat()) {
-			if (lng >= hm_data[i].location.lng()) {
-				data_bins[0].push(hm_data[i]);
-			} else {
-				data_bins[3].push(hm_data[i]);
-			}
-		} else {
-			if (lng >= hm_data[i].location.lng()) {
-				data_bins[1].push(hm_data[i]);
-			} else {
-				data_bins[2].push(hm_data[i]);
-			}
-		}
-	}
-
-	// Find nearest point in each bin (or find nothing if empty bin)
-	for (var i = 0; i < data_bins.length; i++) {
-		for (var j = 0; j < data_bins[i].length; j++) {
-			if (nearest.length < (i+1)) {
-				// Trivial case; the first point looked at is the nearest so far
-				nearest.push(data_bins[i][j]);
-				nearest_distance.push(distanceTo(lat, lng, data_bins[i][j].location
-						.lat(), data_bins[i][j].location.lng()));
-			} else {
-				var dist_to_j = distanceTo(lat, lng, data_bins[i][j].location
-						.lat(), data_bins[i][j].location.lng())
-						if (dist_to_j < nearest_distance[i]) {
-							nearest[i] = data_bins[i][j];
-							nearest_distance[i] = dist_to_j;
-						}
-			}
-		}
-	}
-	/*
-	console.log("Lat: " + lat + " Lng: " + lng);
-	for (var i = 0; i < nearest.length; i++) {
-		console.log("Near point Lat: " + nearest[i].location.lat() + 
-				" Lng: " + nearest[i].location.lng() + " Distance: " +
-				nearest_distance[i]);
-	}
-	 */
-
-	var final_weight = 0;
-	if (nearest.length > 0) {
-		var dist_sum = nearest_distance.reduce(function(a, b) {
-			return a + b;
-		});
-
-		for (var i = 0; i < nearest.length; i++) {
-			var dist_scaling = Math.pow(SOLAR_SCALING_DISTANCE / nearest_distance[i],
-					4 - nearest.length + 1);
-			if (dist_scaling > 1) {
-				dist_scaling = 1;
-			}
-
-			final_weight += (nearest[i].weight * (1 - nearest_distance[i] / dist_sum)
-					* dist_scaling);
-		}
-	}
-
-	return (nearest.length > 0 ? final_weight / nearest.length : 0);
-}
-
-function _getDataWeightHydro(hm_data, lat, lng) {
-	var final_weight = 0;
-	// go through each stream in the streams set
-	for (var i = 0; i < streams_data.length; i++) {
-		// TODO: In the future, account for more than two points
-		if (pointOnLine(lat, lng, streams_data[i][0], streams_data[i][1])) {
-			// if point lies *roughly* along the line of a stream, find the nearest
-			// 2 hydro stations; take a weighted average of their monitoring, and
-			// draw point with that weight
-
-			// Right now, only looks for the one closest stations
-			var nearest_distance;
-			var nearest_weight;
-			for (var j = 0; j < hm_data.length; j++) {
-				if (j == 0) {
-					//Trivial case, the best so far is the first
-					nearest_distance = distanceTo(lat, lng, 
-							hm_data[j].location.lat(), hm_data[j].location.lng());
-					nearest_weight = hm_data[j].weight;
-				} else {
-					var next_dist = distanceTo(lat, lng, 
-							hm_data[j].location.lat(), hm_data[j].location.lng());
-					if (next_dist < nearest_distance) {
-						nearest_distance = next_dist;
-						nearest_weight = hm_data[j].weight;
-					}
-				}
-			}
-			final_weight = nearest_weight;
-			break;
-		}
-	}
-
-	return final_weight;
-}
-
-/*
- * Returns true if distance from the lat, lng point is less than the current diameter
- * of the heatmap spots away from the line represented by point1, point2 (if the point
- * lies inside the boundary formed by the points)
- */
-function pointOnLine(lat, lng, point1, point2) {
-	var is_on_line = false;
-
-	if (lat > Math.min(point1.lat, point2.lat) && lat < Math.max(point1.lat, point2.lat)) {
-		if (lng > Math.min(point1.lon, point2.lon) && lng < Math.max(point1.lon, point2.lon)) {
-			/*
-		 	var slope = (point2.lat - point1.lat)/(point2.lon - point1.lon);
-			var A = slope * (-1);
-			var B = 1;
-			var C = (A * point1.lon + B) * (-1);
-
-			var numer = Math.abs(A*lng + B*lat + C);
-			var denom = Math.sqrt(Math.pow(A,2) + Math.pow(B,2));
-
-			var distance = (numer/denom);
-			is_on_line = (distance <= 
-				MAX_DATA_WIDTH / Math.pow(2, (g_map.getZoom() - LEAST_ZOOM)) * 0.98 * 2);
-			console.log(distance);
-			console.log(MAX_DATA_WIDTH / Math.pow(2, (g_map.getZoom() - LEAST_ZOOM)) * 0.98 * 2);
-			 */
-			// The above can't get close enough to ever return true with our granularity ...
-			is_on_line = true;
-		}
-	}
-
-	return is_on_line;
 }
 
 /*
