@@ -7,7 +7,10 @@
 // Until now, the marker is not created yet.
 // Yes, we created a bubble first, then we created a marker.
 // markerBalloon is declared global.
-markerBalloon = new google.maps.InfoWindow();
+var markerBalloon = new google.maps.InfoWindow();
+
+/* For unique ids */
+var markerHTMLIdSubscript = 0;
 
 // Code for get rid of top-left bug. Doesn't affect functions.
 // Explanation:
@@ -56,17 +59,17 @@ function addMarker(map, loc) {
 		icon : "http://www.google.com/intl/en_us/mapfiles/ms/micons/red-dot.png"		
 	});
 
-	// the object handle returned from the current fake function.
+	// the object handle holding the data
 	var pointDataObject = getPointData(marker.getPosition().lat(), marker.getPosition().lng());		
-	// note that the numeric value returned are rounded to 3 digits. Change this if needed.
-	var latPosition = marker.getPosition().lat().toFixed(3).toString();
-	var lngPosition = marker.getPosition().lng().toFixed(3).toString();
 
 	// this is the bubble displayed when pin is dropped
 	// the function _balloonText() is called to get the string displayed in the balloon.
-	markerBalloon.setContent(_balloonText(pointDataObject, latPosition, lngPosition));	
+	var balloonUniqID = "balloon" + markerHTMLIdSubscript;
+	markerHTMLIdSubscript += 1;
+	markerBalloon.setContent(_balloonText(balloonUniqID, pointDataObject));	
 	markerBalloon.bindTo('position', marker, 'position');
 	markerBalloon.open(map, marker);
+	populatePointData(pointDataObject, balloonUniqID);
 
 	// this is the bubble displayed when pin is left-clicked.
 	// left click to toggle the bubble.
@@ -74,14 +77,14 @@ function addMarker(map, loc) {
 	marker.addListener('click', function() {
 		// if the current balloon is closed
 		if (markerBalloon.getContent()=="") {
-			markerBalloon.setContent(_balloonText(pointDataObject, latPosition, lngPosition));
+			markerBalloon.setContent(_balloonText(balloonUniqID, pointDataObject));
 			markerBalloon.bindTo('position', this, 'position');
 			markerBalloon.open(map, this);	
 		} else {
 			// clicking a different pin, show a bubble for that pin.
 			if (markerBalloon.getPosition().lat() != this.getPosition().lat()
 					|| markerBalloon.getPosition().lng() != this.getPosition().lng()) {
-				markerBalloon.setContent(_balloonText(pointDataObject, latPosition, lngPosition));
+				markerBalloon.setContent(_balloonText(balloonUniqID, pointDataObject));
 				markerBalloon.bindTo('position', this, 'position');
 				markerBalloon.open(map, this);	
 			} else {
@@ -124,16 +127,39 @@ function showHelpMarker() {
 // the function to return the string to be displayed in the balloon.
 // this function exists to factor out some code in the previous section.
 // numeric values are rounded to 2 digits. change this if needed.
-function _balloonText(objectHandle, lat, lng) {
-	var balloonString = "<div class=\"scrollFix\">" + 
-	"<h2>Detailed Energy Data (kWh)</h2>" +
-	"<h3>Latitude: " + lat + "<br/>" + 
-	"Longitute: " + lng + "</h3>" +
-	"Wind Energy: " + objectHandle.wind_raw.toFixed(2).toString() + "<br/>" + 
-	"Solar Energy: " + objectHandle.solar_raw.toFixed(2).toString() + "<br/>" +
-	"Hydro Energy: " + objectHandle.hydro_raw.toFixed(2).toString() + "<br/>" +
-	"<h4>Total Energy: " + objectHandle.total_energy.toFixed(2).toString() + "</h4>" +
-	"<p><i>Right click on the pin to remove pin.</i></p>" +
-	"<p><i>Left click on the pin to toggle this window.</i></p></div>";
+function _balloonText(div_id, pointDataObject) {
+	var balloonString = ""; 
+	if (pointDataObject.wind_raw == null ||
+			pointDataObject.solar_raw == null ||
+			pointDataObject.hydro_raw == null) {
+		balloonString = "<div class=\"scrollFix\" id=\"" + div_id + "\">" + 
+		"<h2>Detailed Energy Data (kWh)</h2>" +
+		"<h3>Latitude: " + pointDataObject.lat.toFixed(3).toString() + "<br/>" + 
+		"Longitude: " + pointDataObject.lng.toFixed(3).toString() + "</h3>" +
+		"Wind Energy: <span class=\"windstring\"><em>Loading</em></span><br/>" +
+		"Solar Energy: <span class=\"solarstring\"><em>Loading</em></span><br/>" +
+		"Hydro Energy: <span class=\"hydrostring\"><em>Loading</em></span>" +
+		"<h4>Total Energy: <span class=\"totalstring\"><em>Loading</em></span></h4>" +
+		"<p><i>Right click on the pin to remove pin.</i></p>" +
+		"<p><i>Left click on the pin to toggle this window.</i></p></div>";
+	} else {
+		var totalEnergy = pointDataObject.wind_raw + pointDataObject.solar_raw + 
+			pointDataObject.hydro_raw;
+		balloonString = "<div class=\"scrollFix\" id=\"" + div_id + "\">" + 
+		"<h2>Detailed Energy Data (kWh)</h2>" +
+		"<h3>Latitude: " + pointDataObject.lat.toFixed(3).toString() + "<br/>" + 
+		"Longitude: " + pointDataObject.lng.toFixed(3).toString() + "</h3>" +
+		"Wind Energy: <span class=\"windstring\">" + 
+		pointDataObject.wind_raw.toFixed(2).toString() + "</span><br/>" + 
+		"Solar Energy: <span class=\"solarstring\">" + 
+		pointDataObject.solar_raw.toFixed(2).toString() + "</span><br/>" +
+		"Hydro Energy: <span class=\"hydrostring\">" + 
+		pointDataObject.hydro_raw.toFixed(2).toString() + "</span><br/>" +
+		"<h4>Total Energy: <span class=\"totalstring\">" + 
+		totalEnergy.toFixed(2).toString() + "</span></h4>" +
+		"<p><i>Right click on the pin to remove pin.</i></p>" +
+		"<p><i>Left click on the pin to toggle this window.</i></p></div>";
+	}
+	
 	return balloonString;
 }

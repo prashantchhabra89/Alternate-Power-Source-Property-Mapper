@@ -1,34 +1,15 @@
-function updateData(new_data, neLat, neLng, swLat, swLng, type) {
-	var lat_offset = getLatOffset(neLat, swLat);
-	var lng_offset = getLngOffset(neLng, swLng);
+/*
+ * Call this to update global data arrays based on raw data. Will process, interpolate,
+ * and assign data to matching global array.
+ */
+function updateData(raw_data, neLat, neLng, swLat, swLng, type) {
+	var hm_data = [];
+	processData(raw_data, hm_data, neLat, neLng, swLat, swLng, type);
 	
-	var usable_data = [];
-	_filterData(new_data, usable_data,
-			neLat + lat_offset,
-			neLng + lng_offset,
-			swLat - lat_offset,
-			swLng - lng_offset,
-			type);
-	set_scaler(type);
-	
-	var weight_points = [];
-	for (var i = 0; i < usable_data.length; i++) {
-		weight_points.push(usable_data[i].weight);
-	}
-	var topval = getArrayMax(weight_points);
-	var botval = getArrayMin(weight_points);
-	
-	console.log("Data Points on Screen: " + usable_data.length);
+	console.log("Data Points on Screen: " + hm_data.length);
 	console.log("Scaler: " + scaler);
-	console.log("Top val: " + topval);
-	console.log("Bottom val: " + botval);
 	console.log("Zoom: " + g_map.getZoom());
 	
-	var hm_data = [];
-	for (var i = 0; i < usable_data.length; i++) {
-		addHeatmapCoord(hm_data, usable_data[i].lat, usable_data[i].lng,
-				apply_scaler(usable_data[i].weight, botval, type));
-	}
 	if (POINT_DEBUGGER) {
 		if (type == "WIND") {
 			wind_data = hm_data;
@@ -47,6 +28,40 @@ function updateData(new_data, neLat, neLng, swLat, swLng, type) {
 			hydro_data = _interpolateData(hm_data, neLat, neLng, swLat, swLng, type);
 		}
 		console.timeEnd('_interpolateData');
+	}
+}
+
+/*
+ * Call this to process raw data. Don't call it on a single point, give that an
+ * offset of some value first so that you don't discard all real data points before
+ * determining weights.
+ */
+function processData(raw_data, hm_data, neLat, neLng, swLat, swLng, type) {
+	var lat_offset = getLatOffset(neLat, swLat);
+	var lng_offset = getLngOffset(neLng, swLng);
+	
+	var usable_data = [];
+	_filterData(raw_data, usable_data,
+			neLat + lat_offset,
+			neLng + lng_offset,
+			swLat - lat_offset,
+			swLng - lng_offset,
+			type);
+	set_scaler(type);
+	
+	var weight_points = [];
+	for (var i = 0; i < usable_data.length; i++) {
+		weight_points.push(usable_data[i].weight);
+	}
+	var topval = getArrayMax(weight_points);
+	var botval = getArrayMin(weight_points);
+
+	console.log("Top val: " + topval);
+	console.log("Bottom val: " + botval);
+	
+	for (var i = 0; i < usable_data.length; i++) {
+		addHeatmapCoord(hm_data, usable_data[i].lat, usable_data[i].lng,
+				apply_scaler(usable_data[i].weight, botval, type));
 	}
 }
 
@@ -310,7 +325,7 @@ function pointOnLine(lat, lng, point1, point2) {
 function getDataWeight(hm_data, lat, lng, type) {
 	var weight_val = 0;
 	if (type == "WIND") {
-		weight_val = _getDataWeightWind(hm_data, lat, lng, false);
+		weight_val = _getDataWeightWind(hm_data, lat, lng);
 	} else if (type == "SOLAR") {
 		weight_val = _getDataWeightSolar(hm_data, lat, lng);
 	} else if (type == "HYDRO") {
@@ -335,24 +350,115 @@ function getDataWeight(hm_data, lat, lng, type) {
  * ajax calls will need to be handled here first.
  */
 function getPointData(lat_point, lng_point) {
-	var pointDataObj = {
-			wind_raw : 0,
-			solar_raw : 0,
-			hydro_raw : 0,
-			total_energy : 0
+	return pointDataObj = {
+			lat : lat_point,
+			lng : lng_point,
+			wind_raw : null,
+			solar_raw : null,
+			hydro_raw : null
 	};
+}
 
-	// Fake [all] only some of the data!!
-	pointDataObj.wind_raw = ((wind_data.length) ? 
-			_getDataWeightWind(wind_data, lat_point, lng_point, true)*WIND_SCALER : 
-				1000 * Math.random());
-	pointDataObj.solar_raw = ((solar_data.length) ? 
-			_getDataWeightSolar(solar_data, lat_point, lng_point)*SOLAR_SCALER :
-				10 * Math.random());
-	pointDataObj.hydro_raw = ((hydro_data.length) ?
-			_getDataWeightHydro(hydro_data, lat_point, lng_point)*HYDRO_SCALER :
-				(Math.random() > 0.65 ? 5000 * Math.random() : 0));
-	pointDataObj.total_energy = pointDataObj.wind_raw
-	+ pointDataObj.solar_raw + pointDataObj.hydro_raw;
-	return pointDataObj;
+/*
+ * You want real data for each energy type at a single point? Well here you go!
+ * Feast your eyes on this!
+ * 
+ * TODO: Clean this up a little bit. Could stand a bit of modularizing...
+ */
+function populatePointData(pointDataObj, uniq_id) {
+	var offset = 0.05;
+	
+	var neLat = pointDataObj.lat + offset;
+	var neLng = pointDataObj.lng + offset;
+	var swLat = pointDataObj.lat - offset;
+	var swLng = pointDataObj.lng - offset;
+
+	if (wind_data.length) {
+		pointDataObj.wind_raw = _getDataWeightWind(wind_data, pointDataObj.lat, pointDataObj.lng)
+			* WIND_SCALER;
+		$("#" + uniq_id + " .windstring").html(pointDataObj.wind_raw.toFixed(2).toString());
+		_tryPopulateTotalEnergy(pointDataObj, uniq_id);
+	} else if (checkCache(neLat, neLng, swLat, swLng, "WIND")) {
+		var hm_data = [];
+		var raw_data = fetchFromCache(pointDataObj.lat, pointDataObj.lng, 
+				pointDataObj.lat, pointDataObj.lng, "WIND");
+		processData(raw_data, hm_data, neLat, neLng, swLat, swLng, "WIND");
+		pointDataObj.wind_raw = _getDataWeightWind(hm_data, pointDataObj.lat, pointDataObj.lng)
+			* WIND_SCALER;
+		$("#" + uniq_id + " .windstring").html(pointDataObj.wind_raw.toFixed(2).toString());
+		_tryPopulateTotalEnergy(pointDataObj, uniq_id);
+	} else {
+		queryAndCallback('anu', neLat, neLng, swLat, swLng, 0, 0, "WIND", function(data) {
+			var hm_data = [];
+			processData(data, hm_data, neLat, neLng, swLat, swLng, "WIND");
+			pointDataObj.wind_raw = _getDataWeightWind(hm_data, pointDataObj.lat, pointDataObj.lng)
+				* WIND_SCALER;
+			$("#" + uniq_id + " .windstring").html(pointDataObj.wind_raw.toFixed(2).toString());
+			_tryPopulateTotalEnergy(pointDataObj, uniq_id);
+		});
+	}
+	
+	if (solar_data.length) {
+		pointDataObj.solar_raw = _getDataWeightSolar(solar_data, pointDataObj.lat, pointDataObj.lng)
+			* SOLAR_SCALER;
+		$("#" + uniq_id + " .solarstring").html(pointDataObj.solar_raw.toFixed(2).toString());
+		_tryPopulateTotalEnergy(pointDataObj, uniq_id);
+	} else if (checkCache(neLat, neLng, swLat, swLng, "SOLAR")) {
+		var hm_data = [];
+		var raw_data = fetchFromCache(pointDataObj.lat, pointDataObj.lng,
+				pointDataObj.lat, pointDataObj.lng, "SOLAR");
+		processData(raw_data, hm_data, neLat, neLng, swLat, swLng, "SOLAR");
+		pointDataObj.solar_raw = _getDataWeightSolar(hm_data, pointDataObj.lat, pointDataObj.lng)
+			* SOLAR_SCALER;
+		$("#" + uniq_id + " .solarstring").html(pointDataObj.solar_raw.toFixed(2).toString());
+		_tryPopulateTotalEnergy(pointDataObj, uniq_id);
+	} else {
+		queryAndCallback('anu', neLat, neLng, swLat, swLng, 0, 0, "SOLAR", function(data) {
+			var hm_data = [];
+			processData(data, hm_data, neLat, neLng, swLat, swLng, "SOLAR");
+			pointDataObj.solar_raw = _getDataWeightSolar(hm_data, pointDataObj.lat, pointDataObj.lng)
+				* SOLAR_SCALER;
+			$("#" + uniq_id + " .solarstring").html(pointDataObj.solar_raw.toFixed(2).toString());
+			_tryPopulateTotalEnergy(pointDataObj, uniq_id);
+		});
+	}
+	
+	if (hydro_data.length) {
+		pointDataObj.hydro_raw = _getDataWeightHydro(hydro_data, pointDataObj.lat, pointDataObj.lng)
+			* HYDRO_SCALER;
+		$("#" + uniq_id + " .hydrostring").html(pointDataObj.hydro_raw.toFixed(2).toString());
+		_tryPopulateTotalEnergy(pointDataObj, uniq_id);
+	} else if (checkCache(neLat, neLng, swLat, swLng, "HYDRO")) {
+		var hm_data = [];
+		var raw_data = fetchFromCache(pointDataObj.lat, pointDataObj.lng,
+				pointDataObj.lat, pointDataObj.lng, "HYDRO");
+		processData(raw_data, hm_data, neLat, neLng, swLat, swLng, "HYDRO");
+		pointDataObj.hydro_raw = _getDataWeightHydro(hm_data, pointDataObj.lat, pointDataObj.lng)
+			* HYDRO_SCALER;
+		$("#" + uniq_id + " .hydrostring").html(pointDataObj.hydro_raw.toFixed(2).toString());
+		_tryPopulateTotalEnergy(pointDataObj, uniq_id);
+	}  else {
+		queryAndCallback('anu', neLat, neLng, swLat, swLng, 0, 0, "HYDRO", function(data) {
+			var hm_data = [];
+			processData(data, hm_data, neLat, neLng, swLat, swLng, "HYDRO");
+			pointDataObj.hydro_raw = _getDataWeightHydro(hm_data, pointDataObj.lat, pointDataObj.lng)
+				* HYDRO_SCALER;
+			$("#" + uniq_id + " .hydrostring").html(pointDataObj.hydro_raw.toFixed(2).toString());
+			_tryPopulateTotalEnergy(pointDataObj, uniq_id);
+		});
+	}
+}
+
+/*
+ * If all the energy types of a pointDataObj have a value, populate the total
+ * energy. 
+ */
+function _tryPopulateTotalEnergy(pointDataObj, uniq_id) {
+	if (pointDataObj.wind_raw != null && 
+			pointDataObj.solar_raw != null && 
+			pointDataObj.hydro_raw != null) {
+		var totalEnergy = pointDataObj.wind_raw + pointDataObj.solar_raw + 
+			pointDataObj.hydro_raw;
+		$("#" + uniq_id + " .totalstring").html(totalEnergy.toFixed(2).toString());
+	}
 }

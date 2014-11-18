@@ -22,7 +22,7 @@ function _filterWindData(raw_data, push_data, neLat, neLng, swLat, swLng) {
  * average to the four nearest data points (or if fewer than four data points,
  * using all the ones available).
  */
-function _getDataWeightWind(hm_data, lat, lng, output) {
+function _getDataWeightWind(hm_data, lat, lng) {
 	var nearest = [];
 	var nearest_distance = [];
 
@@ -60,21 +60,12 @@ function _getDataWeightWind(hm_data, lat, lng, output) {
 			if (dist_scaling > 1) {
 				dist_scaling = 1;
 			}
-			if (output) {
-				console.log("Scaling " + dist_scaling);
-				console.log("Weight " + (i+1) + ": " + nearest[i].weight);
-				console.log("Distance " + nearest_distance[i])
-			}
 			final_weight += (nearest[i].weight
 					* (1 - nearest_distance[i] / dist_sum) * dist_scaling);
 			// final_weight += ((1 - (nearest_distance[i] / dist_sum))
 			// * (nearest[i].weight / weight_max));
 		}
 
-	}
-	if (output) {
-		console.log((nearest.length > 0 ? 
-				final_weight / (nearest.length > 1 ? nearest.length - 1 : nearest.length/2) : 0));
 	}
 	return (nearest.length > 0 ? 
 			final_weight / (nearest.length > 1 ? nearest.length - 1 : nearest.length/2) : 0);

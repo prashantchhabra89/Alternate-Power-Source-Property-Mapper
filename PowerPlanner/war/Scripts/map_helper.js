@@ -3,6 +3,10 @@
  * - (the minus symbol) indicates a function
  * = (the equals symbol) indicates a global var
  * 
+ * server_query.js
+ * - queryAndUpdate(season, neLat, neLng, swLat, swLng, lat_offset, lng_offset, type)
+ * - queryAndCallback(season, neLat, neLng, swLat, swLng, lat_offset, lng_offset, type, callback)
+ * 
  * cache_helper.js
  * = wind_cache
  * = solar_cache
@@ -18,7 +22,8 @@
  * - hydroPow(precalc, eff, heightdiff)
  * 
  * data_common_functions.js
- * - updateData(new_data, neLat, neLng, swLat, swLng, type)
+ * - updateData(raw_data, neLat, neLng, swLat, swLng, type)
+ * - processData(raw_data, hm_data, neLat, neLng, swLat, swLng, type)
  * - set_scaler(type)
  * - apply_scaler(raw_weight, offset, type)
  * - _filterData(raw_data, push_data, neLat, neLng, swLat, swLng, type)
@@ -30,6 +35,8 @@
  * - pointOnLine(lat, lng, point1, point2)
  * - getDataWeight(hm_data, lat, lng, type)
  * - getPointData(lat_point, lng_point)
+ * - populatePointData(pointDataObj, uniq_id)
+ * - _tryPopulateTotalEnergy(pointDataObj, uniq_id)
  * 
  * location_helper.js
  * - initializeSearchBox(map, pushToMap, element_id)
@@ -39,7 +46,7 @@
  * - initializeMarkers(map)
  * - addMarker(map, loc)
  * - showHelpMarker()
- * - _balloonText(objectHandle, lat, lng)
+ * - _balloonText(div_id, pointDataObject)
  * 
  * wind_data.js
  * - _filterWindData(raw_data, push_data, neLat, neLng, swLat, swLng)
@@ -201,7 +208,7 @@ function toggleHeatmapData(showWind, showSolar, showHydro) {
  * HYDRO. Triggers a heatmap update upon server response.
  */
 function _getHeatmapData(type, neLat, neLng, swLat, swLng) {
-	console.time("_getHeatmapData");
+	console.time("_checkCacheData");
 	var lat_offset = getLatOffset(neLat, swLat);
 	var lng_offset = getLngOffset(neLng, swLng);
 
@@ -228,44 +235,10 @@ function _getHeatmapData(type, neLat, neLng, swLat, swLng) {
 		var new_data = fetchFromCache(neLat_w_off, neLng_w_off, swLat_w_off, swLng_w_off, type);
 		updateData(new_data, neLat, neLng, swLat, swLng, type);
 		updateHeatmap();
-		console.timeEnd("_getHeatmapData");
+		console.timeEnd("_checkCacheData");
 	} else {
-		$.ajax({
-			// url : '/powerplanner',
-			url : '/powerdb',
-			type : 'POST',
-			data : {
-				type : type,
-				neLat : neLat_w_off,
-				neLng : neLng_w_off,
-				swLat : swLat_w_off,
-				swLng : swLng_w_off,
-				season : "anu"
-			},
-			dataType : 'json',
-			success : function(data, status) {
-				if (status) {
-					console.log("Total Data Points: " + data.length);
-
-					// Cache all points
-					addToCache(data, type);
-
-					updateData(data, neLat, neLng, swLat, swLng, type);
-				}
-				else {
-					console.log("Status: " + status);
-				}
-			},
-			error : function(thing, status, error) {
-				console.log("Error!");
-				console.log(status);
-				console.log(error);
-			},
-			complete : function() {
-				updateHeatmap();
-				console.timeEnd("_getHeatmapData");
-			}
-		});
+		console.timeEnd("_checkCacheData");
+		queryAndUpdate('anu', neLat, neLng, swLat, swLng, lat_offset, lng_offset, type);
 	}
 }
 
