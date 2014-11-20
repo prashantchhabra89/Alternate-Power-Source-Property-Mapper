@@ -249,13 +249,13 @@ function _getHeatmapData(type, neLat, neLng, swLat, swLng) {
  */
 function getLatOffset(northLat, southLat) {
 	var lat_offset = (northLat - southLat);
-	if (view_state == WIDE_VIEW) {
+	/*if (view_state == WIDE_VIEW) {
 		lat_offset = lat_offset / 4;
 	} else if (view_state == SMALL_VIEW) {
 		lat_offset = lat_offset * 2;
 	} else if (view_state == OVER_VIEW) {
 		lat_offset = lat_offset / 8;
-	}
+	}*/
 	return lat_offset;
 }
 
@@ -265,13 +265,13 @@ function getLatOffset(northLat, southLat) {
  */
 function getLngOffset(eastLng, westLng) {
 	var lng_offset = (eastLng - westLng);
-	if (view_state == WIDE_VIEW) {
+	/*if (view_state == WIDE_VIEW) {
 		lng_offset = lng_offset / 4;
 	} else if (view_state == SMALL_VIEW) {
 		lng_offset = lng_offset * 2;
 	} else if (view_state == OVER_VIEW) {
 		lng_offset = lng_offset / 8;
-	}
+	}*/
 	return lng_offset;
 }
 
