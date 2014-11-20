@@ -103,8 +103,8 @@ function _filterData(raw_data, push_data, neLat, neLng, swLat, swLng, type) {
  * too large.
  */
 function _interpolateData(hm_data, neLat, neLng, swLat, swLng, type) {
-	var lat_offset = (neLat - swLat) / 10;
-	var lng_offset = (neLng - swLng) / 10;
+	var lat_offset = (neLat - swLat);// / 10;
+	var lng_offset = (neLng - swLng);// / 10;
 
 	var lat_width = (neLat - swLat) + (2 * lat_offset);
 	var lng_width = (neLng - swLng) + (2 * lng_offset);
