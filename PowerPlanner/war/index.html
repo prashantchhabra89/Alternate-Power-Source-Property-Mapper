@@ -31,10 +31,21 @@
 <script src="Scripts/Data/wind_data.js"></script>
 <script src="Scripts/Data/solar_data.js"></script>
 <script src="Scripts/Data/hydro_data.js"></script>
+<script src="Scripts/html2canvas.js"></script>
+<script>
+function generateImage() {
+    html2canvas($("#bodytag"), {
+        onrendered: function(canvas) {
+            var myImage = canvas.toDataURL("image/png");
+            window.open(myImage);
+        }
+    });
+};
+</script>
 
 </head>
 
-<body>
+<body id="bodytag">
 	<!-- Start of first page -->
 	<div data-role="page" id="home">
 		<!-- /header -->
@@ -264,6 +275,7 @@
 		<div data-role="footer" data-position="fixed" data-theme="b"
 			data-tap-toggle="false">
 			<p class="footer-text">Copyright &copy Power Planner 2014</p>
+			<button type="button" onclick="generateImage();">Generate Image</button>
 		</div>
 	</div>
 	<!-- /page -->
