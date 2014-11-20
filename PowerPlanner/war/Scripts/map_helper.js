@@ -323,10 +323,10 @@ function updateHeatmap() {
 	hm_data = hm_data.concat(solar_data);
 	hm_data = hm_data.concat(hydro_data);
 
-	if (!POINT_DEBUGGER) {
+	/*if (!POINT_DEBUGGER) {
 		g_heatmap.set('radius', MAX_DATA_WIDTH
 				/ Math.pow(2, (g_map.getZoom() - LEAST_ZOOM)) * 0.98);
-	}
+	}*/
 
 	console.log("Points on map: " + hm_data.length);
 

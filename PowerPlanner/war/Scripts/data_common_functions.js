@@ -153,6 +153,10 @@ function _interpolateData(hm_data, neLat, neLng, swLat, swLng, type) {
 				offset = latset; // reset offset
 			}
 		}
+	} else if (type == "HYDRO") {
+		_boundedInterpolation(hm_data, temp_data, streams_data, lat_width, 
+				lng_width, swLat - lat_offset, swLng - lng_offset, latset, 
+				lngset, offset, type);
 	} else {
 		_createInterpolation(hm_data, temp_data, lat_width, lng_width,
 				swLat - lat_offset, swLng - lng_offset, latset, lngset, 
@@ -160,6 +164,19 @@ function _interpolateData(hm_data, neLat, neLng, swLat, swLng, type) {
 	}
 
 	return temp_data;
+}
+
+function _boundedInterpolation(hm_data, fill_data, bind_data, lat_width, 
+		lng_width, lat_start, lng_start, latset, lngset, offset, type) {
+	console.log(bind_data);
+	for (var i = 0; i < bind_data.length; i++) {
+		for (var j = 0; j < bind_data[i].length; j++) {
+			addHeatmapCoord(fill_data, bind_data[i][j].lat, bind_data[i][j].lon, Math.random());
+		}
+	}
+	
+	g_heatmap.set('radius', MAX_DATA_WIDTH
+			/ Math.pow(2, (g_map.getZoom() - LEAST_ZOOM)) * 0.08);
 }
 
 /*
