@@ -36,12 +36,13 @@ body {
 }
 #pac-input {
 	margin-top: 16px;
+	width: 300px;
 }
 #pac-input:focus, #pac-input-intro:focus {
 	border-color: #4d90fe;
 	margin-left: -1px;
 	padding-left: 14px; /* Regular padding-left + 1. */
-	width: 401px;
+	width: 300px;
 	color: #333;
 }
 
@@ -412,6 +413,13 @@ h4.intro-subheading {
 		font-size: 40px;
 		margin-top: 40px;
 	}
+	#pac-input {
+		margin-top: 16px;
+		width: 210px;
+	}
+	#pac-input:focus {
+		width: 210px !important;
+	}
 	p.intro-text {
 		font-size: 20px;
 		margin-top: 52px;
@@ -508,6 +516,13 @@ h4.intro-subheading {
 @media only screen and (min-width: 768px) {
 	h1.intro-title {
 		font-size: 80px;
+	}
+	#pac-input {
+		margin-top: 16px;
+		width: 500px;
+	}
+	#pac-input:focus {
+		width: 500px !important;
 	}
 	.show-description {
 		height: 236px !important;
