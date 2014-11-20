@@ -34,10 +34,13 @@
 <script src="Scripts/html2canvas.js"></script>
 <script>
 function generateImage() {
+//document.querySelector('textual_info').style.display = "block";
     html2canvas($("#bodytag"), {
         onrendered: function(canvas) {
             var myImage = canvas.toDataURL("image/png");
             window.open(myImage);
+            // document.querySelector('textual_info').style.display = "none";
+            
         }
     });
 };
@@ -278,6 +281,10 @@ function generateImage() {
 			<button type="button" onclick="generateImage();">Generate Image</button>
 		</div>
 	</div>
+	<!--  
+	<div id="textual_info">
+	textual info for image generation goes here.
+	</div>-->
 	<!-- /page -->
 </body>
 </html>
