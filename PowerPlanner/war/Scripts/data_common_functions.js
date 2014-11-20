@@ -4,7 +4,7 @@
  */
 function updateData(raw_data, neLat, neLng, swLat, swLng, type) {
 	var hm_data = [];
-	processData(raw_data, hm_data, neLat, neLng, swLat, swLng, type);
+	processData(raw_data, hm_data, neLat, neLng, swLat, swLng, type);	
 	
 	console.log("Data Points on Screen: " + hm_data.length);
 	console.log("Scaler: " + scaler);
@@ -461,4 +461,19 @@ function _tryPopulateTotalEnergy(pointDataObj, uniq_id) {
 			pointDataObj.hydro_raw;
 		$("#" + uniq_id + " .totalstring").html(totalEnergy.toFixed(2).toString());
 	}
+}
+
+/*
+ * Get season's representative index.
+ */
+function parseSeason(season) {
+	var season_index = 0;
+	switch(season) {
+	case "anu": season_index = 0; break;
+	case "djf": season_index = 1; break;
+	case "mam": season_index = 2; break;
+	case "jja": season_index = 3; break;
+	case "son": season_index = 4; break;
+	}
+	return season_index;
 }

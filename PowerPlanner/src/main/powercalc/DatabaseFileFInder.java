@@ -10,14 +10,14 @@ public class DatabaseFileFInder {
 	private String [] windFileFullArr_mam = new String[630];
 	private String [] windFileFullArr_son = new String[630];
 	private String [] SolardFileFullArr = new String[5];
-	private String [] HydroFileFullArr = new String[6];
+	private String [] HydroFileFullArr = new String[330];
 	private Double latitude1;
 	private Double latitude2;
 	private Double longitude1;
 	private Double longitude2;
 	private String returnWindFileListArray[] = new String[3150];
 	private String returnSolarFileListArray[] = new String[1];
-	private String returnHydroFileListArray[] = new String[2];
+	private String returnHydroFileListArray[] = new String[326];
 	private int counterWindfileFinder;
 	private String pathWind;
 	private String pathSolar;
@@ -49,12 +49,17 @@ public class DatabaseFileFInder {
 		SolardFileFullArr[3] = "Solar_jja.json";
 		SolardFileFullArr[4] = "Solar_son.json";
 	    
-	    HydroFileFullArr[0] = "Stream_1.json";
-	    HydroFileFullArr[1] = "Hydro_anu.json";
-	    HydroFileFullArr[2] = "Hydro_djf.json";
-	    HydroFileFullArr[3] = "Hydro_mam.json";
-	    HydroFileFullArr[4] = "Hydro_jja.json";
-	    HydroFileFullArr[5] = "Hydro_son.json";
+	    HydroFileFullArr[0] = "Hydro_anu.json";
+	    HydroFileFullArr[1] = "Hydro_djf.json";
+	    HydroFileFullArr[2] = "Hydro_mam.json";
+	    HydroFileFullArr[3] = "Hydro_jja.json";
+	    HydroFileFullArr[4] = "Hydro_son.json";
+	    for (int i = 0; i < 13; i++) {
+	    	for (int j = 0; j < 25; j++) {
+	    		HydroFileFullArr[5 + i*25 + j] = "Stream_" + String.valueOf(49+i) + "_" + String.valueOf(-138+j)
+						+ "_" + String.valueOf(48+i) + "_" + String.valueOf(-139+j) + ".json";
+	    	}
+	    }
 	}
 	
     //supplied season name should be anu,djf,jja,son,mam
@@ -109,7 +114,6 @@ public class DatabaseFileFInder {
 	}
 	public void displayWindReturnarr()
 	{
-	
 		for(int counter = 0; returnWindFileListArray[counter]!=null; counter++)
 		{
 			System.out.println(returnWindFileListArray[counter]);
@@ -134,21 +138,55 @@ public class DatabaseFileFInder {
 		System.out.println(returnSolarFileListArray[0]);
 	}
 	
-	public String [] hydroFileFinder(String Season, boolean getStreams)
+	public String [] hydroFileFinder(Double neLat, Double neLon, Double swLat, Double swLon, String Season, boolean getHydro, boolean getStream)
 	{
-		int fileCounter = 0;
-		if (getStreams) {
-			returnHydroFileListArray[fileCounter] = pathHydro+HydroFileFullArr[0];
-			fileCounter++;
+		int counterHydrofileFinder = 0;
+		if(getHydro) {
+			switch(Season)
+			{
+				case "anu" : returnHydroFileListArray[counterHydrofileFinder] = pathHydro+HydroFileFullArr[1]; break;
+				case "djf" : returnHydroFileListArray[counterHydrofileFinder] = pathHydro+HydroFileFullArr[2]; break;
+				case "mam" : returnHydroFileListArray[counterHydrofileFinder] = pathHydro+HydroFileFullArr[3]; break;
+				case "jja" : returnHydroFileListArray[counterHydrofileFinder] = pathHydro+HydroFileFullArr[4]; break;
+				case "son" : returnHydroFileListArray[counterHydrofileFinder] = pathHydro+HydroFileFullArr[5]; break;
+			}
+			counterHydrofileFinder++;
 		}
-				
-		switch(Season)
-		{
-			case "anu" : returnHydroFileListArray[fileCounter] = pathHydro+HydroFileFullArr[1]; break;
-			case "djf" : returnHydroFileListArray[fileCounter] = pathHydro+HydroFileFullArr[2]; break;
-			case "mam" : returnHydroFileListArray[fileCounter] = pathHydro+HydroFileFullArr[3]; break;
-			case "jja" : returnHydroFileListArray[fileCounter] = pathHydro+HydroFileFullArr[4]; break;
-			case "son" : returnHydroFileListArray[fileCounter] = pathHydro+HydroFileFullArr[5]; break;
+		if(getStream) {
+			for(String item : HydroFileFullArr)
+			{
+				Pattern boundaryP = Pattern.compile("^(\\w)+_([-]?\\d+)_([-]?\\d+)_([-]?\\d+)_([-]?\\d+).*$");
+				Matcher boundaryM = boundaryP.matcher(item);
+				if (!boundaryM.matches()) {
+					continue;
+				} else {
+					latitude1 = Double.parseDouble(boundaryM.group(2));
+					latitude2 = Double.parseDouble(boundaryM.group(4));
+					longitude1 = Double.parseDouble(boundaryM.group(3));
+					longitude2 = Double.parseDouble(boundaryM.group(5));
+				}
+				//if one of the corner of requested grid falls inside our database grid
+				if(((neLat>=latitude2&&neLat<=latitude1)||(swLat>=latitude2&&swLat<=latitude1))
+						&& ((neLon<=longitude1&&neLon>=longitude2)||(swLon<=longitude1&&swLon>=longitude2)))
+				{
+					returnHydroFileListArray[counterHydrofileFinder]=pathHydro+item;
+					counterHydrofileFinder++;
+				}
+				//if one of the corner of our database grid falls inside requested grid
+				else if (((latitude1>=swLat&&latitude1<=neLat)||(latitude2>=swLat&&latitude2<=neLat))
+						&& ((longitude1>=swLon&&longitude1<=neLon)||(longitude2>=swLon&&longitude2<=neLon)))
+				{
+					returnHydroFileListArray[counterHydrofileFinder]=pathHydro+item;
+					counterHydrofileFinder++;
+				}
+				//if there is overlap of the database and requested grid, but no corners fall in the other
+				else if (((latitude2<swLat && latitude1>neLat)&&(longitude2>swLon && longitude1<neLon))
+						|| ((longitude2<swLon && longitude1>neLon)&&(latitude2>swLat && latitude1<neLat))) 
+				{
+					returnHydroFileListArray[counterHydrofileFinder]=pathHydro+item;
+					counterHydrofileFinder++;
+				}	
+			}
 		}
 		return returnHydroFileListArray;
 	}

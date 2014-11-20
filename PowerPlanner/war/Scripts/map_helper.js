@@ -208,6 +208,7 @@ function toggleHeatmapData(showWind, showSolar, showHydro) {
  * HYDRO. Triggers a heatmap update upon server response.
  */
 function _getHeatmapData(type, neLat, neLng, swLat, swLng) {
+	var season = "anu";
 	console.time("_checkCacheData");
 	var lat_offset = getLatOffset(neLat, swLat);
 	var lng_offset = getLngOffset(neLng, swLng);
@@ -228,17 +229,17 @@ function _getHeatmapData(type, neLat, neLng, swLat, swLng) {
 	console.log("swLng: " + swLng_w_off);
 
 	// Check whether cache has the requested data
-	var in_cache = checkCache(neLat_w_off, neLng_w_off, swLat_w_off, swLng_w_off, type);
+	var in_cache = checkCache(neLat_w_off, neLng_w_off, swLat_w_off, swLng_w_off, type, season);
 	
 	if(in_cache) {
 		console.log("IN CACHE");
-		var new_data = fetchFromCache(neLat_w_off, neLng_w_off, swLat_w_off, swLng_w_off, type);
+		var new_data = fetchFromCache(neLat_w_off, neLng_w_off, swLat_w_off, swLng_w_off, type, season);
 		updateData(new_data, neLat, neLng, swLat, swLng, type);
 		updateHeatmap();
 		console.timeEnd("_checkCacheData");
 	} else {
 		console.timeEnd("_checkCacheData");
-		queryAndUpdate('anu', neLat, neLng, swLat, swLng, lat_offset, lng_offset, type);
+		queryAndUpdate(season, neLat, neLng, swLat, swLng, lat_offset, lng_offset, type);
 	}
 }
 
