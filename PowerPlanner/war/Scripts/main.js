@@ -190,5 +190,6 @@ function startButtonClick() {
 		markerBalloon.open(g_map);
 		markerBalloon.setPosition(g_map.getCenter());
 	});
+	startIntro();
 }
 
