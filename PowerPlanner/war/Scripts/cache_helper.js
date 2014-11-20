@@ -106,7 +106,11 @@ function fetchFromCache(neLat, neLng, swLat, swLng, type, season) {
 	} else if (type == "HYDRO") {
 		console.log("ACCESSING HYDRO CACHE");
 		new_data.push(hydro_cache[parseSeason(season)]);
-		new_data.concat(fetchCacheStream(neLat_floor, neLng_floor, swLat_floor, swLng_floor));
+		var stream_array = fetchCacheStream(neLat_floor, neLng_floor, swLat_floor, swLng_floor);
+		console.log("str len" + stream_array.length);
+		for (var i = 0; i < stream_array.length; i++) {
+			new_data.push(stream_array[i]);			
+		}
 	}
 	
 	return new_data;
@@ -124,7 +128,6 @@ function fetchCacheStream(neLat, neLng, swLat, swLng) {
 			new_data.push(stream_cache[lat][lng]);
 		}
 	}
-	
 	return new_data;
 }
 
@@ -144,8 +147,7 @@ function addToCache(new_data, type, season) {
 	} else if (type == "HYDRO") {
 		var hydro_new_data = [];
 		if (typeof hydro_cache[parseSeason(season)] == 'undefined') {
-			hydro_new_data = new_data.slice(0,1);
-			hydro_cache[parseSeason(season)] = hydro_new_data;
+			hydro_cache[parseSeason(season)] = new_data.slice(0,1)[0];
 			
 			for(var i = 1; i < new_data.length; i++) {
 				if(typeof stream_cache[new_data[i].grid.swLat] == 'undefined') {
@@ -162,6 +164,5 @@ function addToCache(new_data, type, season) {
 				stream_cache[new_data[i].grid.swLat][new_data[i].grid.swLng] = new_data[i];
 			}
 		}
-		
 	}
 }

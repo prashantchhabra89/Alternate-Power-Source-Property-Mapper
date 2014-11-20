@@ -144,11 +144,11 @@ public class DatabaseFileFInder {
 		if(getHydro) {
 			switch(Season)
 			{
-				case "anu" : returnHydroFileListArray[counterHydrofileFinder] = pathHydro+HydroFileFullArr[1]; break;
-				case "djf" : returnHydroFileListArray[counterHydrofileFinder] = pathHydro+HydroFileFullArr[2]; break;
-				case "mam" : returnHydroFileListArray[counterHydrofileFinder] = pathHydro+HydroFileFullArr[3]; break;
-				case "jja" : returnHydroFileListArray[counterHydrofileFinder] = pathHydro+HydroFileFullArr[4]; break;
-				case "son" : returnHydroFileListArray[counterHydrofileFinder] = pathHydro+HydroFileFullArr[5]; break;
+				case "anu" : returnHydroFileListArray[counterHydrofileFinder] = pathHydro+HydroFileFullArr[0]; break;
+				case "djf" : returnHydroFileListArray[counterHydrofileFinder] = pathHydro+HydroFileFullArr[1]; break;
+				case "mam" : returnHydroFileListArray[counterHydrofileFinder] = pathHydro+HydroFileFullArr[2]; break;
+				case "jja" : returnHydroFileListArray[counterHydrofileFinder] = pathHydro+HydroFileFullArr[3]; break;
+				case "son" : returnHydroFileListArray[counterHydrofileFinder] = pathHydro+HydroFileFullArr[4]; break;
 			}
 			counterHydrofileFinder++;
 		}
