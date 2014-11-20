@@ -431,6 +431,15 @@ h4.intro-subheading {
 		margin-top:-40px;
 		margin-bottom:-15px
 	}
+	div.ui-input-text{
+		width: 100% !important;
+	}
+	.searchBoxWidth {
+		width: 235px !important;
+	}
+	.resourcesInput {
+		width: 140px !important;
+	}
 	.app-header {
 		padding: 0.5em 0 !important;
 		font-size: 0.8em !important;
@@ -471,7 +480,7 @@ h4.intro-subheading {
 	.resources-panel {
 	  width:100%;
 	}
-		.start-button {
+	.start-button {
 		margin-bottom: 40% !important;
 	}
 	
@@ -498,7 +507,13 @@ h4.intro-subheading {
 		font-size: 0.8em !important;
 	}
 	div.ui-input-text{
-		width: 170px !important;
+		width: 100% !important;
+	}
+	.searchBoxWidth {
+		width: 235px !important;
+	}
+	.resourcesInput {
+		width: 160px !important;
 	}
 	.showAdvancedOptions {
 		width: 39% !important;
@@ -529,7 +544,10 @@ h4.intro-subheading {
 		display: inline;
 	}
 	div.ui-input-text{
-		width: 170px !important;
+		width: 100% !important;
+	}
+	.searchBoxWidth {
+		width: 235px !important;
 	}
 	.showAdvancedOptions {
 		width: 15% !important;
