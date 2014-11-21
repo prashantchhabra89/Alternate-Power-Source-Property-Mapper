@@ -3,18 +3,19 @@
  */
 function _filterHydroData(raw_data, push_data, neLat, neLng, swLat, swLng) {
 	for (var i = 0; i < raw_data.length; i++) {
-		if (raw_data[i].hasOwnProperty('points')) {
-			if (raw_data[i].points[0].lat > swLat && raw_data[i].points[0].lat < neLat) {
-				if (raw_data[i].points[0].lon > swLng && raw_data[i].points[0].lon < neLng) {
-					streams_data.push(raw_data[i].points);
-				}
+		if (raw_data[i].hasOwnProperty('grid')) {
+			for (var j = 0; j < raw_data[i].data.length; j++) {
+				streams_data.push(raw_data[i].data[j].points);
 			}
+			
 		} else {
-			push_data.push({
-				lat : raw_data[i].lat,
-				lng : raw_data[i].lon,
-				weight : hydroPow(raw_data[i].precalc,0.9,15)
-			});
+			for (var j = 0; j < raw_data[i].length; j++) {
+				push_data.push({
+					lat : raw_data[i][j].lat,
+					lng : raw_data[i][j].lon,
+					weight : hydroPow(raw_data[i][j].precalc,0.9,15)
+				});
+			}
 		}
 	}
 }

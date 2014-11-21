@@ -1,9 +1,16 @@
+var getStream = true; // Prevent request for stream data when not needed
+
 function queryAndUpdate(season, neLat, neLng, swLat, swLng, lat_offset, lng_offset, type) {
 	console.time("_getHeatmapData");
 	var neLat_w_off = (neLat + lat_offset);
 	var neLng_w_off = (neLng + lng_offset);
 	var swLat_w_off = (swLat - lat_offset);
 	var swLng_w_off = (swLng - lng_offset);
+	
+	var getHydro = false;	
+	if (typeof hydro_cache[parseSeason(season)] == 'undefined') {
+		getHydro = true;
+	}
 	
 	$.ajax({
 		url : '/powerdb',
@@ -14,7 +21,9 @@ function queryAndUpdate(season, neLat, neLng, swLat, swLng, lat_offset, lng_offs
 			neLng : neLng_w_off,
 			swLat : swLat_w_off,
 			swLng : swLng_w_off,
-			season : season
+			season : season,
+			sendHydro : getHydro,
+			sendStream : getStream
 		},
 		dataType : 'json',
 		success : function(data, status) {
@@ -22,8 +31,12 @@ function queryAndUpdate(season, neLat, neLng, swLat, swLng, lat_offset, lng_offs
 				console.log("Total Data Points: " + data.length);
 
 				// Cache all points
-				addToCache(data, type);
-
+				addToCache(data, type, season);
+				if(type == "HYDRO" && !getHydro) {
+					data.push(hydro_cache[parseSeason(season)]);
+				} else if (type == "HYDRO" && !getStream) {
+					data.push(fetchCacheStream(neLat_w_off, neLng_w_off, swLat_w_off, swLng_w_off));
+				}
 				updateData(data, neLat, neLng, swLat, swLng, type);
 			}
 			else {
@@ -49,6 +62,11 @@ function queryAndCallback(season, neLat, neLng, swLat, swLng, lat_offset, lng_of
 	var swLat_w_off = (swLat - lat_offset);
 	var swLng_w_off = (swLng - lng_offset);
 	
+	var getHydro = false;
+	if (typeof hydro_cache[parseSeason(season)] == 'undefined') {
+		getHydro = true;
+	}
+	
 	$.ajax({
 		url : '/powerdb',
 		type : 'POST',
@@ -58,7 +76,8 @@ function queryAndCallback(season, neLat, neLng, swLat, swLng, lat_offset, lng_of
 			neLng : neLng_w_off,
 			swLat : swLat_w_off,
 			swLng : swLng_w_off,
-			season : season
+			season : season,
+			sendHydro: getHydro
 		},
 		dataType : 'json',
 		success : function(data, status) {
@@ -66,7 +85,7 @@ function queryAndCallback(season, neLat, neLng, swLat, swLng, lat_offset, lng_of
 				console.log("Total Data Points: " + data.length);
 
 				// Cache all points
-				addToCache(data, type);
+				addToCache(data, type, season);
 				callback(data);
 			}
 			else {
