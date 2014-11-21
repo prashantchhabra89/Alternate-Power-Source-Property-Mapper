@@ -208,7 +208,6 @@ function toggleHeatmapData(showWind, showSolar, showHydro) {
  * HYDRO. Triggers a heatmap update upon server response.
  */
 function _getHeatmapData(type, neLat, neLng, swLat, swLng) {
-	var season = "anu";
 	console.time("_checkCacheData");
 	var lat_offset = getLatOffset(neLat, swLat);
 	var lng_offset = getLngOffset(neLng, swLng);
@@ -229,17 +228,17 @@ function _getHeatmapData(type, neLat, neLng, swLat, swLng) {
 	console.log("swLng: " + swLng_w_off);
 
 	// Check whether cache has the requested data
-	var in_cache = checkCache(neLat_w_off, neLng_w_off, swLat_w_off, swLng_w_off, type, season);
+	var in_cache = checkCache(neLat_w_off, neLng_w_off, swLat_w_off, swLng_w_off, type);
 	
 	if(in_cache) {
 		console.log("IN CACHE");
-		var new_data = fetchFromCache(neLat_w_off, neLng_w_off, swLat_w_off, swLng_w_off, type, season);
+		var new_data = fetchFromCache(neLat_w_off, neLng_w_off, swLat_w_off, swLng_w_off, type);
 		updateData(new_data, neLat, neLng, swLat, swLng, type);
 		updateHeatmap();
 		console.timeEnd("_checkCacheData");
 	} else {
 		console.timeEnd("_checkCacheData");
-		queryAndUpdate(season, neLat, neLng, swLat, swLng, lat_offset, lng_offset, type);
+		queryAndUpdate('anu', neLat, neLng, swLat, swLng, lat_offset, lng_offset, type);
 	}
 }
 
@@ -249,13 +248,13 @@ function _getHeatmapData(type, neLat, neLng, swLat, swLng) {
  */
 function getLatOffset(northLat, southLat) {
 	var lat_offset = (northLat - southLat);
-	/*if (view_state == WIDE_VIEW) {
+	if (view_state == WIDE_VIEW) {
 		lat_offset = lat_offset / 4;
 	} else if (view_state == SMALL_VIEW) {
 		lat_offset = lat_offset * 2;
 	} else if (view_state == OVER_VIEW) {
 		lat_offset = lat_offset / 8;
-	}*/
+	}
 	return lat_offset;
 }
 
@@ -265,13 +264,13 @@ function getLatOffset(northLat, southLat) {
  */
 function getLngOffset(eastLng, westLng) {
 	var lng_offset = (eastLng - westLng);
-	/*if (view_state == WIDE_VIEW) {
+	if (view_state == WIDE_VIEW) {
 		lng_offset = lng_offset / 4;
 	} else if (view_state == SMALL_VIEW) {
 		lng_offset = lng_offset * 2;
 	} else if (view_state == OVER_VIEW) {
 		lng_offset = lng_offset / 8;
-	}*/
+	}
 	return lng_offset;
 }
 
