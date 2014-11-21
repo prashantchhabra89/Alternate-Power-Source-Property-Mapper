@@ -60,7 +60,7 @@
 					<strong>Power Sources</strong>
 				</h4>
 				<br>
-				<div id="img-container" class="center">
+				<div id="img-container-intro" class="center">
 					<div id="wind-panel" class="wind"></div>
 					<div id="solar-panel" class="solar"></div>
 					<div id="hydro-panel" class="hydro"></div>
@@ -176,7 +176,7 @@
 			<input type="text" name="placesTextSearch" id="pac-input"
 				class="controls" placeholder="Search Box">
 			<h3>How To Use</h3>
-			<p>
+			<p class="howToUse">
 				Select one of the alternative energy source types, and toggle
 				the energy potential heatmap on by selecting 'Show'
 			</p>
@@ -186,7 +186,7 @@
 				<div id="solar-panel" class="solar"></div>
 				<div id="hydro-panel" class="hydro"></div>
 			</div>
-			<p>
+			<p class="howToUse">
 				Choose from wind, solar, or hydro energy generation potentials.
 				See the areas with the greatest and the worst potential for
 				generating your own electricity. Modify the power calculations
@@ -252,9 +252,9 @@
 								<fieldset data-role="controlgroup" data-type="horizontal"
 									class="ui-controlgroup ui-controlgroup-horizontal ui-corner-all">
 									<input class="ui-mini" type="radio" name="windView" id="windAnnual"
-										value="annual" checked="checked" /> <label
+										value="annual" checked="checked"  data-mini="true" /> <label
 										for="windAnnual">Annual</label> <input type="radio"
-										name="windView" id="windSeasonal" value="seasonal" /> <label
+										name="windView" id="windSeasonal" value="seasonal"  data-mini="true"/> <label
 										for="windSeasonal">Seasonal</label>
 								</fieldset>
 							</div>
@@ -297,9 +297,9 @@
 								<fieldset data-role="controlgroup" data-type="horizontal"
 									class="ui-controlgroup ui-controlgroup-horizontal ui-corner-all">
 									<input type="radio" name="solarView" id="solarAnnual"
-										value="annual" checked="checked" /> <label
+										value="annual" checked="checked" data-mini="true"/> <label
 										for="solarAnnual">Annual</label> <input type="radio"
-										name="solarView" id="solarSeasonal" value="seasonal" /> <label
+										name="solarView" id="solarSeasonal" value="seasonal" data-mini="true"/> <label
 										for="solarSeasonal">Seasonal</label>
 								</fieldset>
 							</div>
@@ -340,9 +340,9 @@
 								<fieldset data-role="controlgroup" data-type="horizontal"
 									class="ui-controlgroup ui-controlgroup-horizontal ui-corner-all">
 									<input type="radio" name="hydroView" id="hydroAnnual"
-										value="annual" checked="checked" /> <label
+										value="annual" checked="checked" data-mini="true"/> <label
 										for="hydroAnnual">Annual</label> <input type="radio"
-										name="hydroView" id="hydroSeasonal" value="seasonal" /> <label
+										name="hydroView" id="hydroSeasonal" value="seasonal" data-mini="true"/> <label
 										for="hydroSeasonal">Seasonal</label>
 								</fieldset>
 							</div>
