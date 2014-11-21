@@ -35,7 +35,6 @@ function queryAndUpdate(season, neLat, neLng, swLat, swLng, lat_offset, lng_offs
 			console.log(error);
 		},
 		complete : function() {
-			_setHeatmapSize(type);
 			updateHeatmap();
 			console.timeEnd("_getHeatmapData");
 		}

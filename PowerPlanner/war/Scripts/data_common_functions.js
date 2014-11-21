@@ -3,7 +3,7 @@
  * and assign data to matching global array.
  */
 function updateData(raw_data, neLat, neLng, swLat, swLng, type) {
-	//_setHeatmapSize(type);
+	_setHeatmapSize(type);
 	var hm_data = [];
 	processData(raw_data, hm_data, neLat, neLng, swLat, swLng, type);	
 	
@@ -114,8 +114,8 @@ function _filterData(raw_data, push_data, neLat, neLng, swLat, swLng, type) {
  * too large.
  */
 function _interpolateData(hm_data, neLat, neLng, swLat, swLng, type) {
-	var lat_offset = (neLat - swLat);// / 10;
-	var lng_offset = (neLng - swLng);// / 10;
+	var lat_offset = (neLat - swLat) / 10;
+	var lng_offset = (neLng - swLng) / 10;
 
 	var lat_width = (neLat - swLat) + (2 * lat_offset);
 	var lng_width = (neLng - swLng) + (2 * lng_offset);
@@ -179,14 +179,49 @@ function _interpolateData(hm_data, neLat, neLng, swLat, swLng, type) {
 
 function _boundedInterpolation(hm_data, fill_data, lat_width, 
 		lng_width, lat_start, lng_start, latset, lngset, offset, type) {
+	var diam = MAX_DATA_WIDTH / Math.pow(2, (g_map.getZoom() - LEAST_ZOOM)) * 0.08;
 	console.log(hm_data);
 	for (var i = 0; i < hm_data.length; i++) {
-		//for (var j = 0; j < hm_data[i].points.length; j++) {
+		var curr_point = hm_data[i].points[0];
 		addHeatmapCoord(fill_data, hm_data[i].points[0].lat, hm_data[i].points[0].lon, 
-					Math.random());
-		//}
+				hm_data[i].weight/scaler);
+		for (var j = 1; j < hm_data[i].points.length; j++) {
+			var dist = distanceTo(curr_point.lat, curr_point.lon, 
+					hm_data[i].points[j].lat, hm_data[i].points[j].lon);
+			if (dist > diam) {
+				if (! (dist > MAX_RIVER_SEPARATION)) {
+					_lineInterpolation(fill_data, curr_point, hm_data[i].points[j], 
+							dist, diam, hm_data[i].weight/scaler);
+				}
+				curr_point = hm_data[i].points[j];
+				addHeatmapCoord(fill_data, hm_data[i].points[j].lat,
+						hm_data[i].points[j].lon, hm_data[i].weight/scaler);
+			} 
+		}
 	}
 	console.log(fill_data);
+}
+
+function _lineInterpolation(fill_data, start_point, end_point, distance, diameter, weight) {
+	//var slope = (end_point.lat - start_point.lat)/(end_point.lon - start_point.lon);
+	//var intercept = start_point.lat - slope * start_point.lon;
+	var dist_remaining = distance - diameter;
+	var start_lat = start_point.lat;
+	var start_lon = start_point.lon;
+	var end_lat = end_point.lat;
+	var end_lon = end_point.lon;
+	
+	while (dist_remaining > diameter) {
+		var new_lat = start_lat + (end_lat - start_lat) * (diameter / distance);
+		var new_lon = start_lon + (end_lon - start_lon) * (diameter / distance);
+		
+		addHeatmapCoord(fill_data, new_lat, new_lon, weight);
+		
+		start_lat = new_lat;
+		start_lon = new_lon;
+		
+		dist_remaining -= diameter;
+	}
 }
 
 /*

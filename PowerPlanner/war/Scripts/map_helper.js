@@ -85,12 +85,13 @@ var MAX_DATA_WIDTH = 0.32; /* Width of interpolating points (LEAST_ZOOM = 8) */
 
 var WEIGHT_SCALING_DISTANCE = 1; /* Data point further away has less impact */
 var SOLAR_SCALING_DISTANCE = 1; /* Data point further away may have less impact */
+var MAX_RIVER_SEPARATION = 0.1; /* Due to odd interpolations, limit river size */
 
 var MIN_DISPLAY_WEIGHT = 0.01; /* Don't add a point with less weight to heatmap */
 
 var WIND_SCALER = 12;
 var SOLAR_SCALER = 3.3;
-var HYDRO_SCALER = 500;
+var HYDRO_SCALER = 10000;
 var scaler = WIND_SCALER;
 
 var POINT_DEBUGGER = false; /* true = view data points instead of interpolation */
@@ -234,7 +235,6 @@ function _getHeatmapData(type, neLat, neLng, swLat, swLng) {
 		console.log("IN CACHE");
 		var new_data = fetchFromCache(neLat_w_off, neLng_w_off, swLat_w_off, swLng_w_off, type);
 		updateData(new_data, neLat, neLng, swLat, swLng, type);
-		_setHeatmapSize(type);
 		updateHeatmap();
 		console.timeEnd("_checkCacheData");
 	} else {
