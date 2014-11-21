@@ -2,6 +2,7 @@
  * TODO: Add in other metrics for calculations.
  */
 function _filterWindData(raw_data, push_data, neLat, neLng, swLat, swLng) {
+	console.log(raw_data);
 	for (var grid = 0; grid < raw_data.length; grid++) {
 		for (var i = 0; i < raw_data[grid].data.length; i++) {
 			if (raw_data[grid].data[i].lat > swLat && raw_data[grid].data[i].lat < neLat) {
@@ -15,6 +16,7 @@ function _filterWindData(raw_data, push_data, neLat, neLng, swLat, swLng) {
 			}
 		}
 	}
+	console.log(push_data);
 }
 
 /*

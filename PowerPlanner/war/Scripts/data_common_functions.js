@@ -3,6 +3,7 @@
  * and assign data to matching global array.
  */
 function updateData(raw_data, neLat, neLng, swLat, swLng, type) {
+	//_setHeatmapSize(type);
 	var hm_data = [];
 	processData(raw_data, hm_data, neLat, neLng, swLat, swLng, type);	
 	
@@ -34,34 +35,44 @@ function updateData(raw_data, neLat, neLng, swLat, swLng, type) {
 /*
  * Call this to process raw data. Don't call it on a single point, give that an
  * offset of some value first so that you don't discard all real data points before
- * determining weights.
+ * determining weights. Note that hydro data is a real troublemaker and doesn't do
+ * things like any other data type!
  */
 function processData(raw_data, hm_data, neLat, neLng, swLat, swLng, type) {
 	var lat_offset = getLatOffset(neLat, swLat);
 	var lng_offset = getLngOffset(neLng, swLng);
-	
-	var usable_data = [];
-	_filterData(raw_data, usable_data,
-			neLat + lat_offset,
-			neLng + lng_offset,
-			swLat - lat_offset,
-			swLng - lng_offset,
-			type);
 	set_scaler(type);
 	
-	var weight_points = [];
-	for (var i = 0; i < usable_data.length; i++) {
-		weight_points.push(usable_data[i].weight);
-	}
-	var topval = getArrayMax(weight_points);
-	var botval = getArrayMin(weight_points);
-
-	console.log("Top val: " + topval);
-	console.log("Bottom val: " + botval);
+	if (type == "HYDRO") {
+		_filterData(raw_data, hm_data,
+				neLat + lat_offset,
+				neLng + lng_offset,
+				swLat - lat_offset,
+				swLng - lng_offset,
+				type);
+	} else {
+		var usable_data = [];
+		_filterData(raw_data, usable_data,
+				neLat + lat_offset,
+				neLng + lng_offset,
+				swLat - lat_offset,
+				swLng - lng_offset,
+				type);
+		
+		var weight_points = [];
+		for (var i = 0; i < usable_data.length; i++) {
+			weight_points.push(usable_data[i].weight);
+		}
+		var topval = getArrayMax(weight_points);
+		var botval = getArrayMin(weight_points);
 	
-	for (var i = 0; i < usable_data.length; i++) {
-		addHeatmapCoord(hm_data, usable_data[i].lat, usable_data[i].lng,
-				apply_scaler(usable_data[i].weight, botval, type));
+		console.log("Top val: " + topval);
+		console.log("Bottom val: " + botval);
+		
+		for (var i = 0; i < usable_data.length; i++) {
+			addHeatmapCoord(hm_data, usable_data[i].lat, usable_data[i].lng,
+					apply_scaler(usable_data[i].weight, botval, type));
+		}
 	}
 }
 
@@ -154,7 +165,7 @@ function _interpolateData(hm_data, neLat, neLng, swLat, swLng, type) {
 			}
 		}
 	} else if (type == "HYDRO") {
-		_boundedInterpolation(hm_data, temp_data, streams_data, lat_width, 
+		_boundedInterpolation(hm_data, temp_data, lat_width, 
 				lng_width, swLat - lat_offset, swLng - lng_offset, latset, 
 				lngset, offset, type);
 	} else {
@@ -166,17 +177,16 @@ function _interpolateData(hm_data, neLat, neLng, swLat, swLng, type) {
 	return temp_data;
 }
 
-function _boundedInterpolation(hm_data, fill_data, bind_data, lat_width, 
+function _boundedInterpolation(hm_data, fill_data, lat_width, 
 		lng_width, lat_start, lng_start, latset, lngset, offset, type) {
-	console.log(bind_data);
-	for (var i = 0; i < bind_data.length; i++) {
-		for (var j = 0; j < bind_data[i].length; j++) {
-			addHeatmapCoord(fill_data, bind_data[i][j].lat, bind_data[i][j].lon, Math.random());
-		}
+	console.log(hm_data);
+	for (var i = 0; i < hm_data.length; i++) {
+		//for (var j = 0; j < hm_data[i].points.length; j++) {
+		addHeatmapCoord(fill_data, hm_data[i].points[0].lat, hm_data[i].points[0].lon, 
+					Math.random());
+		//}
 	}
-	
-	g_heatmap.set('radius', MAX_DATA_WIDTH
-			/ Math.pow(2, (g_map.getZoom() - LEAST_ZOOM)) * 0.08);
+	console.log(fill_data);
 }
 
 /*

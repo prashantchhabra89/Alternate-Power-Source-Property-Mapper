@@ -234,6 +234,7 @@ function _getHeatmapData(type, neLat, neLng, swLat, swLng) {
 		console.log("IN CACHE");
 		var new_data = fetchFromCache(neLat_w_off, neLng_w_off, swLat_w_off, swLng_w_off, type);
 		updateData(new_data, neLat, neLng, swLat, swLng, type);
+		_setHeatmapSize(type);
 		updateHeatmap();
 		console.timeEnd("_checkCacheData");
 	} else {
@@ -351,6 +352,17 @@ function addHeatmapCoord(hm_data, lat, lng, weight) {
 	});
 
 	return hm_data;
+}
+
+function _setHeatmapSize(type) {
+	var radius = 0;
+	if (type == "HYDRO") {
+		radius = MAX_DATA_WIDTH / Math.pow(2, (g_map.getZoom() - LEAST_ZOOM)) * 0.08;
+	} else {
+		radius = MAX_DATA_WIDTH / Math.pow(2, (g_map.getZoom() - LEAST_ZOOM)) * 0.98;
+	}
+	g_heatmap.set('radius', radius);
+	return radius;
 }
 
 /*
