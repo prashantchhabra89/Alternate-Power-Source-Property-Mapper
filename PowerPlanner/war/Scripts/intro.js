@@ -1,42 +1,63 @@
 /**
  * Introduction overlay to show our features
  */
+	
 function startIntro() {
-	var intro = introJs();
 	var w = "Wind".bold().fontcolor("green");
 	var s = "Solar".bold().fontcolor("orange");
 	var h = "Hydro".bold().fontcolor("blue");
-	intro.setOptions({
+	var mark = "<div id=\"start-helper\" class=\"scrollFix\">" + 
+	"<p>Right clicking on any area of the<br/>" +
+	"map will place a marker and open<br/>" +
+	"a window with information about<br/>" +
+	"the power generation potential<br/>" + 
+	"in that area?</p></div>";
+	var tour = new Tour({
 		steps: [
-		    {
-		    	intro: "Take a tour of our application to learn its features!"
+			{
+				title: "Introduction",
+				content: "Take a tour of our application to learn its features!",
+				orphan: true
+			},		
+			{
+		    	element: "#wind-panel",
+		    	title: "Wind",
+		    	content: "Click here to see more options for " + w + ". Click again to hide the menu."
 		    },
 		    {
-		    	element: document.querySelectorAll('#start-helper')[0],
-		    	intro: "Check this out!",
-		    	position: 'bottom'
+		    	element: "#solar-panel",
+		    	title: "Solar",
+		    	content: "Click here to see more options for " + s + ". Click again to hide the menu."
 		    },
 		    {
-		    	element: document.querySelectorAll('#wind-panel')[0],
-		    	intro: "Click here to see more options for " + w + ". Click again to hide the menu.",
-		    	position: 'right'
+		    	element: "#hydro-panel",
+		    	title: "Hydro",
+		    	content: "Click here to see more options for " + h + ". Click again to hide the menu."
 		    },
 		    {
-		    	element: document.querySelectorAll('#solar-panel')[0],
-		    	intro: "Click here to see more options for " + s + ". Click again to hide the menu.",
-		    	position: 'right'
+		    	element: "#question-panel",
+		    	title: "Help",
+		    	content: "Click here for more help. Click again to hide the menu."
 		    },
 		    {
-		    	element: document.querySelectorAll('#hydro-panel')[0],
-		    	intro: "Click here to see more options for " + h + ". Click again to hide the menu.",
-		    	position: 'right'
-		    },
-		    {
-		    	element: document.querySelectorAll('#question-panel')[0],
-		    	intro: "Click here for more help. Click again to hide the menu.",
-		    	position: 'right'
+		    	title: "Markers",
+		    	content: mark,
+		    	orphan: true
 		    }
-		]
-	});	
-	intro.start();
+		],
+		orphan: true,
+		backdrop: true,
+		onShown: function(tour) {
+	        var stepElement = getTourElement(tour);
+	        $(stepElement).before($('.tour-step-background'));
+	        $(stepElement).after($('.tour-backdrop'));
+	    }
+	});
+
+	tour.init();
+	tour.restart();
+}
+
+function getTourElement(tour){
+    return tour._options.steps[tour._current].element
 }
