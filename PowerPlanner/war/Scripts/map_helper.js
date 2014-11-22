@@ -93,6 +93,8 @@ var SOLAR_SCALER = 3.3;
 var HYDRO_SCALER = 1000;
 var scaler = WIND_SCALER;
 
+var HOUR_TO_YEAR = 8760;
+
 var POINT_DEBUGGER = false; /* true = view data points instead of interpolation */
 
 //View (or zoom) state of the map; used to implement different time saving

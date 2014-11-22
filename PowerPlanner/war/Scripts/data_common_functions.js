@@ -5,7 +5,7 @@
 function updateData(raw_data, neLat, neLng, swLat, swLng, type) {
 	_setHeatmapSize(type);
 	var hm_data = [];
-	processData(raw_data, hm_data, neLat, neLng, swLat, swLng, type);	
+	processData(raw_data, hm_data, neLat, neLng, swLat, swLng, type);
 	
 	console.log("Data Points on Screen: " + hm_data.length);
 	console.log("Scaler: " + scaler);
@@ -26,7 +26,7 @@ function updateData(raw_data, neLat, neLng, swLat, swLng, type) {
 		} else if (type == "SOLAR") {
 			solar_data = _interpolateData(hm_data, neLat, neLng, swLat, swLng, type);
 		} else if (type == "HYDRO") {
-			hydro_data = _interpolateData(hm_data, neLat, neLng, swLat, swLng, type);
+			hydro_data = hm_data;
 		}
 		console.timeEnd('_interpolateData');
 	}
@@ -43,36 +43,32 @@ function processData(raw_data, hm_data, neLat, neLng, swLat, swLng, type) {
 	var lng_offset = getLngOffset(neLng, swLng);
 	set_scaler(type);
 	
-	if (type == "HYDRO") {
-		_filterData(raw_data, hm_data,
-				neLat + lat_offset,
-				neLng + lng_offset,
-				swLat - lat_offset,
-				swLng - lng_offset,
-				type);
-	} else {
-		var usable_data = [];
-		_filterData(raw_data, usable_data,
-				neLat + lat_offset,
-				neLng + lng_offset,
-				swLat - lat_offset,
-				swLng - lng_offset,
-				type);
-		
-		var weight_points = [];
-		for (var i = 0; i < usable_data.length; i++) {
-			weight_points.push(usable_data[i].weight);
-		}
-		var topval = getArrayMax(weight_points);
-		var botval = getArrayMin(weight_points);
+	var usable_data = [];
+	_filterData(raw_data, usable_data,
+			neLat + lat_offset,
+			neLng + lng_offset,
+			swLat - lat_offset,
+			swLng - lng_offset,
+			type);
 	
-		console.log("Top val: " + topval);
-		console.log("Bottom val: " + botval);
-		
-		for (var i = 0; i < usable_data.length; i++) {
-			addHeatmapCoord(hm_data, usable_data[i].lat, usable_data[i].lng,
-					apply_scaler(usable_data[i].weight, botval, type));
-		}
+	var weight_points = [];
+	for (var i = 0; i < usable_data.length; i++) {
+		weight_points.push(usable_data[i].weight);
+	}
+	var topval = getArrayMax(weight_points);
+	var botval = getArrayMin(weight_points);
+
+	console.log("Top val: " + topval);
+	console.log("Bottom val: " + botval);
+	
+	// Hydro has to be interpolated at this point in order to retain meaning
+	if (type == "HYDRO") {
+		usable_data = _interpolateData(usable_data, neLat, neLng, swLat, swLng, type);
+	}
+	
+	for (var i = 0; i < usable_data.length; i++) {
+		addHeatmapCoord(hm_data, usable_data[i].lat, usable_data[i].lng,
+				apply_scaler(usable_data[i].weight, botval, type));
 	}
 }
 
@@ -182,25 +178,29 @@ function _boundedInterpolation(hm_data, fill_data, lat_width,
 	var diam = MAX_DATA_WIDTH / Math.pow(2, (g_map.getZoom() - LEAST_ZOOM)) * 0.08;
 	for (var i = 0; i < hm_data.length; i++) {
 		var curr_point = hm_data[i].points[0];
-		addHeatmapCoord(fill_data, hm_data[i].points[0].lat, hm_data[i].points[0].lon, 
-				hm_data[i].weight/scaler);
+		fill_data.push({
+			lat : hm_data[i].points[0].lat,
+			lng : hm_data[i].points[0].lon,
+			weight : hm_data[i].weight
+		});
 		for (var j = 1; j < hm_data[i].points.length; j++) {
 			var dist = distanceTo(curr_point.lat, curr_point.lon, 
 					hm_data[i].points[j].lat, hm_data[i].points[j].lon);
 			if (dist > diam) {
 				_lineInterpolation(fill_data, curr_point, hm_data[i].points[j], 
-							dist, diam, hm_data[i].weight/scaler);
+							dist, diam, hm_data[i].weight);
 				curr_point = hm_data[i].points[j];
-				addHeatmapCoord(fill_data, hm_data[i].points[j].lat,
-						hm_data[i].points[j].lon, hm_data[i].weight/scaler);
+				fill_data.push({
+					lat : hm_data[i].points[j].lat,
+					lng : hm_data[i].points[j].lon,
+					weight : hm_data[i].weight
+				});
 			} 
 		}
 	}
 }
 
 function _lineInterpolation(fill_data, start_point, end_point, distance, diameter, weight) {
-	//var slope = (end_point.lat - start_point.lat)/(end_point.lon - start_point.lon);
-	//var intercept = start_point.lat - slope * start_point.lon;
 	var dist_remaining = distance - diameter;
 	var start_lat = start_point.lat;
 	var start_lon = start_point.lon;
@@ -211,7 +211,11 @@ function _lineInterpolation(fill_data, start_point, end_point, distance, diamete
 		var new_lat = start_lat + (end_lat - start_lat) * (diameter / distance);
 		var new_lon = start_lon + (end_lon - start_lon) * (diameter / distance);
 		
-		addHeatmapCoord(fill_data, new_lat, new_lon, weight);
+		fill_data.push({
+			lat : new_lat,
+			lng : new_lon,
+			weight : weight
+		});
 		
 		start_lat = new_lat;
 		start_lon = new_lon;

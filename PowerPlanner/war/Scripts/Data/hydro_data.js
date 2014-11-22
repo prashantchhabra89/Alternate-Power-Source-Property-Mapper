@@ -31,8 +31,6 @@ function _getRiverCenter(start_point, end_point) {
 }
 
 function _getDataWeightHydro(hm_data, lat, lng) {
-	console.log(hm_data);
-	console.log(hm_data[0].location.lat());
 	var final_weight = 0;
 	// go through each stream in the streams set
 	for (var i = 0; i < hm_data.length; i++) {
