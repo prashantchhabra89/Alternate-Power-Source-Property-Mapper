@@ -38,50 +38,139 @@
 	<!-- Start of first page -->
 	<div data-role="page" id="home">
 		<!-- /header -->
-		<div data-role="header" data-theme="b" class="ui-header-intro">
-			<header class="intro">
+
+		<div role="main" class="ui-content">
+			<div class="intro">
 				<h1 class="intro-title">Power Planner</h1>
 				<div class="logo-small"></div>
 				<p class="intro-text">Putting power in people's hands for
 					finding sites for sustainable electricity generation.</p>
-				<input type="text" name="placesTextSearch" id="pac-input-intro"
-					class="controls placesTextSearch"
-					placeholder="Search a place in BC"> <br> <a
-					href="#app" class="ui-btn ui-btn-inline start-button">Start</a>
-			</header>
-		</div>
-		<div role="main" class="ui-content calc-background">
-			<h3 class="intro-header calc-header">Calculations</h3>
-			<p class="intro-text calc-text">Ew = 1.8Av3Cp , where Ew is the
-				wind energy output in kWh<br>A is the rotor area of the wind turbine in
-				m2 (note: different brand different area) <br>p is the density of air in
-				kg/m3 (note: different height different density,
-				http://www.denysschen.com/catalogue/density.aspx) <br>v is the wind
-				speed in m/s <br>Cp is the power coefficient (note: it basically means
-				the efficiency of the wind turbine) <br>get data for highlighted from
-				http://www.windatlas.ca/en/index.php taken from
-				http://www.raeng.org.uk/publications/other/23-wind-turbine</p>
-
-			<div class="ui-content about-background">
-				<h3 class="intro-header about-header">About Us</h3>
+				<div class="inputText searchBoxWidth center">
+					<input type="text" name="placesTextSearch" id="pac-input-intro"
+						class="controls placesTextSearch"
+						placeholder="Search a place in BC, Canada">
+				</div>
+				 <br> 
+				 <a	href="#app" class="ui-btn ui-btn-inline start-button">Start</a>
+			</div>
+	
+			<div class="ui-content calc-background">
+				<h3 class="intro-header calc-header">How to use</h3>
 				<h4 class="intro-subheading">
 					<strong>Description</strong>
 				</h4>
-				<p class="about-text">A web application that puts the power into
+				<p class="intro-text calc-text">A web application that puts the power into
 					people's hands for finding sites for sustainable electricity
 					generation. This application is being developed as a project for
 					the Startup Programming class at the University of Victoria.</p>
+				<hr>
+				<p class="intro-text calc-text">Select one of the alternative energy source types, and toggle
+					the energy potential heatmap on by selecting 'Show'</p>
+				<h4 class="intro-subheading">
+					<strong>Power Sources</strong>
+				</h4>
+				<br>
+				<div id="img-container-intro" class="center">
+					<div id="wind-panel" class="wind"></div>
+					<div id="solar-panel" class="solar"></div>
+					<div id="hydro-panel" class="hydro"></div>
+				</div>
+				<p class="intro-text calc-text">Choose from wind, solar, or hydro energy generation
+					potentials. See the areas with the greatest and the worst potential
+					for generating your own electricity. Modify the power calculations
+					to match your current - or future - solar panel, wind turbine,
+					and/or hydro turbine setup!</p>
+			</div>
+			<div class="ui-content disclaimer-background">
+				<h3 class="intro-header about-header">Disclaimer</h3>
+				<p class="about-text">The wind data is based on simulated
+					results, while solar and hydro is based on historic measurements of
+					certain pre-defined locations. The data points are then
+					interpolated to produce the heat maps. Therefore there is no
+					guarantee that the values you see here are accurate. These data
+					serves as a first-cut approximation. Always consult an expert for
+					more accurate opinions.</p>
+			</div>
+			<div class="ui-content calc-background">
+				<h3 class="intro-header calc-header">Methodology</h3>
+				<h4 class="intro-subheading">
+						<strong>Wind</strong>
+						<span id="wind-panel" class="wind"></span>						
+				</h4>
+				<p class="intro-text calc-text">Wind data was obtained and
+					processed from </p>
+				<a href="http://www.windatlas.ca/en/index.php" class="calc-text center">http://www.windatlas.ca/en/index.php.</a>
+				<p class="intro-text calc-text"> The data for
+					the lowest height is at 30m, which is higher than what most home
+					users would build their wind turbines at. So the wind profile power
+					law:</p>
+				<div class="windPowerLaw center"></div>
+				<p class="intro-text calc-text">was applied to the 30m wind
+					speed to obtain approximations of wind speed at 5m, 10m, 15m, 20m,
+					and 25m. The value of the exponent coefficient, is assumed to be
+					0.14.<br> The power calculation equation:</p>
+				<div class="windPowerCalc center"></div>
+				<p class="intro-text calc-text">(copy the stuffs from
+					equations&variables file) For more information on how the original
+					wind data is obtained, please refer to</p>
+				<a href="http://www.windatlas.ca/en/methodology.php" class="calc-text center">http://www.windatlas.ca/en/methodology.php.</a>
+				<hr>
+				<h4 class="intro-subheading">
+					<strong>Solar</strong>
+					<span id="solar-panel" class="solar"></span>					
+				</h4>
+				<p class="intro-text calc-text">Solar data was obtained and
+					processed from</p>
+				<a href="http://pv.nrcan.gc.ca" class="calc-text center">http://pv.nrcan.gc.ca/.</a>
+				<p class="intro-text calc-text">
+					The data taken is mean daily global insolation for every area of
+					every month and annually. From the monthly data, the seasonal
+					average is calculated to be consistent with wind data. <br>
+					The power calculation equation:
+				</p>
+				<div class="solarPowerCalc center"></div>
+				<p class="intro-text calc-text">(copy the stuffs from
+					equations&variables file) For more information on how the original
+					solar data is obtained, please refer to</p>
+				<a href="http://pv.nrcan.gc.ca/?lang=e&m=e" class="calc-text center">http://pv.nrcan.gc.ca/?lang=e&m=e.</a>
+				<hr>
+				<h4 class="intro-subheading">
+						<strong>Hydro</strong>						
+						<span id="hydro-panel" class="hydro"></span>	
+				</h4>
+				<p class="intro-text calc-text">Hydro data was obtained and
+					processed from </p>
+				<a href="http://www.ec.gc.ca/rhc-wsc" class="calc-text">http://www.ec.gc.ca/rhc-wsc/ .</a>
+				<p class="intro-text calc-text">The data taken is the
+					historic monthly water flow speed from various stations across
+					Canada for a period of 10 to 40 years. The seasonal and annual
+					average is calculated to be consistent with wind data. The river
+					and stream path data was obtained and processed from the DataBC
+					Catalogue at </p>
+				<a href="http://www.data.gov.bc.ca/dbc/catalogue" class="calc-text center">http://www.data.gov.bc.ca/dbc/catalogue</a>
+				<p class="intro-text calc-text"> using the WSA
+					- STREAM CENTRELINE NETWORK (50,000) data set. This data set is the
+					digital basemap representation of the aquatic features depicted on
+					NTS 1 to 50,000 scale maps. To reduce storage and complexity,
+					streams shorter than roughly 2km were removed, and any bend in the
+					river less than 30¢X was removed. The power calculation equation:</p>
+				<div class="hydroPowerCalc center"></div>
+				<p class="intro-text calc-text"> (copy the stuffs from
+					equations&variables file) For more information on how the original
+					hydro data is obtained, please refer to </p>
+				<a href="http://www.ec.gc.ca/rhc-wsc/default.asp?lang=En&n=894E91BE-1" class="calc-text center">http://www.ec.gc.ca/rhc-wsc/default.asp?lang=En&n=894E91BE-1</a>
+			</div>
+			<div class="ui-content about-background">
+				<h3 class="intro-header about-header">Contact Us</h3>
 				<h4 class="intro-subheading">
 					<strong>The Team</strong>
 				</h4>
-				<p class="about-text">Charlie Guan, Chuan Yun Loe, Daniel
-					Faulkner, Jonathan Lam, Prashant Chhabra</p>
-				<div class="circular jonathan"></div>
-				<div class="circular"></div>
+				<div class="circular daniel"><p class="about-text teamMembers">Daniel Faulkner</p></div>				
+				<div class="circular charlie"><p class="about-text teamMembers">Charlie Guan</p></div>				
 				<br>
-				<div class="circular"></div>
-				<div class="circular"></div>
-				<div class="circular"></div>
+				<div class="circular prashant"><p class="about-text teamMembers">Prashant Chhabra</p></div>				
+				<div class="circular chuan"><p class="about-text teamMembers">Chuan Yun Loe</p></div>				
+				<div class="circular jonathan"><p class="about-text teamMembers">Jonathan Lam</p></div>				
 			</div>
 			<!-- /content -->
 			<div data-role="footer" data-position="fixed" data-theme="b"
@@ -93,21 +182,21 @@
 	<!-- Start of app page -->
 	<div data-role="page" id="app">
 		<div data-role="panel" data-position="left" data-display="push"
-			id="menu" data-theme="b">
+			id="questionPanel" data-theme="b">
 			<input type="text" name="placesTextSearch" id="pac-input"
 				class="controls" placeholder="Search Box">
 			<h3>How To Use</h3>
-			<p>
+			<p class="howToUse">
 				Select one of the alternative energy source types, and toggle
 				the energy potential heatmap on by selecting 'Show'
 			</p>
 			<h3>Power Sources</h3>
 			<div id="img-container">
-				<div><img src="../images/wind-icon.png"/></div>
-				<div><img src="../images/solar-icon.png"/></div>
-				<div><img src="../images/hydro-icon.png"/></div>
+				<div id="wind-panel" class="wind"></div>
+				<div id="solar-panel" class="solar"></div>
+				<div id="hydro-panel" class="hydro"></div>
 			</div>
-			<p>
+			<p class="howToUse">
 				Choose from wind, solar, or hydro energy generation potentials.
 				See the areas with the greatest and the worst potential for
 				generating your own electricity. Modify the power calculations
@@ -115,34 +204,46 @@
 				and/or hydro turbine setup!
 			</p>
 		</div>
-		<div data-role="panel" data-position="right" data-display="overlay"
-			id="menu2">
-			<h2>Menu2 h2</h2>
-			<h3>Menu h3</h3>
+		<div data-role="panel" data-position="right" data-display="push" data-theme="b"
+			id="pdfPanel">
+			<h2>PDF Export</h2>
+			<fieldset data-role="controlgroup">
+			    <!--<legend>Title:</legend>-->
+			    <input type="checkbox" name="pdfShowAll" id="pdfShowAll" checked="">
+			    <label for="pdfShowAll">Show All</label>
+			    <input type="checkbox" name="pdfShowCord" id="pdfShowCord">
+			    <label for="pdfShowCord">Show marker Coordinates</label>
+			    <input type="checkbox" name="pdfShowWindCol" id="pdfShowWindCol">
+			    <label for="pdfShowWindCol">Show Wind Column</label>
+			</fieldset>
+			<button class="ui-shadow ui-btn ui-corner-all">Export</button>
 		</div>
 		<div data-role="header" data-position="fixed" data-theme="b">
 			<a href="#home"
 				class="jqm-navmenu-link ui-nodisc-icon ui-btn-left ui-btn ui-icon-home ui-btn-icon-notext ui-corner-all"
 				data-icon="home" data-theme="c">About</a>
-			<h1>
+			<h1 class="app-header">
 				Power <img id="logo-icon" src="images/PowerPlannerLogo-min.png"
 					data-thumb="" alt=""> Planner
 			</h1>
-			<a href="#menu2"
-				class="jqm-navmenu-link ui-nodisc-icon ui-btn-right ui-btn ui-icon-gear ui-btn-icon-notext ui-corner-all"
-				data-icon="gear" data-theme="b">About</a>
+			<a href="#pdfPanel" data-icon="action" data-theme="b">PDF</a>
+			
 		</div>
 		<!-- /header -->
 		<div role="main" class="ui-content">
 			<div class="ui-block-a gMap" id="googleMap"></div>
 			<div class="resourceContainer">
-				<div id="wind-panel" class="wind"></div>
-				<div id="solar-panel" class="solar"></div>
-				<div id="hydro-panel" class="hydro"></div>
-				<a href="#menu" id="question-panel" class="question"></a>
+				<div id="wind-panel" class="wind windToggleButton"></div>
+				<div id="solar-panel" class="solar solarToggleButton"></div>
+				<div id="hydro-panel" class="hydro hydroToggleButton"></div>
+				<a href="#questionPanel" id="question-panel" class="question"></a>
 			</div>
 			<div class="resources-panel" id="windResource">
-				<form class="resourceRadioButton" action="" id="windResouceRadio">
+				<h1 class="ui-collapsible-heading windHeading windToggleButton" id="windHeading">
+					<a href="#" class="ui-collapsible-heading-toggle ui-btn ui-icon-carat-d ui-btn-icon-right ui-btn-c windToggleHeading">Wind
+					</a>
+				</h1>
+				<form class="resourceRadioButton" action="" id="windResouceRadio">					
 					<div class="ui-grid-a">
 						<div class="ui-block-a inputLabel">
 							<div data-role="fieldcontain">
@@ -159,10 +260,10 @@
 							<div class="ui-field-contain" id="opt-navbars">
 								<fieldset data-role="controlgroup" data-type="horizontal"
 									class="ui-controlgroup ui-controlgroup-horizontal ui-corner-all">
-									<input type="radio" name="windView" id="windAnnual"
-										value="annual" checked="checked" /> <label
+									<input class="ui-mini" type="radio" name="windView" id="windAnnual"
+										value="annual" checked="checked"  data-mini="true" /> <label
 										for="windAnnual">Annual</label> <input type="radio"
-										name="windView" id="windSeasonal" value="seasonal" /> <label
+										name="windView" id="windSeasonal" value="seasonal"  data-mini="true"/> <label
 										for="windSeasonal">Seasonal</label>
 								</fieldset>
 							</div>
@@ -171,7 +272,7 @@
 									placeholder="units in m2">
 							</div>
 							<div class="inputText">
-								<input type="text" name="windEfficiency" id="windEfficiency" value=""
+								<input class="resourcesInput" type="text" name="windEfficiency" id="windEfficiency" value=""
 									placeholder="Power Coefficient">
 							</div>
 						</div>
@@ -183,6 +284,10 @@
 				</form>
 			</div>
 			<div class="resources-panel" id="solarResource">
+				<h1 class="ui-collapsible-heading solarHeading solarToggleButton" id="solarHeading">
+					<a href="#" class="ui-collapsible-heading-toggle ui-btn ui-icon-carat-d ui-btn-icon-right ui-btn-c solarToggleHeading">Solar
+					</a>
+				</h1>
 				<form class="resourceRadioButton" action="" id="solarResouceRadio">
 					<div class="ui-grid-a">
 						<div class="ui-block-a inputLabel">
@@ -201,9 +306,9 @@
 								<fieldset data-role="controlgroup" data-type="horizontal"
 									class="ui-controlgroup ui-controlgroup-horizontal ui-corner-all">
 									<input type="radio" name="solarView" id="solarAnnual"
-										value="annual" checked="checked" /> <label
+										value="annual" checked="checked" data-mini="true"/> <label
 										for="solarAnnual">Annual</label> <input type="radio"
-										name="solarView" id="solarSeasonal" value="seasonal" /> <label
+										name="solarView" id="solarSeasonal" value="seasonal" data-mini="true"/> <label
 										for="solarSeasonal">Seasonal</label>
 								</fieldset>
 							</div>
@@ -225,6 +330,10 @@
 				</form>
 			</div>
 			<div class="resources-panel" id="hydroResource">
+				<h1 class="ui-collapsible-heading hydroHeading hydroToggleButton" id="hydroHeading">
+					<a href="#" class="ui-collapsible-heading-toggle ui-btn ui-icon-carat-d ui-btn-icon-right ui-btn-c hydroToggleHeading">Hydro
+					</a>
+				</h1>
 				<form class="resourceRadioButton" action="" id="hydroResourceRadio">
 					<div class="ui-grid-a">
 						<div class="ui-block-a inputLabel">
@@ -240,9 +349,9 @@
 								<fieldset data-role="controlgroup" data-type="horizontal"
 									class="ui-controlgroup ui-controlgroup-horizontal ui-corner-all">
 									<input type="radio" name="hydroView" id="hydroAnnual"
-										value="annual" checked="checked" /> <label
+										value="annual" checked="checked" data-mini="true"/> <label
 										for="hydroAnnual">Annual</label> <input type="radio"
-										name="hydroView" id="hydroSeasonal" value="seasonal" /> <label
+										name="hydroView" id="hydroSeasonal" value="seasonal" data-mini="true"/> <label
 										for="hydroSeasonal">Seasonal</label>
 								</fieldset>
 							</div>

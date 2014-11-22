@@ -64,18 +64,21 @@ $(document).ready(function() {
 
 	//HACK: Added a delay for when the panel is fully displayed or hidden, then the radio buttons/checkbox will show
 	// to avoid creating a scroll bar. 
-	$('.wind').on('click', function() {		
+	$('.windToggleButton').on('click', function() {		
 		if (windTogglePannelOn == false){
 			solarTogglePannelOn = false;
 			hydroTogglePannelOn = false;
 			hideSolarResources();
 			hideHydroResources();
-			$('#windResource').toggleClass('show-description');
+			$('#windResource').toggleClass('show-description');			
 			$('#solarResource').removeClass('show-description');
 			$('#hydroResource').removeClass('show-description');
+			$('#solarHeading').removeClass('show-description');
+			$('#hydroHeading').removeClass('show-description');
 			$('#showCheckboxWind').checkboxradio("refresh");
 
 			setTimeout(function() {
+				$('#windHeading').toggleClass('show-description');
 				$('#windResouceRadio').toggleClass('displayRadioButtons');				
 			}, 500);
 			windTogglePannelOn = true;
@@ -88,6 +91,9 @@ $(document).ready(function() {
 			windTogglePannelOn = false;
 			setTimeout(function() {
 				$('#windResource').toggleClass('show-description');
+				$('#windHeading').toggleClass('show-description');
+				$('#solarHeading').removeClass('show-description');
+				$('#hydroHeading').removeClass('show-description');
 				$('#solarResource').removeClass('show-description');
 				$('#hydroResource').removeClass('show-description');
 				$('#showCheckboxWind').checkboxradio("refresh");
@@ -95,7 +101,7 @@ $(document).ready(function() {
 		}
 
 	});
-	$('.solar').on('click', function() {
+	$('.solarToggleButton').on('click', function() {
 		if (solarTogglePannelOn == false){
 			windTogglePannelOn = false;
 			hydroTogglePannelOn = false;
@@ -104,9 +110,12 @@ $(document).ready(function() {
 			$('#windResource').removeClass('show-description');
 			$('#solarResource').toggleClass('show-description');
 			$('#hydroResource').removeClass('show-description');
+			$('#windHeading').removeClass('show-description');
+			$('#hydroHeading').removeClass('show-description');
 			$('#showCheckboxSolar').checkboxradio("refresh");
 
 			setTimeout(function() {
+				$('#solarHeading').toggleClass('show-description');
 				$('#solarResouceRadio').toggleClass('displayRadioButtons');				
 			}, 500);
 			solarTogglePannelOn = true;
@@ -120,12 +129,15 @@ $(document).ready(function() {
 			setTimeout(function() {
 				$('#windResource').removeClass('show-description');
 				$('#solarResource').toggleClass('show-description');
+				$('#solarHeading').toggleClass('show-description');
+				$('#windHeading').removeClass('show-description');
+				$('#hydroHeading').removeClass('show-description');
 				$('#hydroResource').removeClass('show-description');
 				$('#showCheckboxSolar').checkboxradio("refresh");
 			}, 100);
 		}
 	});
-	$('.hydro').on('click', function() {
+	$('.hydroToggleButton').on('click', function() {
 		if (hydroTogglePannelOn == false){
 			windTogglePannelOn = false;
 			solarTogglePannelOn = false;
@@ -134,10 +146,13 @@ $(document).ready(function() {
 			$('#windResource').removeClass('show-description');
 			$('#solarResource').removeClass('show-description');
 			$('#hydroResource').toggleClass('show-description');
+			$('#solarHeading').removeClass('show-description');
+			$('#windHeading').removeClass('show-description');
 			$('#showCheckboxHydro').checkboxradio("refresh");
 
 			setTimeout(function() {
-				$('#hydroResourceRadio').toggleClass('displayRadioButtons');				
+				$('#hydroResourceRadio').toggleClass('displayRadioButtons');
+				$('#hydroHeading').toggleClass('show-description');
 			}, 500);
 			hydroTogglePannelOn = true;
 		}
@@ -150,7 +165,10 @@ $(document).ready(function() {
 			setTimeout(function() {
 				$('#windResource').removeClass('show-description');
 				$('#solarResource').removeClass('show-description');
+				$('#solarHeading').removeClass('show-description');
+				$('#windHeading').removeClass('show-description');
 				$('#hydroResource').toggleClass('show-description');
+				$('#hydroHeading').toggleClass('show-description');
 				$('#showCheckboxHydro').checkboxradio("refresh");
 			}, 100);
 		}
