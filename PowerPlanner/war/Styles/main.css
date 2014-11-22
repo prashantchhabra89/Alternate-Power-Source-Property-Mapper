@@ -36,12 +36,13 @@ body {
 }
 #pac-input {
 	margin-top: 16px;
+	width: 300px;
 }
 #pac-input:focus, #pac-input-intro:focus {
 	border-color: #4d90fe;
 	margin-left: -1px;
 	padding-left: 14px; /* Regular padding-left + 1. */
-	width: 401px;
+	width: 300px;
 	color: #333;
 }
 
@@ -63,7 +64,7 @@ body {
 .resourceContainer {
 	width: 70px;
 	position: absolute;
-	margin: 210px 0 0 10px;
+	margin: 200px 0 0 10px;
 }
 
 .resourceContainer div {
@@ -80,7 +81,8 @@ body {
 }
 
 .show-description {
-  height: 35% !important;
+  height: 250px !important;
+  display: inline;
 }
 
 .selected-resource {
@@ -100,16 +102,35 @@ body {
   bottom: 0;
   margin: 0;
   height: 0px;
-  width:100%;
+  width: 89%;
   transition: height .5s;
   -webkit-transition: height .5s;
   -moz-transition: height .5s;
+  right: 0px;
 }
 
 #showCheckboxHydro {
 	width: 20% !important;
 }
 
+.windHeading, .solarHeading, .hydroHeading{
+	display:none;
+}
+.windToggleHeading{
+	background-color: #54f654 !important;
+	text-shadow: none !important;
+	margin-bottom: 12px !important;
+}
+.solarToggleHeading{
+	background-color: #f3f85d !important;
+	text-shadow: none !important;
+	margin-bottom: 12px !important;
+}
+.hydroToggleHeading{
+	background-color: #5dc0f8 !important;
+	text-shadow: none !important;
+	margin-bottom: 40px !important;
+}
 .wind {
 	background: url(../images/wind-icon.png) no-repeat bottom center scroll !important;
 	width: 55px !important;
@@ -141,6 +162,15 @@ body {
 	border-radius: 50%;
 	box-shadow: 0 0 5px #555;
 }
+#wind-panel {
+	margin: 0px 10px 0px 0px !important;
+}
+#solar-panel {
+	margin: 0px 10px 0px 0px !important;
+}
+#hydro-panel {
+	margin: 0px 10px 0px 0px !important;
+}
 
 #question-panel:HOVER {
 	border-color: #3A27DA;
@@ -171,6 +201,14 @@ body {
 .inputText {
 	width: 90% !important;
 }
+.center {
+	text-align:center !important;
+	margin-left: auto;
+	margin-right: auto;
+}
+.teamMembers {
+	margin: -70px 0px 30px 0px !important;
+}
 .ui-field-contain {
 	padding: 0em !important;
 	margin-bottom: 0em !important;
@@ -190,7 +228,7 @@ body {
 }
 
 div.ui-input-text{
-	width: 30% !important;
+	width: 170px !important;
 	display: inline-block !important;
 	font-family: 'Raleway', sans-serif !important;
 }
@@ -208,6 +246,7 @@ div.ui-input-text{
 	border-radius: 12px;
 	font-family: 'Raleway', sans-serif !important;
 	font-weight: lighter !important;
+	margin-bottom: 25%;
 }
 .intro {
 	display: table;
@@ -230,7 +269,7 @@ h1.intro-title, h2.intro-header {
 	font-weight: bold;
 	text-shadow: initial;
 	font-variant: small-caps;
-	margin: 100px 0px 37px 0px;
+	margin: 24px 0px 37px 0px;
 	font-size: 60px;
 }
 
@@ -245,12 +284,12 @@ h2.intro-header {
 	text-align: center;
 }
 
-p.intro-text, h3.intro-header, p.calc-text, h3.calc-header, p.about-text, h3.about-header {
+p.intro-text, h3.intro-header, a.calc-text, p.calc-text, h3.calc-header, p.about-text, h3.about-header {
 	font-family: 'Raleway', sans-serif;
 	font-size: 24px;
 	font-weight: 200;
 	text-shadow: initial;
-	
+	word-wrap: break-word;
 	margin-left: auto;
 	margin-right: auto;
 }
@@ -277,16 +316,23 @@ h3.intro-header {
 h4.intro-subheading {
 	font-family: 'Raleway', sans-serif;
 	font-size: 30px;
+	margin-bottom: -22px;
+	margin-top: 15px;
 }
 .calc-background {
 	background-color: #fff;
-	margin-bottom: -4px;
+	padding: 0px 20px 30px 20px !important;
 }
 .about-background {
 	text-align: center;
 	color: #fff;
 	background-color: #428bca;
 	margin-bottom: -4px;
+}
+.disclaimer-background {
+	background-color: rgb(48, 81, 81);
+	padding: 0px 20px 0px 20px !important;
+	text-align: center;
 }
 
 .circular {
@@ -295,31 +341,62 @@ h4.intro-subheading {
 	display: inline-block;
 	border-radius: 150px;
 	background: url(../images/profilepic.jpg) no-repeat bottom scroll;
-	margin: 0px 80px 17px 80px;
+	margin: 0px 80px 70px 80px;
 }
 
 .daniel {
-	background: url(../images/profilepic.jpg) no-repeat bottom scroll;
+	background: url(../images/daniel.jpg) no-repeat bottom scroll;
+	margin-bottom: 70px;
+	margin-top: 107px;
 }
 
 .chuan {
-	background: url(../images/profilepic.jpg) no-repeat bottom scroll;
+	background: url(../images/chuan.jpg) no-repeat bottom scroll;
 }
 
 .charlie {
-	background: url(../images/profilepic.jpg) no-repeat bottom scroll;
+	background: url(../images/charlie.jpg) no-repeat bottom scroll;
 }
 
 .prashant {
-	background: url(../images/profilepic.jpg) no-repeat bottom scroll;
+	background: url(../images/prashant.jpg) no-repeat bottom scroll;
 }
 
 .jonathan {
-	background: url(../images/profilepic.jpg) no-repeat bottom scroll;
+	background: url(../images/jonathan.jpg) no-repeat bottom scroll;
+}
+
+
+.windPowerLaw {
+	background: url(../images/windEquation.png) no-repeat bottom scroll;
+	width: 278px;
+	height: 108px;
+}
+.windPowerCalc {
+	background: url(../images/windPowerCalc.png) no-repeat bottom scroll;
+	width: 281px;
+	height: 63px;
+}
+.solarPowerCalc {
+	background: url(../images/solarPowerCalc.png) no-repeat bottom scroll;
+	width: 238px;
+	height: 63px;
+}
+.hydroPowerCalc {
+	background: url(../images/hydroPowerCalc.png) no-repeat bottom scroll;
+	width: 238px;
+	height: 63px;
 }
 
 #img-container {
 	display: table;
+	margin-top: -10px;
+	margin-bottom: -5px;
+}
+#img-container-intro {
+	display: table;
+	margin-top: 20px;
+	margin-bottom: -5px;
 }
 #img-container div img {
 	display: inline-block;
@@ -330,6 +407,10 @@ h4.intro-subheading {
 	text-align: center;
 }
 
+p.howToUse {
+	margin-bottom: 3px !important;
+}
+
 /* Fix for info window showing scroll bar in Firefox */
 .scrollFix {
 	line-height: 1.35;
@@ -338,42 +419,132 @@ h4.intro-subheading {
 }
 
 /*FOR RESPONSIVE LAYOUT*/
-/* 0 - 252px */
-@media all and (max-width: 320px) {
-	.ui-header, .ui-title {
+/* 0 - 320px */
+@media all and (max-width: 416px) {
+	h1.intro-title, h2.intro-header {
+		font-size: 40px;
+		margin-top: 40px;
+	}
+	#pac-input {
+		margin-top: 16px;
+		width: 210px;
+	}
+	#pac-input:focus {
+		width: 210px !important;
+	}
+	p.intro-text {
+		font-size: 20px;
+		margin-top: 25px;
+	}
+	.logo-small {
+		background: url(../images/PowerPlannerLogo-XSmall.png) no-repeat bottom center scroll;
+		margin-left: auto;
+		margin-right:auto;
+		margin-top:-40px;
+		margin-bottom:-15px
+	}
+	div.ui-input-text{
+		width: 100% !important;
+	}
+	.searchBoxWidth {
+		width: 235px !important;
+	}
+	.resourcesInput {
+		width: 140px !important;
+	}
+	.app-header {
 		padding: 0.5em 0 !important;
 		font-size: 0.8em !important;
 	}
+	.resourceContainer {
+		width: 70px;
+		position: absolute;
+		margin: 53px 0 0 10px;
+	}
+	h3.intro-header {
+		font-size: 40px;
+		margin: 20px 0px 10px 10px;
+	}
+	.wind {
+	background: url(../images/wind-icon-small.png) no-repeat bottom center scroll !important;
+	width: 39px !important;
+	height: 39px !important;
+	float: left;
+	}
+	.solar {
+		background: url(../images/solar-icon-small.png) no-repeat bottom center scroll !important;
+		width: 39px !important;
+		height: 39px !important;
+		float: left;	
+	}
+	.hydro {
+		background: url(../images/hydro-icon-small.png) no-repeat bottom center scroll !important;
+		width: 39px !important;
+		height: 39px !important;	
+		float: left;
+	}
+	.question {
+		background: url(../images/question-icon-small.png) no-repeat bottom center scroll !important;
+		width: 39px !important;
+		height: 39px !important;
+		float: left;
+	}
+	.resources-panel {
+	  width:100%;
+	}
+	.start-button {
+		margin-bottom: 40% !important;
+	}
+	.show-description {
+		height: 250px !important;
+		display: inline;
+	}
+
+	.inputLabel {
+		width: 87px !important;
+	}
+	.ui-block-b {
+		width: 62% !important;
+	}	
 }
-@media all and (min-width: 320px) {
+@media all and (min-width: 416px) {
 	h1.intro-title {
 		font-size: 49px;
 		margin: 10px 0px 6px 0px;
 	}
 	h3.intro-header {
 		font-size: 48px;
+		margin: 20px 0px 10px 10px;
 	}
 	p.intro-text {
 		font-size: 22px;
+		margin-top: 52px;
 	}
 	.show-description {
-		height: 43% !important;
+		height: 250px !important;
+		display: inline;
 	}
-	.ui-header .ui-title {
+	.app-header {
 		padding: 0.5em 0 !important;
 		font-size: 0.8em !important;
 	}
 	div.ui-input-text{
-		width: 52% !important;
+		width: 100% !important;
+	}
+	.searchBoxWidth {
+		width: 235px !important;
+	}
+	.resourcesInput {
+		width: 160px !important;
 	}
 	.showAdvancedOptions {
 		width: 39% !important;
 	}
-	div.ui-input-text {
-		width: 90% !important;
-	}
 	.inputLabel {
 		width: 96px !important;
+	}
+	.resources-panel {
+	  width:75%;
 	}
 }
 
@@ -382,14 +553,31 @@ h4.intro-subheading {
 	h1.intro-title {
 		font-size: 80px;
 	}
+	#pac-input {
+		margin-top: 16px;
+		width: 500px;
+	}
+	#pac-input:focus {
+		width: 500px !important;
+	}
 	.show-description {
-		height: 34% !important;
+		height: 250px !important;
+		display: inline;
 	}
 	div.ui-input-text{
-		width: 40% !important;
+		width: 100% !important;
+	}
+	.searchBoxWidth {
+		width: 235px !important;
 	}
 	.showAdvancedOptions {
 		width: 15% !important;
+	}
+	.resources-panel {
+	  width:85%;
+	}
+	.start-button {
+		margin-top: 30px;
 	}
 }
 
@@ -397,6 +585,9 @@ h4.intro-subheading {
 @media only screen and (min-width: 1024px) {
 	h1.intro-title {
 		font-size: 100px;
+	}
+	.resources-panel {
+	  width:85%;
 	}
 }
 
