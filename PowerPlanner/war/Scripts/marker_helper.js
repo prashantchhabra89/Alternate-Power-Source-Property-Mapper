@@ -133,13 +133,13 @@ function _balloonText(div_id, pointDataObject) {
 			pointDataObject.solar_raw == null ||
 			pointDataObject.hydro_raw == null) {
 		balloonString = "<div class=\"scrollFix\" id=\"" + div_id + "\">" + 
-		"<h2>Detailed Energy Data (kWh)</h2>" +
+		"<h2>Detailed Energy Data (kWh/yr)</h2>" +
 		"<h3>Latitude: " + pointDataObject.lat.toFixed(3).toString() + "<br/>" + 
 		"Longitude: " + pointDataObject.lng.toFixed(3).toString() + "</h3>" +
-		"Wind Energy: <span class=\"windstring\"><em>Loading</em></span><br/>" +
-		"Solar Energy: <span class=\"solarstring\"><em>Loading</em></span><br/>" +
-		"Hydro Energy: <span class=\"hydrostring\"><em>Loading</em></span>" +
-		"<h4>Total Energy: <span class=\"totalstring\"><em>Loading</em></span></h4>" +
+		"Wind Energy: <span class=\"windstring\"><em>Loading</em></span> kWh/yr<br/>" +
+		"Solar Energy: <span class=\"solarstring\"><em>Loading</em></span> kWh/yr<br/>" +
+		"Hydro Energy: <span class=\"hydrostring\"><em>Loading</em></span> kWh/yr" +
+		"<h4>Total Energy: <span class=\"totalstring\"><em>Loading</em></span> kWh/yr</h4>" +
 		"<p><i>Right click on the pin to remove pin.</i></p>" +
 		"<p><i>Left click on the pin to toggle this window.</i></p></div>";
 	} else {
@@ -150,13 +150,13 @@ function _balloonText(div_id, pointDataObject) {
 		"<h3>Latitude: " + pointDataObject.lat.toFixed(3).toString() + "<br/>" + 
 		"Longitude: " + pointDataObject.lng.toFixed(3).toString() + "</h3>" +
 		"Wind Energy: <span class=\"windstring\">" + 
-		pointDataObject.wind_raw.toFixed(2).toString() + "</span><br/>" + 
+		pointDataObject.wind_raw.toFixed(2).toString() + "</span> kWh/yr<br/>" + 
 		"Solar Energy: <span class=\"solarstring\">" + 
-		pointDataObject.solar_raw.toFixed(2).toString() + "</span><br/>" +
+		pointDataObject.solar_raw.toFixed(2).toString() + "</span> kWh/yr<br/>" +
 		"Hydro Energy: <span class=\"hydrostring\">" + 
-		pointDataObject.hydro_raw.toFixed(2).toString() + "</span><br/>" +
+		pointDataObject.hydro_raw.toFixed(2).toString() + "</span> kWh/yr<br/>" +
 		"<h4>Total Energy: <span class=\"totalstring\">" + 
-		totalEnergy.toFixed(2).toString() + "</span></h4>" +
+		totalEnergy.toFixed(2).toString() + "</span> kWh/yr</h4>" +
 		"<p><i>Right click on the pin to remove pin.</i></p>" +
 		"<p><i>Left click on the pin to toggle this window.</i></p></div>";
 	}

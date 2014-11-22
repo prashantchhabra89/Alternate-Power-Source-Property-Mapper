@@ -9,7 +9,7 @@ function _filterWindData(raw_data, push_data, neLat, neLng, swLat, swLng) {
 					push_data.push({
 						lat : raw_data[grid].data[i].lat,
 						lng : raw_data[grid].data[i].lon,
-						weight : windPow(raw_data[grid].data[i].pre15,0.34,290)
+						weight : windPow(raw_data[grid].data[i].pre15,0.34,176)
 					});
 				}
 			}
