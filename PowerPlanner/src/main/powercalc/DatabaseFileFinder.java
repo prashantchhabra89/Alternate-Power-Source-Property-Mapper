@@ -97,21 +97,21 @@ public class DatabaseFileFinder {
 			if(((neLat>=latitude2&&neLat<=latitude1)||(swLat>=latitude2&&swLat<=latitude1))
 					&& ((neLon<=longitude1&&neLon>=longitude2)||(swLon<=longitude1&&swLon>=longitude2)))
 			{
-				returnWindFileListArray[counterWindfileFinder]=pathWind+item;
+				returnWindFileListArray[counterWindfileFinder]=pathWind+season+"/"+item;
 				counterWindfileFinder++;
 			}
 			//if one of the corner of our database grid falls inside requested grid
 			else if (((latitude1>=swLat&&latitude1<=neLat)||(latitude2>=swLat&&latitude2<=neLat))
 					&& ((longitude1>=swLon&&longitude1<=neLon)||(longitude2>=swLon&&longitude2<=neLon)))
 			{
-				returnWindFileListArray[counterWindfileFinder]=pathWind+item;
+				returnWindFileListArray[counterWindfileFinder]=pathWind+season+"/"+item;
 				counterWindfileFinder++;
 			}
 			//if there is overlap of the database and requested grid, but no corners fall in the other
 			else if (((latitude2<swLat && latitude1>neLat)&&(longitude2>swLon && longitude1<neLon))
 					|| ((longitude2<swLon && longitude1>neLon)&&(latitude2>swLat && latitude1<neLat))) 
 			{
-				returnWindFileListArray[counterWindfileFinder]=pathWind+item;
+				returnWindFileListArray[counterWindfileFinder]=pathWind+season+"/"+item;
 				counterWindfileFinder++;
 			}
 			
