@@ -5,6 +5,11 @@ var hydroTogglePannelOn = false;
 $(document).ready(function() {
 	resizeDiv();
 	$("a.start-button").click(startButtonClick);
+	$("#pac-input-intro").keyup(function (e) {
+		if (e.keyCode == 13) {
+			$("a.start-button").trigger("click");
+		}
+	});
 
 	$("#showCheckboxWind").click(function() {
 		var bg_col = ($(this).is(':checked')) ? "#F84684" : "";
@@ -202,8 +207,7 @@ function startButtonClick() {
 		g_map.setCenter(center);
 		markerBalloon.open(g_map);
 		markerBalloon.setPosition(g_map.getCenter());
-		
-		console.log(markerBalloon.getContent());
-	});
+	});	
+	startIntro();
 }
 

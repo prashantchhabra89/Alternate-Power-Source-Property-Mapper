@@ -4,6 +4,8 @@ import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.servlet.http.*;
 
@@ -11,8 +13,11 @@ import main.powercalc.DatabaseFileFInder;
 
 @SuppressWarnings("serial")
 public class PowerDBServlet extends HttpServlet {
-
-	private boolean sendStreams = true;
+	
+	public void doGet(HttpServletRequest req, HttpServletResponse resp)
+			throws IOException {
+		
+	}
 	
 	/**
 	 * Post request for data. Request is expected to contain several
@@ -36,6 +41,8 @@ public class PowerDBServlet extends HttpServlet {
 		final double swLat = Double.parseDouble(req.getParameter("swLat"));
 		final double swLng = Double.parseDouble(req.getParameter("swLng"));
 		final String season = req.getParameter("season");
+		final boolean sendHydro = Boolean.parseBoolean(req.getParameter("sendHydro"));
+		final boolean sendStream = Boolean.parseBoolean(req.getParameter("sendStream"));
 
 		DatabaseFileFInder dbFind = new DatabaseFileFInder();
 		String[] jsonFiles = new String[0];
@@ -45,61 +52,11 @@ public class PowerDBServlet extends HttpServlet {
 			System.out.println("FETCHED GRID FILES: ");
 			dbFind.displayWindReturnarr();			
 		} else if (type.equals(PowerType.SOLAR.toString())) {
-			switch(season) {
-			case "dfj" :
-				dbFind.solarFileFinder("Dec");
-				dbFind.solarFileFinder("Jan");
-				jsonFiles = dbFind.solarFileFinder("Feb");
-				break;
-			case "mam" :
-				dbFind.solarFileFinder("Mar");
-				dbFind.solarFileFinder("Apr");
-				jsonFiles = dbFind.solarFileFinder("May");
-				break;
-			case "jja" :
-				dbFind.solarFileFinder("Jun");
-				dbFind.solarFileFinder("Jul");
-				jsonFiles = dbFind.solarFileFinder("Aug");
-				break;
-			case "son" : 
-				dbFind.solarFileFinder("Sep");
-				dbFind.solarFileFinder("Oct");
-				jsonFiles = dbFind.solarFileFinder("Nov");
-				break;
-			case "anu" :
-			default :
-				jsonFiles = dbFind.solarFileFinder("Anu");
-				break;
-			}
+			jsonFiles = dbFind.solarFileFinder(season);
 			System.out.println("FETCHED GRID FILES: ");
 			dbFind.displaySolarFileList();	
 		} else if (type.equals(PowerType.HYDRO.toString())) {
-			switch(season) {
-			case "dfj" :
-				dbFind.hydroFileFinder("Dec", sendStreams);
-				dbFind.hydroFileFinder("Jan", sendStreams);
-				jsonFiles = dbFind.hydroFileFinder("Feb", sendStreams);
-				break;
-			case "mam" :
-				dbFind.hydroFileFinder("Mar", sendStreams);
-				dbFind.hydroFileFinder("Apr", sendStreams);
-				jsonFiles = dbFind.hydroFileFinder("May", sendStreams);
-				break;
-			case "jja" :
-				dbFind.hydroFileFinder("Jun", sendStreams);
-				dbFind.hydroFileFinder("Jul", sendStreams);
-				jsonFiles = dbFind.hydroFileFinder("Aug", sendStreams);
-				break;
-			case "son" : 
-				dbFind.hydroFileFinder("Sep", sendStreams);
-				dbFind.hydroFileFinder("Oct", sendStreams);
-				jsonFiles = dbFind.hydroFileFinder("Nov", sendStreams);
-				break;
-			case "anu" :
-			default :
-				jsonFiles = dbFind.hydroFileFinder("Anu", sendStreams);
-				break;
-			}
+			jsonFiles = dbFind.hydroFileFinder(neLat, neLng, swLat, swLng, season, sendHydro, sendStream);
 			System.out.println("FETCHED GRID FILES: ");
 			dbFind.displayHydroFileList();	
 			//sendStreams = false;
@@ -117,8 +74,68 @@ public class PowerDBServlet extends HttpServlet {
 				String newData = new String(buffer, "UTF-8");
 				jfIn.close();
 				if (newData.length() > 1) {
-					dataBuilder.append(newData.substring(1, newData.length() - 1));
-					dataBuilder.append(",");
+					if (type.equals(PowerType.WIND.toString())) {
+						int file_neLat = 0;
+						int file_swLat = 0;
+						int file_neLng = 0;
+						int file_swLng = 0;
+						
+						Pattern boundaryP = Pattern.compile("^[^\\d]*([-]?\\d+)_([-]?\\d+)_([-]?\\d+)_([-]?\\d+)_(\\w)+.*$");
+						Matcher boundaryM = boundaryP.matcher(jsonFile);
+						if (!boundaryM.matches()) {
+							continue;
+						} else {
+							file_neLat = Integer.parseInt(boundaryM.group(1));
+							file_swLat = Integer.parseInt(boundaryM.group(3));
+							file_neLng = Integer.parseInt(boundaryM.group(2));
+							file_swLng = Integer.parseInt(boundaryM.group(4));
+						}
+						dataBuilder.append("{\"grid\":{\"neLat\":");  
+						dataBuilder.append(file_neLat);
+						dataBuilder.append(",\"neLng\":");
+						dataBuilder.append(file_neLng);
+						dataBuilder.append(",\"swLat\":");
+						dataBuilder.append(file_swLat);
+						dataBuilder.append(",\"swLng\":");
+						dataBuilder.append(file_swLng);
+						
+						dataBuilder.append("},\"data\":");
+						dataBuilder.append(newData);
+						dataBuilder.append("},");
+					} else if (type.equals(PowerType.HYDRO.toString())) {
+						int file_neLat = 0;
+						int file_swLat = 0;
+						int file_neLng = 0;
+						int file_swLng = 0;
+						
+						Pattern boundaryP = Pattern.compile("^[^\\d]*(\\w)+_([-]?\\d+)_([-]?\\d+)_([-]?\\d+)_([-]?\\d+).*$");
+						Matcher boundaryM = boundaryP.matcher(jsonFile);
+						if (!boundaryM.matches()) {
+							dataBuilder.append(newData);
+							dataBuilder.append(",");
+						} else {
+							file_neLat = Integer.parseInt(boundaryM.group(2));
+							file_swLat = Integer.parseInt(boundaryM.group(4));
+							file_neLng = Integer.parseInt(boundaryM.group(3));
+							file_swLng = Integer.parseInt(boundaryM.group(5));
+
+							dataBuilder.append("{\"grid\":{\"neLat\":");  
+							dataBuilder.append(file_neLat);
+							dataBuilder.append(",\"neLng\":");
+							dataBuilder.append(file_neLng);
+							dataBuilder.append(",\"swLat\":");
+							dataBuilder.append(file_swLat);
+							dataBuilder.append(",\"swLng\":");
+							dataBuilder.append(file_swLng);
+							
+							dataBuilder.append("},\"data\":");
+							dataBuilder.append(newData);
+							dataBuilder.append("},");
+						}
+					} else {
+						dataBuilder.append(newData.substring(1, newData.length() - 1));
+						dataBuilder.append(",");
+					}
 				}
 			}
 		}
@@ -126,7 +143,7 @@ public class PowerDBServlet extends HttpServlet {
 		dataBuilder.append("]");
 		
 		String dataResponse = dataBuilder.toString();
-		
+
 		resp.setContentLength(dataResponse.length());
 		resp.getOutputStream().write(dataResponse.getBytes());
 		resp.getOutputStream().flush();
