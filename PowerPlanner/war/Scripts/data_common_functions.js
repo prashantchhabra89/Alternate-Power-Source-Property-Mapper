@@ -188,13 +188,8 @@ function _boundedInterpolation(hm_data, fill_data, lat_width,
 			var dist = distanceTo(curr_point.lat, curr_point.lon, 
 					hm_data[i].points[j].lat, hm_data[i].points[j].lon);
 			if (dist > diam) {
-				if (! (dist > MAX_RIVER_SEPARATION)) {
-					_lineInterpolation(fill_data, curr_point, hm_data[i].points[j], 
+				_lineInterpolation(fill_data, curr_point, hm_data[i].points[j], 
 							dist, diam, hm_data[i].weight/scaler);
-				} else {
-					console.log("Error river");
-					console.log(hm_data[i].points);
-				}
 				curr_point = hm_data[i].points[j];
 				addHeatmapCoord(fill_data, hm_data[i].points[j].lat,
 						hm_data[i].points[j].lon, hm_data[i].weight/scaler);

@@ -10,7 +10,7 @@ function _filterHydroData(raw_data, push_data, neLat, neLng, swLat, swLng) {
 				if (river_center.lon > swLng && river_center.lon < neLng) {
 					push_data.push({
 						points : raw_data[grid].data[i].points,
-						weight : hydroPow(raw_data[grid].data[i].weights['anu'], 0.9, 15)
+						weight : hydroPow(raw_data[grid].data[i].weights['anu'], 0.9, 1)
 					});
 				}
 			}
