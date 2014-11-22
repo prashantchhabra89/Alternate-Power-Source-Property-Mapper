@@ -117,7 +117,7 @@ function fetchCacheStream(neLat, neLng, swLat, swLng) {
 	
 	for (var lat = swLat_floor; lat <= neLat_floor; lat++) {
 		for (var lng = swLng_floor; lng <= neLng_floor; lng++) {
-			new_data.push(stream_cache[lat][lng]);
+			new_data.push(hydro_cache[lat][lng]);
 		}
 	}
 	return new_data;

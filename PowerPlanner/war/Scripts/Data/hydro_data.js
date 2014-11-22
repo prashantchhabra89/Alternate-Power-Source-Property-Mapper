@@ -31,34 +31,13 @@ function _getRiverCenter(start_point, end_point) {
 }
 
 function _getDataWeightHydro(hm_data, lat, lng) {
+	console.log(hm_data);
+	console.log(hm_data[0].location.lat());
 	var final_weight = 0;
 	// go through each stream in the streams set
-	for (var i = 0; i < streams_data.length; i++) {
-		// TODO: In the future, account for more than two points
-		if (pointOnLine(lat, lng, streams_data[i][0], streams_data[i][1])) {
-			// if point lies *roughly* along the line of a stream, find the nearest
-			// 2 hydro stations; take a weighted average of their monitoring, and
-			// draw point with that weight
-
-			// Right now, only looks for the one closest stations
-			var nearest_distance;
-			var nearest_weight;
-			for (var j = 0; j < hm_data.length; j++) {
-				if (j == 0) {
-					//Trivial case, the best so far is the first
-					nearest_distance = distanceTo(lat, lng, 
-							hm_data[j].location.lat(), hm_data[j].location.lng());
-					nearest_weight = hm_data[j].weight;
-				} else {
-					var next_dist = distanceTo(lat, lng, 
-							hm_data[j].location.lat(), hm_data[j].location.lng());
-					if (next_dist < nearest_distance) {
-						nearest_distance = next_dist;
-						nearest_weight = hm_data[j].weight;
-					}
-				}
-			}
-			final_weight = nearest_weight;
+	for (var i = 0; i < hm_data.length; i++) {
+		if (pointIsOnPoint(lat, lng, hm_data[i].location.lat(), hm_data[i].location.lng())) {
+			final_weight = hm_data[i].weight;
 			break;
 		}
 	}

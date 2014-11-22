@@ -276,17 +276,6 @@ function getLngOffset(eastLng, westLng) {
 }
 
 /*
- * Find the distance from one provided point to another (assumes latitude and
- * longitude cover the same distance).
- */
-function distanceTo(src_lat, src_lng, dest_lat, dest_lng) {
-	var a = Math.pow((src_lat - dest_lat), 2);
-	var b = Math.pow((src_lng - dest_lng), 2);
-
-	return (Math.sqrt(a + b));
-}
-
-/*
  * Initializes heatmap with current basic settings.
  */
 function initHeatmap(map) {
@@ -352,6 +341,10 @@ function addHeatmapCoord(hm_data, lat, lng, weight) {
 	});
 
 	return hm_data;
+}
+
+function getHeatmapSize() {
+	return g_heatmap.get('radius');
 }
 
 function _setHeatmapSize(type) {

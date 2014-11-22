@@ -180,7 +180,6 @@ function _interpolateData(hm_data, neLat, neLng, swLat, swLng, type) {
 function _boundedInterpolation(hm_data, fill_data, lat_width, 
 		lng_width, lat_start, lng_start, latset, lngset, offset, type) {
 	var diam = MAX_DATA_WIDTH / Math.pow(2, (g_map.getZoom() - LEAST_ZOOM)) * 0.08;
-	console.log(hm_data);
 	for (var i = 0; i < hm_data.length; i++) {
 		var curr_point = hm_data[i].points[0];
 		addHeatmapCoord(fill_data, hm_data[i].points[0].lat, hm_data[i].points[0].lon, 
@@ -192,6 +191,9 @@ function _boundedInterpolation(hm_data, fill_data, lat_width,
 				if (! (dist > MAX_RIVER_SEPARATION)) {
 					_lineInterpolation(fill_data, curr_point, hm_data[i].points[j], 
 							dist, diam, hm_data[i].weight/scaler);
+				} else {
+					console.log("Error river");
+					console.log(hm_data[i].points);
 				}
 				curr_point = hm_data[i].points[j];
 				addHeatmapCoord(fill_data, hm_data[i].points[j].lat,
@@ -199,7 +201,6 @@ function _boundedInterpolation(hm_data, fill_data, lat_width,
 			} 
 		}
 	}
-	console.log(fill_data);
 }
 
 function _lineInterpolation(fill_data, start_point, end_point, distance, diameter, weight) {
@@ -349,36 +350,25 @@ function _getNextStart(curr_start, end_point, increment) {
 }
 
 /*
- * Returns true if distance from the lat, lng point is less than the current diameter
- * of the heatmap spots away from the line represented by point1, point2 (if the point
- * lies inside the boundary formed by the points)
+ * Find the distance from one provided point to another (assumes latitude and
+ * longitude cover the same distance).
  */
-function pointOnLine(lat, lng, point1, point2) {
-	var is_on_line = false;
+function distanceTo(src_lat, src_lng, dest_lat, dest_lng) {
+	var a = Math.pow((src_lat - dest_lat), 2);
+	var b = Math.pow((src_lng - dest_lng), 2);
 
-	if (lat > Math.min(point1.lat, point2.lat) && lat < Math.max(point1.lat, point2.lat)) {
-		if (lng > Math.min(point1.lon, point2.lon) && lng < Math.max(point1.lon, point2.lon)) {
-			/*
-		 	var slope = (point2.lat - point1.lat)/(point2.lon - point1.lon);
-			var A = slope * (-1);
-			var B = 1;
-			var C = (A * point1.lon + B) * (-1);
+	return (Math.sqrt(a + b));
+}
 
-			var numer = Math.abs(A*lng + B*lat + C);
-			var denom = Math.sqrt(Math.pow(A,2) + Math.pow(B,2));
-
-			var distance = (numer/denom);
-			is_on_line = (distance <= 
-				MAX_DATA_WIDTH / Math.pow(2, (g_map.getZoom() - LEAST_ZOOM)) * 0.98 * 2);
-			console.log(distance);
-			console.log(MAX_DATA_WIDTH / Math.pow(2, (g_map.getZoom() - LEAST_ZOOM)) * 0.98 * 2);
-			 */
-			// The above can't get close enough to ever return true with our granularity ...
-			is_on_line = true;
-		}
-	}
-
-	return is_on_line;
+/*
+ * Returns if the distance from the lat, lng value is less than the current radius
+ * of the heatmap spots away from the lat and lng of a point.
+ */
+function pointIsOnPoint(lat, lng, point_lat, point_lng) {
+	//console.log("Distance between points: " + distanceTo(lat, lng, point_lat, point_lng));
+	//console.log("Heatmap size: " + getHeatmapSize());
+	return distanceTo(lat, lng, point_lat, point_lng) <= getHeatmapSize() ?
+			true : false;
 }
 
 /*
