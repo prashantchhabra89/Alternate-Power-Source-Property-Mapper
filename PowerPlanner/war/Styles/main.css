@@ -81,7 +81,7 @@ body {
 }
 
 .show-description {
-  height: 236px !important;
+  height: 250px !important;
   display: inline;
 }
 
@@ -496,7 +496,7 @@ p.howToUse {
 		margin-bottom: 40% !important;
 	}
 	.show-description {
-		height: 236px !important;
+		height: 250px !important;
 		display: inline;
 	}
 
@@ -521,7 +521,7 @@ p.howToUse {
 		margin-top: 52px;
 	}
 	.show-description {
-		height: 236px !important;
+		height: 250px !important;
 		display: inline;
 	}
 	.app-header {
@@ -561,7 +561,7 @@ p.howToUse {
 		width: 500px !important;
 	}
 	.show-description {
-		height: 236px !important;
+		height: 250px !important;
 		display: inline;
 	}
 	div.ui-input-text{
