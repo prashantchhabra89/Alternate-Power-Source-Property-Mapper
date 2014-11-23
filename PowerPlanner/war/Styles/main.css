@@ -80,6 +80,13 @@ body {
 	cursor: pointer;
 }
 
+.legendContainer {
+	width: 175px;
+	position: absolute;
+	bottom: 0.5em;
+	left: 0.5em;
+}
+
 .show-description {
   height: 250px !important;
   display: inline;
@@ -153,6 +160,12 @@ body {
 	background: url(../images/question-icon.png) no-repeat bottom center scroll !important;
 	width: 55px !important;
 	height: 55px !important;
+	float: left;
+}
+#legend {
+	background: url(../images/power_legend_left.png) no-repeat bottom center scroll !important;
+	width: 170px !important;
+	height: 178px !important;	
 	float: left;
 }
 
@@ -419,6 +432,12 @@ p.howToUse {
 }
 
 /*FOR RESPONSIVE LAYOUT*/
+@media all and (max-height: 720px) {
+	.legendContainer {
+		left: 5em;
+	}
+}
+
 /* 0 - 320px */
 @media all and (max-width: 416px) {
 	h1.intro-title, h2.intro-header {
@@ -461,15 +480,20 @@ p.howToUse {
 		position: absolute;
 		margin: 53px 0 0 10px;
 	}
+	.legendContainer {
+		left: auto;
+		right: 0.5em;
+		bottom: 1em;
+	}
 	h3.intro-header {
 		font-size: 40px;
 		margin: 20px 0px 10px 10px;
 	}
 	.wind {
-	background: url(../images/wind-icon-small.png) no-repeat bottom center scroll !important;
-	width: 39px !important;
-	height: 39px !important;
-	float: left;
+		background: url(../images/wind-icon-small.png) no-repeat bottom center scroll !important;
+		width: 39px !important;
+		height: 39px !important;
+		float: left;
 	}
 	.solar {
 		background: url(../images/solar-icon-small.png) no-repeat bottom center scroll !important;
@@ -488,6 +512,12 @@ p.howToUse {
 		width: 39px !important;
 		height: 39px !important;
 		float: left;
+	}
+	#legend {
+		background: url(../images/power_legend_right.png) no-repeat bottom center scroll !important;
+		width: 170px !important;
+		height: 178px !important;	
+		float: right;
 	}
 	.resources-panel {
 	  width:100%;
