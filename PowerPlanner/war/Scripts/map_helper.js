@@ -249,11 +249,11 @@ function _getHeatmapData(type, neLat, neLng, swLat, swLng) {
  * current global view state.
  */
 function getLatOffset(northLat, southLat) {
-	var lat_offset = (northLat - southLat);
+	var lat_offset = (northLat - southLat) * 2;
 	if (view_state == WIDE_VIEW) {
 		lat_offset = lat_offset / 4;
 	} else if (view_state == SMALL_VIEW) {
-		lat_offset = lat_offset * 2;
+		lat_offset = lat_offset * 4;
 	} else if (view_state == OVER_VIEW) {
 		lat_offset = lat_offset / 8;
 	}
@@ -265,11 +265,11 @@ function getLatOffset(northLat, southLat) {
  * map's current global view state.
  */
 function getLngOffset(eastLng, westLng) {
-	var lng_offset = (eastLng - westLng);
+	var lng_offset = (eastLng - westLng) * 2;
 	if (view_state == WIDE_VIEW) {
 		lng_offset = lng_offset / 4;
 	} else if (view_state == SMALL_VIEW) {
-		lng_offset = lng_offset * 2;
+		lng_offset = lng_offset * 4;
 	} else if (view_state == OVER_VIEW) {
 		lng_offset = lng_offset / 8;
 	}
