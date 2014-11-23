@@ -4,23 +4,27 @@ var hydroTogglePannelOn = false;
 
 $(document).ready(function() {
 	resizeDiv();
-	$("a.start-button").click(startButtonClick);
+	$("a.tour-button").click(startButtonClick);
+	$("a.home-button").click(resetIntro);
 	$("#pac-input-intro").keyup(function (e) {
 		if (e.keyCode == 13) {
 			$("a.start-button").trigger("click");
 		}
 	});
-
+	
+	// For intro tour. Constantly checking if "question panel" is open. 
+	window.setInterval(checkQuestionPanelOpen,100);
+	
 	$("#showCheckboxWind").click(function() {
 		var bg_col = ($(this).is(':checked')) ? "#F84684" : "";
 
 		//TEMP (to disallow multi-selection)
 		$("#showCheckboxSolar").prop("checked", false);
 		$("#showCheckboxHydro").prop("checked", false);
-		$("#solar-panel").css("border-color", "");
-		$("#hydro-panel").css("border-color", "");
+		$("#solar-panel-app").css("border-color", "");
+		$("#hydro-panel-app").css("border-color", "");
 		
-		$('#wind-panel').css("border-color", bg_col);
+		$('#wind-panel-app').css("border-color", bg_col);
 		toggleHeatmapData(
 				$(this).is(':checked'),
 				$("#showCheckboxSolar").is(':checked'),
@@ -34,10 +38,10 @@ $(document).ready(function() {
 		//TEMP (to disallow multi-selection)
 		$("#showCheckboxWind").prop("checked", false);
 		$("#showCheckboxHydro").prop("checked", false);
-		$("#wind-panel").css("border-color", "");
-		$("#hydro-panel").css("border-color", "");
+		$("#wind-panel-app").css("border-color", "");
+		$("#hydro-panel-app").css("border-color", "");
 		
-		$('#solar-panel').css("border-color", bg_col);
+		$('#solar-panel-app').css("border-color", bg_col);
 		toggleHeatmapData(
 				$("#showCheckboxWind").is(':checked'),
 				$(this).is(':checked'),
@@ -51,10 +55,10 @@ $(document).ready(function() {
 		//TEMP (to disallow multi-selection)
 		$("#showCheckboxWind").prop("checked", false);
 		$("#showCheckboxSolar").prop("checked", false);
-		$("#wind-panel").css("border-color", "");
-		$("#solar-panel").css("border-color", "");
+		$("#wind-panel-app").css("border-color", "");
+		$("#solar-panel-app").css("border-color", "");
 		
-		$('#hydro-panel').css("border-color", bg_col);
+		$('#hydro-panel-app').css("border-color", bg_col);
 		toggleHeatmapData(
 				$("#showCheckboxWind").is(':checked'),
 				$("#showCheckboxSolar").is(':checked'),
@@ -209,5 +213,19 @@ function startButtonClick() {
 		markerBalloon.setPosition(g_map.getCenter());
 	});	
 	startIntro();
+}
+function checkQuestionPanelOpen (){
+	//If "question panel" is  open, move the step 4 tour tip to correct position.
+	if($("#questionPanel" ).hasClass( "ui-panel-open" )){
+		if($("#step-4").hasClass( "question-panel-open" ) == false){
+			$("#step-4").addClass('question-panel-open');
+		}		
+	}
+	else {
+		$("#step-4").removeClass('question-panel-open');
+	}
+}
+function resetIntro() {
+	endIntro();
 }
 

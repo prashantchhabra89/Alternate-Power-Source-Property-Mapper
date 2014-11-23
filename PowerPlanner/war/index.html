@@ -34,14 +34,12 @@
 <script src="Scripts/Data/solar_data.js"></script>
 <script src="Scripts/Data/hydro_data.js"></script>
 <script src="Scripts/intro.js"></script>
-
 </head>
 
 <body>
 	<!-- Start of first page -->
 	<div data-role="page" id="home">
 		<!-- /header -->
-
 		<div role="main" class="ui-content">
 			<div class="intro">
 				<h1 class="intro-title">Power Planner</h1>
@@ -57,7 +55,7 @@
 				 <a	href="#app" class="ui-btn ui-btn-inline start-button">Start</a>
 			</div>
 	
-			<div class="ui-content calc-background">
+			<div class="ui-content calc-background center">
 				<h3 class="intro-header calc-header">How to use</h3>
 				<h4 class="intro-subheading">
 					<strong>Description</strong>
@@ -83,6 +81,7 @@
 					for generating your own electricity. Modify the power calculations
 					to match your current - or future - solar panel, wind turbine,
 					and/or hydro turbine setup!</p>
+				<a	href="#app" class="tour-button ui-btn ui-btn-inline center">Take a tour!</a>
 			</div>
 			<div class="ui-content disclaimer-background">
 				<h3 class="intro-header about-header">Disclaimer</h3>
@@ -223,23 +222,22 @@
 		</div>
 		<div data-role="header" data-position="fixed" data-theme="b">
 			<a href="#home"
-				class="jqm-navmenu-link ui-nodisc-icon ui-btn-left ui-btn ui-icon-home ui-btn-icon-notext ui-corner-all"
-				data-icon="home" data-theme="c">About</a>
+				class="jqm-navmenu-link ui-nodisc-icon ui-btn-left ui-btn ui-icon-home ui-btn-icon-notext ui-corner-all home-button"
+				data-icon="home" data-theme="c">Home</a>
 			<h1 class="app-header">
 				Power <img id="logo-icon" src="images/PowerPlannerLogo-min.png"
 					data-thumb="" alt=""> Planner
 			</h1>
-			<a href="#pdfPanel" data-icon="action" data-theme="b">PDF</a>
-			
+			<a href="#pdfPanel" data-icon="action" data-theme="b">PDF</a>			
 		</div>
 		<!-- /header -->
 		<div role="main" class="ui-content">
 			<div class="ui-block-a gMap" id="googleMap"></div>
 			<div class="resourceContainer">
-				<div id="wind-panel" class="wind windToggleButton"></div>
-				<div id="solar-panel" class="solar solarToggleButton"></div>
-				<div id="hydro-panel" class="hydro hydroToggleButton"></div>
-				<a href="#questionPanel" id="question-panel" class="question"></a>
+				<div id="wind-panel-app" class="wind windToggleButton"></div>
+				<div id="solar-panel-app" class="solar solarToggleButton"></div>
+				<div id="hydro-panel-app" class="hydro hydroToggleButton"></div>
+				<a href="#questionPanel" id="question-panel-app" class="question question-panel-app"></a>
 			</div>
 			<div class="resources-panel" id="windResource">
 				<h1 class="ui-collapsible-heading windHeading windToggleButton" id="windHeading">
