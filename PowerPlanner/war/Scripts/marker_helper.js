@@ -113,7 +113,7 @@ function addMarker(map, loc) {
 }
 
 function showHelpMarker() {
-	markerBalloon.setContent("<div id=\"start-helper\" class=\"scrollFix\">" + 
+	markerBalloon.setContent("<div class=\"scrollFix\">" + 
 			"<h3>Did you know that ...</h3>" +
 			"<p><em>Right clicking on any area of the map <br/>" +
 			"will place a marker and open a similar <br/>" +
