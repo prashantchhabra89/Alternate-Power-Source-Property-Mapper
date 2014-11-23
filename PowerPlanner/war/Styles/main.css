@@ -419,11 +419,9 @@ h4.intro-subheading {
 	display: table-cell;
 	text-align: center;
 }
-
 p.howToUse {
 	margin-bottom: 3px !important;
 }
-
 .tour-backdrop {
 	margin: 0px !important;
 	border: 0px !important;
