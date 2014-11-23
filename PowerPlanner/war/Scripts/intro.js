@@ -9,7 +9,7 @@ var mark = "<div id=\"start-helper\" class=\"scrollFix\">" +
 "map will place a marker and open<br/>" +
 "a window with information about<br/>" +
 "the power generation potential<br/>" + 
-"in that area?</p></div>";
+"in that area.</p></div>";
 var tour = new Tour({
 	steps: [
 		{
