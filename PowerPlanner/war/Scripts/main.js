@@ -103,7 +103,6 @@ $(document).ready(function() {
 				$('#showCheckboxWind').checkboxradio("refresh");
 			}, 100);
 		}
-
 	});
 	$('.solarToggleButton').on('click', function() {
 		if (solarTogglePannelOn == false){
