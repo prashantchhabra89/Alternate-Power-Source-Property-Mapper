@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
 
 import javax.servlet.http.*;
 
-import main.powercalc.DatabaseFileFInder;
+import main.powercalc.DatabaseFileFinder;
 
 @SuppressWarnings("serial")
 public class PowerDBServlet extends HttpServlet {
@@ -41,10 +41,8 @@ public class PowerDBServlet extends HttpServlet {
 		final double swLat = Double.parseDouble(req.getParameter("swLat"));
 		final double swLng = Double.parseDouble(req.getParameter("swLng"));
 		final String season = req.getParameter("season");
-		final boolean sendHydro = Boolean.parseBoolean(req.getParameter("sendHydro"));
-		final boolean sendStream = Boolean.parseBoolean(req.getParameter("sendStream"));
 
-		DatabaseFileFInder dbFind = new DatabaseFileFInder();
+		DatabaseFileFinder dbFind = new DatabaseFileFinder();
 		String[] jsonFiles = new String[0];
 		
 		if (type.equals(PowerType.WIND.toString())) {
@@ -56,7 +54,7 @@ public class PowerDBServlet extends HttpServlet {
 			System.out.println("FETCHED GRID FILES: ");
 			dbFind.displaySolarFileList();	
 		} else if (type.equals(PowerType.HYDRO.toString())) {
-			jsonFiles = dbFind.hydroFileFinder(neLat, neLng, swLat, swLng, season, sendHydro, sendStream);
+			jsonFiles = dbFind.hydroFileFinder(neLat, neLng, swLat, swLng, season);
 			System.out.println("FETCHED GRID FILES: ");
 			dbFind.displayHydroFileList();	
 			//sendStreams = false;
@@ -111,8 +109,7 @@ public class PowerDBServlet extends HttpServlet {
 						Pattern boundaryP = Pattern.compile("^[^\\d]*(\\w)+_([-]?\\d+)_([-]?\\d+)_([-]?\\d+)_([-]?\\d+).*$");
 						Matcher boundaryM = boundaryP.matcher(jsonFile);
 						if (!boundaryM.matches()) {
-							dataBuilder.append(newData);
-							dataBuilder.append(",");
+							continue;
 						} else {
 							file_neLat = Integer.parseInt(boundaryM.group(2));
 							file_swLat = Integer.parseInt(boundaryM.group(4));
@@ -139,7 +136,9 @@ public class PowerDBServlet extends HttpServlet {
 				}
 			}
 		}
-		dataBuilder.deleteCharAt(dataBuilder.length() - 1);
+		if (dataBuilder.length() > 1) {
+			dataBuilder.deleteCharAt(dataBuilder.length() - 1);
+		}
 		dataBuilder.append("]");
 		
 		String dataResponse = dataBuilder.toString();

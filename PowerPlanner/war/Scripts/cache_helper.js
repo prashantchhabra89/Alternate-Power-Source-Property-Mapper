@@ -4,7 +4,7 @@
 var wind_cache = [];
 var solar_cache = [];
 var hydro_cache = [];
-var stream_cache = [];
+//var stream_cache = [];
 
 /* calculated wind data's boundary */
 var wind_data_bounds = {
@@ -53,33 +53,26 @@ function checkCache(neLat, neLng, swLat, swLng, type, season) {
 		}
 	} else if (type == "HYDRO") {
 		console.log("CHECKING HYDRO CACHE");
-		var hydro_hit = false;
-		if(typeof hydro_cache[parseSeason(season)] != 'undefined') {
-			hydro_hit = true;
-		}
-		for (var lat = swLat_floor; lat <= neLat_floor; lat++) {
-			if (typeof stream_cache[lat] != 'undefined') {
-				for (var lng = swLng_floor; lng <= neLng_floor; lng++) {
-					if (typeof stream_cache[lat][lng] != 'undefined') {
-						cache_hit = true;
-						getStream = false;
-					} else {
-						cache_hit = false;
-						getStream = true;
-						break;
+		if (hydro_cache.length > 0) {
+		
+			for (var lat = swLat_floor; lat <= neLat_floor; lat++) {
+				if (typeof hydro_cache[lat] != 'undefined') {
+					for (var lng = swLng_floor; lng <= neLng_floor; lng++) {
+						if (typeof hydro_cache[lat][lng] != 'undefined') {
+							cache_hit = true;
+						} else {
+							cache_hit = false;
+							break;
+						}
 					}
+				} else {
+					cache_hit = false;
+					break;
 				}
-			} else {
-				cache_hit = false;
-				getStream = true;
-				break;
+				if (!cache_hit) {
+					break;
+				}
 			}
-			if (!cache_hit) {
-				break;
-			}
-		}
-		if (hydro_hit == false || cache_hit == false) {
-			cache_hit = false;
 		}
 	}
 	
@@ -105,11 +98,10 @@ function fetchFromCache(neLat, neLng, swLat, swLng, type, season) {
 		new_data = solar_cache[parseSeason(season)];
 	} else if (type == "HYDRO") {
 		console.log("ACCESSING HYDRO CACHE");
-		new_data.push(hydro_cache[parseSeason(season)]);
-		var stream_array = fetchCacheStream(neLat_floor, neLng_floor, swLat_floor, swLng_floor);
-		console.log("str len" + stream_array.length);
-		for (var i = 0; i < stream_array.length; i++) {
-			new_data.push(stream_array[i]);			
+		for (var lat = swLat_floor; lat <= neLat_floor; lat++) {
+			for (var lng = swLng_floor; lng <= neLng_floor; lng++) {
+				new_data.push(hydro_cache[lat][lng]);
+			}
 		}
 	}
 	
@@ -125,7 +117,7 @@ function fetchCacheStream(neLat, neLng, swLat, swLng) {
 	
 	for (var lat = swLat_floor; lat <= neLat_floor; lat++) {
 		for (var lng = swLng_floor; lng <= neLng_floor; lng++) {
-			new_data.push(stream_cache[lat][lng]);
+			new_data.push(hydro_cache[lat][lng]);
 		}
 	}
 	return new_data;
@@ -146,23 +138,14 @@ function addToCache(new_data, type, season) {
 		solar_cache[parseSeason(season)] = new_data;
 	} else if (type == "HYDRO") {
 		var hydro_new_data = [];
-		if (typeof hydro_cache[parseSeason(season)] == 'undefined') {
-			hydro_cache[parseSeason(season)] = new_data.slice(0,1)[0];
-			
-			for(var i = 1; i < new_data.length; i++) {
-				if(typeof stream_cache[new_data[i].grid.swLat] == 'undefined') {
-					stream_cache[new_data[i].grid.swLat] = [];
-				}
-				stream_cache[new_data[i].grid.swLat][new_data[i].grid.swLng] = new_data[i];
-				
+		for(var i = 0; i < new_data.length; i++) {
+			if(typeof hydro_cache[new_data[i].grid.swLat] == 'undefined') {
+				hydro_cache[new_data[i].grid.swLat] = [];
 			}
-		} else {
-			for(var i = 0; i < new_data.length; i++) {
-				if(typeof stream_cache[new_data[i].grid.swLat] == 'undefined') {
-					stream_cache[new_data[i].grid.swLat] = [];
-				}
-				stream_cache[new_data[i].grid.swLat][new_data[i].grid.swLng] = new_data[i];
+			if(typeof hydro_cache[new_data[i].grid.swLat][new_data[i].grid.swLng] == 'undefined') {
+				hydro_cache[new_data[i].grid.swLat][new_data[i].grid.swLng] = [];
 			}
+			hydro_cache[new_data[i].grid.swLat][new_data[i].grid.swLng] = new_data[i];
 		}
 	}
 }

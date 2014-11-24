@@ -9,7 +9,7 @@ function _filterWindData(raw_data, push_data, neLat, neLng, swLat, swLng) {
 					push_data.push({
 						lat : raw_data[grid].data[i].lat,
 						lng : raw_data[grid].data[i].lon,
-						weight : windPow(raw_data[grid].data[i].pre15,0.34,290)
+						weight : windPow(raw_data[grid].data[i].pre15,0.34,176)
 					});
 				}
 			}
@@ -49,8 +49,9 @@ function _getDataWeightWind(hm_data, lat, lng) {
 	}
 
 	var final_weight = 0;
+	var dist_sum = 0;
 	if (nearest.length > 0) {
-		var dist_sum = nearest_distance.reduce(function(a, b) {
+		dist_sum = nearest_distance.reduce(function(a, b) {
 			return a + b;
 		});
 
@@ -60,13 +61,13 @@ function _getDataWeightWind(hm_data, lat, lng) {
 			if (dist_scaling > 1) {
 				dist_scaling = 1;
 			}
-			final_weight += (nearest[i].weight
-					* (1 - nearest_distance[i] / dist_sum) * dist_scaling);
-			// final_weight += ((1 - (nearest_distance[i] / dist_sum))
-			// * (nearest[i].weight / weight_max));
+			final_weight += nearest[i].weight * nearest_distance[i] * dist_scaling;
+//			final_weight += (nearest[i].weight
+//					* (1 - nearest_distance[i] / dist_sum) * dist_scaling);
 		}
 
 	}
-	return (nearest.length > 0 ? 
-			final_weight / (nearest.length > 1 ? nearest.length - 1 : nearest.length/2) : 0);
+	return (nearest.length > 0 ? final_weight / dist_sum : 0);
+//	return (nearest.length > 0 ? 
+//			final_weight / (nearest.length > 1 ? nearest.length - 1 : nearest.length/2) : 0);
 }
