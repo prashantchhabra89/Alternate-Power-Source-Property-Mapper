@@ -42,6 +42,13 @@ var tour = new Tour({
 	    	backdrop: true
 	    },
 	    {
+	    	element: "#legend",
+	    	title: "Legend",
+	    	orphan: true,
+	    	content: "Show the colour scale of the heatmap, ranging from less to more power potential.",
+	    	backdrop: true
+	    },
+	    {
 	    	title: "Markers",
 	    	content: mark,
 	    	orphan: true

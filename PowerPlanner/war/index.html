@@ -44,7 +44,7 @@
 			<div class="intro">
 				<h1 class="intro-title">Power Planner</h1>
 				<div class="logo-small"></div>
-				<p class="intro-text">Putting power in people's hands for
+				<p class="intro-text intro-main-text">Putting power in people's hands for
 					finding sites for sustainable electricity generation.</p>
 				<div class="inputText searchBoxWidth center">
 					<input type="text" name="placesTextSearch" id="pac-input-intro"
@@ -163,7 +163,7 @@
 				<a href="http://www.ec.gc.ca/rhc-wsc/default.asp?lang=En&n=894E91BE-1" class="calc-text center">http://www.ec.gc.ca/rhc-wsc/default.asp?lang=En&n=894E91BE-1</a>
 			</div>
 			<div class="ui-content about-background">
-				<h3 class="intro-header about-header">Contact Us</h3>
+				<h3 class="intro-header about-header">About Us</h3>
 				<h4 class="intro-subheading">
 					<strong>The Team</strong>
 				</h4>
@@ -172,7 +172,38 @@
 				<br>
 				<div class="circular prashant"><p class="about-text teamMembers">Prashant Chhabra</p></div>				
 				<div class="circular chuan"><p class="about-text teamMembers">Chuan Yun Loe</p></div>				
-				<div class="circular jonathan"><p class="about-text teamMembers">Jonathan Lam</p></div>				
+				<div class="circular jonathan"><p class="about-text teamMembers">Jonathan Lam</p></div>	
+				<hr>
+				<h4 class="intro-subheading feedbackHead">
+					<strong>Feedbacks</strong>
+				</h4>
+				<div id="form" class="contact-us-form feedbackForm center">
+					<form id="feedback" target="_self" onsubmit=""
+						action="postContactToGoogle()">
+						<fieldset>
+							<label for="name">Name *</label> <input id="name"
+								type="text" name="name">
+						</fieldset>
+						<fieldset>
+							<label for="email">Email *</label> <input id="email"
+								type="text" name="email">
+						</fieldset>
+						<fieldset>
+							<label for="feed">Questions or Feedback?</label>
+							<textarea id="feed" name="feed" class="feedbackText"></textarea>
+						</fieldset>
+						<div style="text-align: right; padding-bottom: 15px;">* Required</div>
+						<div style="width: 100%; display: block; float: right;">
+							<button id="send" type="submit">Contact Us</button>
+						</div>
+						<div
+							style="width: 100%; display: block; float: right; padding-top: 15px;">
+							<div class="requestSubmited"
+								style="display: none; text-align: center;">Your request
+								has been sent!</div>
+						</div>
+					</form>
+				</div>
 			</div>
 			<!-- /content -->
 			<div data-role="footer" data-position="fixed" data-theme="b"

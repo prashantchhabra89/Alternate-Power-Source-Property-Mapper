@@ -45,7 +45,6 @@ body {
 	width: 300px;
 	color: #333;
 }
-
 .controls {
 	margin-top: 16px;
 	border: 1px solid transparent;
@@ -319,6 +318,9 @@ p.intro-text, h3.intro-header, a.calc-text, p.calc-text, h3.calc-header, p.about
 p.intro-text {
 	color: rgb(253, 231, 2);
 }
+p.intro-main-text {
+	background: rgba(0, 0, 0, 0.5);
+}
 p.footer-text {
 	font-size:0.8em;
 	text-align: center;
@@ -338,7 +340,7 @@ h3.intro-header {
 
 h4.intro-subheading {
 	font-family: 'Raleway', sans-serif;
-	font-size: 30px;
+	font-size: 28px;
 	margin-bottom: -22px;
 	margin-top: 15px;
 }
@@ -453,6 +455,20 @@ p.howToUse {
 .question-panel-open {
 	left: 346px !important;
 }
+.legendTourTip {
+	top: 25% !important;
+	left: 30% !important;
+}
+.feedbackHead {
+	margin-bottom: 0px !important;
+}
+.feedbackForm {
+	text-align: left !important;
+	width: 90% !important;
+}
+.feedbackText {
+	height: 100px !important;
+}
 
 /* Fix for info window showing scroll bar in Firefox */
 .scrollFix {
@@ -516,7 +532,7 @@ p.howToUse {
 		bottom: 1em;
 	}
 	h3.intro-header {
-		font-size: 40px;
+		font-size: 35px;
 		margin: 20px 0px 10px 10px;
 	}
 	.wind {
@@ -542,6 +558,10 @@ p.howToUse {
 		width: 39px !important;
 		height: 39px !important;
 		float: left;
+	}
+	.legendTourTip {
+		top: 25% !important;
+		left: 4% !important;
 	}
 	#legend {
 		background: url(../images/power_legend_right.png) no-repeat bottom center scroll !important;
@@ -573,7 +593,7 @@ p.howToUse {
 		margin: 10px 0px 6px 0px;
 	}
 	h3.intro-header {
-		font-size: 48px;
+		font-size: 35px;
 		margin: 20px 0px 10px 10px;
 	}
 	p.intro-text {
