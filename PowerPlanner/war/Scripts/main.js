@@ -4,7 +4,7 @@ var hydroTogglePannelOn = false;
 
 $(document).ready(function() {
 	resizeDiv();
-	$("a.tour-button").click(startButtonClick);
+	$("a.tour-button").click(tourButtonClick);
 	$("a.start-button").click(startButtonClick);
 	$("a.home-button").click(resetIntro);
 	$("#pac-input-intro").keyup(function (e) {
