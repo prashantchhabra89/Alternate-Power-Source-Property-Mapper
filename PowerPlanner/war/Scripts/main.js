@@ -175,6 +175,14 @@ $(document).ready(function() {
 	});
 });
 
+/*
+ * Checks for changes to URL parameters and tries to interpret URL
+ * in response.
+ */
+$(function(){
+	$(window).hashchange(decodeURL);
+});
+
 window.onresize = function(event) {
 	resizeDiv();
 }

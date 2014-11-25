@@ -8,6 +8,7 @@
 // Yes, we created a bubble first, then we created a marker.
 // markerBalloon is declared global.
 var markerBalloon = new google.maps.InfoWindow();
+var markerSet = [];
 
 /* For unique ids */
 var markerHTMLIdSubscript = 0;
@@ -58,6 +59,7 @@ function addMarker(map, loc) {
 		map : map,
 		icon : "http://www.google.com/intl/en_us/mapfiles/ms/micons/red-dot.png"		
 	});
+	markerSet.push(marker);
 
 	// the object handle holding the data
 	var pointDataObject = getPointData(marker.getPosition().lat(), marker.getPosition().lng());		
@@ -101,6 +103,7 @@ function addMarker(map, loc) {
 	marker.addListener('rightclick', function() {
 		// didn't actually delete or close the marker, just set it to invisible.
 		this.setVisible(false);
+		markerSet.pop(this);
 
 		// test if we are right clicking the pin with opening bubble.
 		// if we are, close the bubble. If we are not, don't do anything.
