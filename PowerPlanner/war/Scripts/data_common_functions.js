@@ -513,6 +513,7 @@ function _tryPopulateTotalEnergy(pointDataObj, uniq_id) {
 			pointDataObj.hydro_raw;
 		$("#" + uniq_id + " .totalstring").html(totalEnergy.toFixed(2).toString());
 		
+		// when all energy types have a value, change the marker's icon.
 		changeMarkerIcon(totalEnergy/11000);
 		
 	}
