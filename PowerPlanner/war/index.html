@@ -46,7 +46,7 @@
 				<div class="logo-small"></div>
 				<p class="intro-text intro-main-text">Putting power in people's hands for
 					finding sites for sustainable electricity generation.</p>
-				<div class="inputText searchBoxWidth center">
+				<div class="searchBoxWidth center">
 					<input type="text" name="placesTextSearch" id="pac-input-intro"
 						class="controls placesTextSearch"
 						placeholder="Search a place in BC, Canada">
@@ -112,8 +112,7 @@
 					and 25m. The value of the exponent coefficient, is assumed to be
 					0.14.<br> The power calculation equation:</p>
 				<div class="windPowerCalc center"></div>
-				<p class="intro-text calc-text">(copy the stuffs from
-					equations&variables file) For more information on how the original
+				<p class="intro-text calc-text">For more information on how the original
 					wind data is obtained, please refer to</p>
 				<a href="http://www.windatlas.ca/en/methodology.php" class="calc-text center">http://www.windatlas.ca/en/methodology.php.</a>
 				<hr>
@@ -131,8 +130,7 @@
 					The power calculation equation:
 				</p>
 				<div class="solarPowerCalc center"></div>
-				<p class="intro-text calc-text">(copy the stuffs from
-					equations&variables file) For more information on how the original
+				<p class="intro-text calc-text">For more information on how the original
 					solar data is obtained, please refer to</p>
 				<a href="http://pv.nrcan.gc.ca/?lang=e&m=e" class="calc-text center">http://pv.nrcan.gc.ca/?lang=e&m=e.</a>
 				<hr>
@@ -155,10 +153,9 @@
 					digital basemap representation of the aquatic features depicted on
 					NTS 1 to 50,000 scale maps. To reduce storage and complexity,
 					streams shorter than roughly 2km were removed, and any bend in the
-					river less than 30¢X was removed. The power calculation equation:</p>
+					river less than 30&deg; was removed. The power calculation equation:</p>
 				<div class="hydroPowerCalc center"></div>
-				<p class="intro-text calc-text"> (copy the stuffs from
-					equations&variables file) For more information on how the original
+				<p class="intro-text calc-text">For more information on how the original
 					hydro data is obtained, please refer to </p>
 				<a href="http://www.ec.gc.ca/rhc-wsc/default.asp?lang=En&n=894E91BE-1" class="calc-text center">http://www.ec.gc.ca/rhc-wsc/default.asp?lang=En&n=894E91BE-1</a>
 			</div>
@@ -208,7 +205,7 @@
 			<!-- /content -->
 			<div data-role="footer" data-position="fixed" data-theme="b"
 				data-tap-toggle="false">
-				<p class="footer-text">Copyright &copy Power Planner 2014</p>
+				<p class="footer-text">Copyright &copy; Power Planner 2014</p>
 			</div>
 		</div>
 	</div>
@@ -297,9 +294,15 @@
 									class="ui-controlgroup ui-controlgroup-horizontal ui-corner-all">
 									<input class="ui-mini" type="radio" name="windView" id="windAnnual"
 										value="annual" checked="checked"  data-mini="true" /> <label
-										for="windAnnual">Annual</label> <input type="radio"
-										name="windView" id="windSeasonal" value="seasonal"  data-mini="true"/> <label
-										for="windSeasonal">Seasonal</label>
+										for="windAnnual" id="windAnnualLabel">Annual</label>
+									<label for="wind-seasonal" class="select" data-mini="true">Seasonal</label>
+									<select name="wind-seasonal" id="wind-seasonal" data-native-menu="false" data-mini="true">
+										<option>Seasonal</option>
+										<option value="spring">Spring</option>
+										<option value="summer">Summer</option>
+										<option value="fall">Fall</option>
+										<option value="winter">Winter</option>
+									</select>
 								</fieldset>
 							</div>
 							<div class="inputText">
@@ -342,9 +345,15 @@
 									class="ui-controlgroup ui-controlgroup-horizontal ui-corner-all">
 									<input type="radio" name="solarView" id="solarAnnual"
 										value="annual" checked="checked" data-mini="true"/> <label
-										for="solarAnnual">Annual</label> <input type="radio"
-										name="solarView" id="solarSeasonal" value="seasonal" data-mini="true"/> <label
-										for="solarSeasonal">Seasonal</label>
+										for="solarAnnual" id="solarAnnualLabel">Annual</label>
+									<label for="solar-seasonal" class="select" data-mini="true">Seasonal</label>
+									<select name="solar-seasonal" id="solar-seasonal" data-native-menu="false" data-mini="true">
+										<option>Seasonal</option>
+										<option value="spring">Spring</option>
+										<option value="summer">Summer</option>
+										<option value="fall">Fall</option>
+										<option value="winter">Winter</option>
+									</select>
 								</fieldset>
 							</div>
 							<div class="inputText">
@@ -385,9 +394,15 @@
 									class="ui-controlgroup ui-controlgroup-horizontal ui-corner-all">
 									<input type="radio" name="hydroView" id="hydroAnnual"
 										value="annual" checked="checked" data-mini="true"/> <label
-										for="hydroAnnual">Annual</label> <input type="radio"
-										name="hydroView" id="hydroSeasonal" value="seasonal" data-mini="true"/> <label
-										for="hydroSeasonal">Seasonal</label>
+										for="hydroAnnual" id="hydroAnnualLabel">Annual</label>
+									<label for="hydro-seasonal" class="select" data-mini="true">Seasonal</label>
+									<select name="hydro-seasonal" id="hydro-seasonal" data-native-menu="false" data-mini="true">
+										<option>Seasonal</option>
+										<option value="spring">Spring</option>
+										<option value="summer">Summer</option>
+										<option value="fall">Fall</option>
+										<option value="winter">Winter</option>
+									</select>
 								</fieldset>
 							</div>
 							<div class="inputText">
@@ -407,7 +422,7 @@
 		<!-- /content -->
 		<div data-role="footer" data-position="fixed" data-theme="b"
 			data-tap-toggle="false">
-			<p class="footer-text">Copyright &copy Power Planner 2014</p>
+			<p class="footer-text">Copyright &copy; Power Planner 2014</p>
 		</div>
 	</div>
 	<!-- /page -->

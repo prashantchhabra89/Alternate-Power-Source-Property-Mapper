@@ -22,17 +22,58 @@ $(document).ready(function() {
 	// Tour tip for legend so that tooltip is above legend not beside
 	window.setInterval(checkLegend,100);
 	
+	// Checking if a season is selected. If it is, then add 'ui-btn-active' class to Seasonal 
+	// which will highlight Seasonal. Then unhighlight Annual.
+	$("#wind-seasonal").change(function() {
+		if ($("#wind-seasonal").val() != null) {
+			$("#wind-seasonal-button").addClass('ui-btn-active');
+			$("#windAnnual").prop('checked', false);
+			$("#windAnnualLabel").removeClass('ui-btn-active');			
+		}
+	});
+	//If Annual is clicked, unhighlight Seasonal and reset Seasonal value.
+	$("#windAnnualLabel").click(function() {
+		$("#wind-seasonal-button").removeClass('ui-btn-active');
+		$("#wind-seasonal").val(null);
+	});
+	$("#solar-seasonal").change(function() {
+		if ($("#solar-seasonal").val() != null) {
+			$("#solar-seasonal-button").addClass('ui-btn-active');
+			$("#solarAnnual").prop('checked', false);
+			$("#solarAnnualLabel").removeClass('ui-btn-active');			
+		}
+	});
+	$("#solarAnnualLabel").click(function() {
+		$("#solar-seasonal-button").removeClass('ui-btn-active');
+		$("#solar-seasonal").val(null);
+	});
+	$("#hydro-seasonal").change(function() {
+		if ($("#hydro-seasonal").val() != null) {
+			$("#hydro-seasonal-button").addClass('ui-btn-active');
+			$("#hydroAnnual").prop('checked', false);
+			$("#hydroAnnualLabel").removeClass('ui-btn-active');			
+		}
+	});
+	$("#hydroAnnualLabel").click(function() {
+		$("#hydro-seasonal-button").removeClass('ui-btn-active');
+		$("#hydro-seasonal").val(null);
+	});
 	
 	$("#showCheckboxWind").click(function() {
 		var bg_col = ($(this).is(':checked')) ? "#F84684" : "";
-
+		var border_width = ($(this).is(':checked')) ? "3px" : "";
+		
 		//TEMP (to disallow multi-selection)
 		$("#showCheckboxSolar").prop("checked", false);
 		$("#showCheckboxHydro").prop("checked", false);
 		$("#solar-panel-app").css("border-color", "");
 		$("#hydro-panel-app").css("border-color", "");
+		$('#solar-panel-app').css("border-width", border_width);
+		$('#hydro-panel-app').css("border-width", border_width);
+		
 		
 		$('#wind-panel-app').css("border-color", bg_col);
+		$('#wind-panel-app').css("border-width", border_width);
 		toggleHeatmapData(
 				$(this).is(':checked'),
 				$("#showCheckboxSolar").is(':checked'),
@@ -42,14 +83,18 @@ $(document).ready(function() {
 
 	$("#showCheckboxSolar").click(function() {
 		var bg_col = ($(this).is(':checked')) ? "#F84684" : "";
+		var border_width = ($(this).is(':checked')) ? "3px" : "";
 		
 		//TEMP (to disallow multi-selection)
 		$("#showCheckboxWind").prop("checked", false);
 		$("#showCheckboxHydro").prop("checked", false);
 		$("#wind-panel-app").css("border-color", "");
 		$("#hydro-panel-app").css("border-color", "");
+		$('#wind-panel-app').css("border-width", "");
+		$('#hydro-panel-app').css("border-width", "");
 		
 		$('#solar-panel-app').css("border-color", bg_col);
+		$('#solar-panel-app').css("border-width", border_width);
 		toggleHeatmapData(
 				$("#showCheckboxWind").is(':checked'),
 				$(this).is(':checked'),
@@ -59,14 +104,18 @@ $(document).ready(function() {
 
 	$("#showCheckboxHydro").click(function() {
 		var bg_col = ($(this).is(':checked')) ? "#F84684" : "";
+		var border_width = ($(this).is(':checked')) ? "3px" : "";
 		
 		//TEMP (to disallow multi-selection)
 		$("#showCheckboxWind").prop("checked", false);
 		$("#showCheckboxSolar").prop("checked", false);
 		$("#wind-panel-app").css("border-color", "");
 		$("#solar-panel-app").css("border-color", "");
+		$('#wind-panel-app').css("border-width", "");
+		$('#solar-panel-app').css("border-width", "");
 		
 		$('#hydro-panel-app').css("border-color", bg_col);
+		$('#hydro-panel-app').css("border-width", border_width);
 		toggleHeatmapData(
 				$("#showCheckboxWind").is(':checked'),
 				$("#showCheckboxSolar").is(':checked'),

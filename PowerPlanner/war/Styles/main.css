@@ -68,7 +68,7 @@ body {
 
 .resourceContainer div {
 	margin: 0.2em 0.2em;
-	border: 2px solid #999;
+	border: 3px solid #999;
 	border-radius: 7px;
 	box-shadow: 0 0 2px #555;
 }
@@ -211,7 +211,7 @@ body {
 	margin-top: 0em !important;
 }
 .inputText {
-	width: 90% !important;
+	width: 168px !important;
 }
 .center {
 	text-align:center !important;
@@ -237,6 +237,9 @@ body {
 }
 .resourceBox, .resourceImg {
 	margin-top: 8px;
+}
+.ui-controlgroup-controls {
+	width: 300px !important;
 }
 
 div.ui-input-text{
