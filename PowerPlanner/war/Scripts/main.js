@@ -5,6 +5,7 @@ var hydroTogglePannelOn = false;
 $(document).ready(function() {
 	resizeDiv();
 	$("a.tour-button").click(startButtonClick);
+	$("a.start-button").click(startButtonClick);
 	$("a.home-button").click(resetIntro);
 	$("#pac-input-intro").keyup(function (e) {
 		if (e.keyCode == 13) {
@@ -219,6 +220,9 @@ function startButtonClick() {
 		markerBalloon.open(g_map);
 		markerBalloon.setPosition(g_map.getCenter());
 	});	
+}
+function tourButtonClick() {
+	startButtonClick();
 	startIntro();
 }
 function checkQuestionPanelOpen (){
@@ -260,14 +264,14 @@ function postToGoogle() {
 				statusCode: {
 					0: function() {
 						//Success message
-						alert("Thank You for the feedback! Your feedback has been sent.");
+						alert("Thank you for the feedback! Your feedback has been sent.");
 						$('#name').val("");
 						$('#email').val("");
 						$('#feed').val("");
 					},
 					200: function() {
 						//Success Message
-						alert("Thank You for the feedback! Your feedback has been sent.");
+						alert("Thank you for the feedback! Your feedback has been sent.");
 						$('#name').val("");
 						$('#email').val("");
 						$('#feed').val("");	
