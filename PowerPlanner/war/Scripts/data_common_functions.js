@@ -462,12 +462,9 @@ function populatePointData(pointDataObj, uniq_id) {
 	}
 	
 	if (solar_data.length) {
-		pointDataObj.solar_raw = extract_raw_weight(_getDataWeightSolar(solar_data, 
-																		pointDataObj.lat, 
-																		pointDataObj.lng), 
-													SOLAR_SCALER,
-													SOLAR_BOTTOM, "SOLAR")
-								 * HOUR_TO_YEAR;
+		pointDataObj.solar_raw = 
+			extract_raw_weight(_getDataWeightSolar(solar_data, pointDataObj.lat, pointDataObj.lng), 
+			SOLAR_SCALER, SOLAR_BOTTOM, "SOLAR") * HOUR_TO_YEAR;
 		$("#" + uniq_id + " .solarstring").html(pointDataObj.solar_raw.toFixed(2).toString());
 		_tryPopulateTotalEnergy(pointDataObj, uniq_id);
 	} else if (checkCache(neLat, neLng, swLat, swLng, "SOLAR")) {
@@ -475,24 +472,18 @@ function populatePointData(pointDataObj, uniq_id) {
 		var raw_data = fetchFromCache(pointDataObj.lat, pointDataObj.lng,
 				pointDataObj.lat, pointDataObj.lng, "SOLAR");
 		processData(raw_data, hm_data, neLat, neLng, swLat, swLng, "SOLAR");
-		pointDataObj.solar_raw = extract_raw_weight(_getDataWeightSolar(hm_data, 
-																		pointDataObj.lat, 
-																		pointDataObj.lng), 
-													SOLAR_SCALER,
-													SOLAR_BOTTOM, "SOLAR")
-								 * HOUR_TO_YEAR;
+		pointDataObj.solar_raw = 
+			extract_raw_weight(_getDataWeightSolar(hm_data, pointDataObj.lat, pointDataObj.lng), 
+			SOLAR_SCALER, SOLAR_BOTTOM, "SOLAR") * HOUR_TO_YEAR;
 		$("#" + uniq_id + " .solarstring").html(pointDataObj.solar_raw.toFixed(2).toString());
 		_tryPopulateTotalEnergy(pointDataObj, uniq_id);
 	} else {
 		queryAndCallback('anu', neLat, neLng, swLat, swLng, 0, 0, "SOLAR", function(data) {
 			var hm_data = [];
 			processData(data, hm_data, neLat, neLng, swLat, swLng, "SOLAR");
-			pointDataObj.solar_raw = extract_raw_weight(_getDataWeightSolar(hm_data, 
-																			pointDataObj.lat, 
-																			pointDataObj.lng), 
-														SOLAR_SCALER,
-														SOLAR_BOTTOM, "SOLAR")
-									 * HOUR_TO_YEAR;
+			pointDataObj.solar_raw = 
+				extract_raw_weight(_getDataWeightSolar(hm_data, pointDataObj.lat, pointDataObj.lng), 
+				SOLAR_SCALER, SOLAR_BOTTOM, "SOLAR") * HOUR_TO_YEAR;
 			$("#" + uniq_id + " .solarstring").html(pointDataObj.solar_raw.toFixed(2).toString());
 			_tryPopulateTotalEnergy(pointDataObj, uniq_id);
 		});

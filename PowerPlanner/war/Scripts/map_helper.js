@@ -4,7 +4,6 @@
  * = (the equals symbol) indicates a global var
  * 
  * server_query.js
- * - queryAndUpdate(season, neLat, neLng, swLat, swLng, lat_offset, lng_offset, type)
  * - queryAndCallback(season, neLat, neLng, swLat, swLng, lat_offset, lng_offset, type, callback)
  * 
  * cache_helper.js
@@ -151,7 +150,7 @@ function mapLoader() {
 	google.maps.event.addListener(g_map, 'dragend', _eventHeatmapDataToggler);
 	// Modify zoom state overhead when map is zoomed; load heatmap data
 	google.maps.event.addListener(g_map, 'zoom_changed', function() {
-		zoom = g_map.getZoom();
+		var zoom = g_map.getZoom();
 		view_state = (zoom <= CHANGETO_WIDE_VIEW ? 
 				(zoom <= CHANGETO_OVER_VIEW ? OVER_VIEW: WIDE_VIEW) : 
 					(zoom <= CHANGETO_AVE_VIEW ? AVE_VIEW : SMALL_VIEW));
@@ -170,8 +169,11 @@ function mapLoader() {
 	 * the map is not being moved.
 	 */
 	google.maps.event.addListener(g_map, 'idle', function() {
+		var zoom = g_map.getZoom();
 		var bound_listener = google.maps.event.addListener(g_map, 'bounds_changed', function() {
-			_eventHeatmapDataToggler();
+			if (g_map.getZoom() == zoom) {
+				_eventHeatmapDataToggler();
+			}
 		});
 		var this_listener = google.maps.event.addListener(g_map, 'dragstart', function() {
 				google.maps.event.removeListener(bound_listener);
@@ -198,75 +200,23 @@ function toggleHeatmapData(showWind, showSolar, showHydro) {
 		wind_data = [];
 		solar_data = [];
 		hydro_data = [];
-	
-		var neLat = getNELatitude(g_map);
-		var neLng = getNELongitude(g_map);
-		var swLat = getSWLatitude(g_map);
-		var swLng = getSWLongitude(g_map);
-		
+
 		console.log("===============");
 		console.log("Data Toggled:");
 		console.log("  Wind? " + showWind);
 		console.log("  Solar? " + showSolar);
 		console.log("  Hydro? " + showHydro);
 		console.log("===============");
-	
-		// throttle to prevent multiple requests at the same time
-		if (showWind) {
-			_.throttle(_getHeatmapData("WIND", neLat, neLng, swLat, swLng),500,{leading:false});
-		}
-	
-		if (showSolar) {
-			_.throttle(_getHeatmapData("SOLAR", neLat, neLng, swLat, swLng),500,{leading:false});
-		}
-	
-		if (showHydro) {
-			_.throttle(_getHeatmapData("HYDRO", neLat, neLng, swLat, swLng),500,{leading:false});
-		}
-	
-		if (!showWind && !showSolar && !showHydro) {
+		
+		if (showWind || showSolar || showHydro) {
+			launchQueryUpdate('anu', {
+				wind : showWind,
+				solar : showSolar,
+				hydro : showHydro 
+			});
+		} else {
 			updateHeatmap();
 		}
-	}
-}
-
-/*
- * Sends a POST request to the server for data within the provided latitude and
- * longitude bounds of a particular type. Acceptable types are WIND, SOLAR, and
- * HYDRO. Triggers a heatmap update upon server response.
- */
-function _getHeatmapData(type, neLat, neLng, swLat, swLng) {
-	console.time("_checkCacheData");
-	var lat_offset = getLatOffset(neLat, swLat);
-	var lng_offset = getLngOffset(neLng, swLng);
-
-	// requested grid
-	var neLat_w_off = (neLat + lat_offset);
-	var neLng_w_off = (neLng + lng_offset);
-	var swLat_w_off = (swLat - lat_offset);
-	var swLng_w_off = (swLng - lng_offset);
-	var neLat_floor = Math.floor(neLat_w_off);
-	var neLng_floor = Math.floor(neLng_w_off);
-	var swLat_floor = Math.floor(swLat_w_off);
-	var swLng_floor = Math.floor(swLng_w_off);
-
-	console.log("neLat: " + neLat_w_off);
-	console.log("neLng: " + neLng_w_off);
-	console.log("swLat: " + swLat_w_off);
-	console.log("swLng: " + swLng_w_off);
-
-	// Check whether cache has the requested data
-	var in_cache = checkCache(neLat_w_off, neLng_w_off, swLat_w_off, swLng_w_off, type);
-	
-	if(in_cache) {
-		console.log("IN CACHE");
-		var new_data = fetchFromCache(neLat_w_off, neLng_w_off, swLat_w_off, swLng_w_off, type);
-		updateData(new_data, neLat, neLng, swLat, swLng, type);
-		updateHeatmap();
-		console.timeEnd("_checkCacheData");
-	} else {
-		console.timeEnd("_checkCacheData");
-		queryAndUpdate('anu', neLat, neLng, swLat, swLng, lat_offset, lng_offset, type);
 	}
 }
 
