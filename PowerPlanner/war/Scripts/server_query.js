@@ -187,17 +187,46 @@ function buildURL() {
 					markerSet[i].getPosition().lat() + ',' +
 					markerSet[i].getPosition().lng();
 	}
+	var datastate = "";
+	if ($("#showCheckboxOnlyWind").is(':checked')) {
+		datastate = 'w';
+	} else if ($("#showCheckboxOnlySolar").is(':checked')) {
+		datastate = 's';
+	} else if ($("#showCheckboxOnlyHydro").is(':checked')) {
+		datastate = 'h';
+	} else {
+		if ($("#showCheckboxWind").is(':checked')) {
+			datastate += 'w';
+		}
+		if ($("#showCheckboxSolar").is(':checked')) {
+			datastate += 's';
+		}
+		if ($("#showCheckboxHydro").is(':checked')) {
+			datastate += 'h';
+		}
+	}
+	if (datastate.length > 0) {
+		builder = builder + '&d=' + datastate;
+	}
 	return builder;
 }
 
 function decodeURL() {
 	var url = window.location.origin + '/powerdb?' + window.location.hash.split('?')[1];
 	var zoom = getUrlParameter('z');
+	var data = getUrlParameter('d');
 	var center = getUrlParameter('c');
 	var markers = getUrlParameter('m');
 	if (zoom[0] >= LEAST_ZOOM && zoom[0] <= MAX_ZOOM) {
 		console.log(zoom[0]);
 		g_map.setZoom(Number(zoom[0]));
+	}
+	if (data) {
+		$("#showCheckboxWind").prop("checked", (data[0].indexOf('w') !== -1));
+		$("#showCheckboxSolar").prop("checked", (data[0].indexOf('s') !== -1));
+		$("#showCheckboxHydro").prop("checked", (data[0].indexOf('h') !== -1));
+		toggleHighlightCheck();
+		_eventHeatmapDataToggler();
 	}
 	if (center) {
 		if (center.length > 0) {
