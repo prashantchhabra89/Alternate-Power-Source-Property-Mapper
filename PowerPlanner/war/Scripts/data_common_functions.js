@@ -85,10 +85,20 @@ function set_scaler(type) {
 function apply_scaler(raw_weight, offset, type) {
 	var scaled = raw_weight / scaler;
 	if (type == "SOLAR") {
-		scaled = 2.5 * ((Math.pow(10, raw_weight) - Math.pow(10, offset))
+		scaled = 2.5 * ((Math.pow(10, raw_weight))// - Math.pow(10, offset))
 				/ Math.pow(10, scaler));
 	}
 	return scaled;
+}
+
+function extract_raw_weight(scaled, scaler, offset, type) {
+	var raw = scaled * scaler;
+	if (type == "SOLAR") {
+		raw = Math.log((scaled * Math.pow(10, scaler))/2.5)// + Math.pow(10, offset))
+				/ Math.log(10);
+		console.log(raw);
+	}
+	return (raw > 0 ? raw : 0);
 }
 
 function _filterData(raw_data, push_data, neLat, neLng, swLat, swLng, type) {
@@ -102,7 +112,8 @@ function _filterData(raw_data, push_data, neLat, neLng, swLat, swLng, type) {
 }
 
 /*
- * Fills in a grid of all the points visible on the screen as defined by the
+ * Fills in a grid of all the points visible on the scree
+ * n as defined by the
  * provided boundary coordinates (with a little bit of bleed over the boundaries
  * to prevent visible edge discolouration) by interpolating values from the
  * provided set of real data points based on a weighting algorithm. Returns the
@@ -450,8 +461,12 @@ function populatePointData(pointDataObj, uniq_id) {
 	}
 	
 	if (solar_data.length) {
-		pointDataObj.solar_raw = _getDataWeightSolar(solar_data, pointDataObj.lat, pointDataObj.lng)
-			* SOLAR_SCALER * HOUR_TO_YEAR;
+		pointDataObj.solar_raw = extract_raw_weight(_getDataWeightSolar(solar_data, 
+																		pointDataObj.lat, 
+																		pointDataObj.lng), 
+													SOLAR_SCALER,
+													SOLAR_BOTTOM, "SOLAR")
+								 * HOUR_TO_YEAR;
 		$("#" + uniq_id + " .solarstring").html(pointDataObj.solar_raw.toFixed(2).toString());
 		_tryPopulateTotalEnergy(pointDataObj, uniq_id);
 	} else if (checkCache(neLat, neLng, swLat, swLng, "SOLAR")) {
@@ -459,21 +474,28 @@ function populatePointData(pointDataObj, uniq_id) {
 		var raw_data = fetchFromCache(pointDataObj.lat, pointDataObj.lng,
 				pointDataObj.lat, pointDataObj.lng, "SOLAR");
 		processData(raw_data, hm_data, neLat, neLng, swLat, swLng, "SOLAR");
-		pointDataObj.solar_raw = _getDataWeightSolar(hm_data, pointDataObj.lat, pointDataObj.lng)
-			* SOLAR_SCALER * HOUR_TO_YEAR;
+		pointDataObj.solar_raw = extract_raw_weight(_getDataWeightSolar(hm_data, 
+																		pointDataObj.lat, 
+																		pointDataObj.lng), 
+													SOLAR_SCALER,
+													SOLAR_BOTTOM, "SOLAR")
+								 * HOUR_TO_YEAR;
 		$("#" + uniq_id + " .solarstring").html(pointDataObj.solar_raw.toFixed(2).toString());
 		_tryPopulateTotalEnergy(pointDataObj, uniq_id);
 	} else {
 		queryAndCallback('anu', neLat, neLng, swLat, swLng, 0, 0, "SOLAR", function(data) {
 			var hm_data = [];
 			processData(data, hm_data, neLat, neLng, swLat, swLng, "SOLAR");
-			pointDataObj.solar_raw = _getDataWeightSolar(hm_data, pointDataObj.lat, pointDataObj.lng)
-				* SOLAR_SCALER * HOUR_TO_YEAR;
+			pointDataObj.solar_raw = extract_raw_weight(_getDataWeightSolar(hm_data, 
+																			pointDataObj.lat, 
+																			pointDataObj.lng), 
+														SOLAR_SCALER,
+														SOLAR_BOTTOM, "SOLAR")
+									 * HOUR_TO_YEAR;
 			$("#" + uniq_id + " .solarstring").html(pointDataObj.solar_raw.toFixed(2).toString());
 			_tryPopulateTotalEnergy(pointDataObj, uniq_id);
 		});
 	}
-	
 	if (hydro_data.length) {
 		pointDataObj.hydro_raw = _getDataWeightHydro(hydro_data, pointDataObj.lat, pointDataObj.lng)
 			* HYDRO_SCALER * HOUR_TO_YEAR;

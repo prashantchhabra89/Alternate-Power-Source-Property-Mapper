@@ -62,12 +62,8 @@ function _getDataWeightWind(hm_data, lat, lng) {
 				dist_scaling = 1;
 			}
 			final_weight += nearest[i].weight * nearest_distance[i] * dist_scaling;
-//			final_weight += (nearest[i].weight
-//					* (1 - nearest_distance[i] / dist_sum) * dist_scaling);
 		}
 
 	}
 	return (nearest.length > 0 ? final_weight / dist_sum : 0);
-//	return (nearest.length > 0 ? 
-//			final_weight / (nearest.length > 1 ? nearest.length - 1 : nearest.length/2) : 0);
 }

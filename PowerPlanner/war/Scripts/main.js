@@ -64,14 +64,8 @@ $(document).ready(function() {
 		var bg_col = ($(this).is(':checked')) ? "#F84684" : "";
 		var border_width = ($(this).is(':checked')) ? "3px" : "";
 		
-		//TEMP (to disallow multi-selection)
-		$("#showCheckboxSolar").prop("checked", false);
-		$("#showCheckboxHydro").prop("checked", false);
-		$("#solar-panel-app").css("border-color", "");
-		$("#hydro-panel-app").css("border-color", "");
-		$('#solar-panel-app').css("border-width", border_width);
-		$('#hydro-panel-app').css("border-width", border_width);
-		
+		$("#showCheckboxOnlySolar").prop("checked", false);
+		$("#showCheckboxOnlyHydro").prop("checked", false);
 		
 		$('#wind-panel-app').css("border-color", bg_col);
 		$('#wind-panel-app').css("border-width", border_width);
@@ -81,18 +75,35 @@ $(document).ready(function() {
 				$("#showCheckboxHydro").is(':checked')
 		);
 	});
+	
+	$("#showCheckboxOnlyWind").click(function() {
+		var bg_col = ($(this).is(':checked')) ? "#F84684" : "";
+		var border_width = ($(this).is(':checked')) ? "3px" : "";
+		
+		if ($(this).is(':checked')) {
+			$("#showCheckboxSolar").prop("checked", false);
+			$("#showCheckboxOnlySolar").prop("checked", false);
+			$("#showCheckboxHydro").prop("checked", false);
+			$("#showCheckboxOnlyHydro").prop("checked", false);
+			$("#solar-panel-app").css("border-color", "");
+			$("#hydro-panel-app").css("border-color", "");
+			$('#wind-panel-app').css("border-color", bg_col);
+			$('#wind-panel-app').css("border-width", border_width);
+			$("#showCheckboxWind").prop("checked", true);
+			toggleHeatmapData(
+					$("#showCheckboxWind").is(':checked'),
+					$("#showCheckboxSolar").is(':checked'),
+					$("#showCheckboxHydro").is(':checked')
+			);
+		}
+	});
 
 	$("#showCheckboxSolar").click(function() {
 		var bg_col = ($(this).is(':checked')) ? "#F84684" : "";
 		var border_width = ($(this).is(':checked')) ? "3px" : "";
 		
-		//TEMP (to disallow multi-selection)
-		$("#showCheckboxWind").prop("checked", false);
-		$("#showCheckboxHydro").prop("checked", false);
-		$("#wind-panel-app").css("border-color", "");
-		$("#hydro-panel-app").css("border-color", "");
-		$('#wind-panel-app').css("border-width", "");
-		$('#hydro-panel-app').css("border-width", "");
+		$("#showCheckboxOnlyWind").prop("checked", false);
+		$("#showCheckboxOnlyHydro").prop("checked", false);
 		
 		$('#solar-panel-app').css("border-color", bg_col);
 		$('#solar-panel-app').css("border-width", border_width);
@@ -102,19 +113,36 @@ $(document).ready(function() {
 				$("#showCheckboxHydro").is(':checked')
 		);
 	});
+	
+	$("#showCheckboxOnlySolar").click(function() {
+		var bg_col = ($(this).is(':checked')) ? "#F84684" : "";
+		var border_width = ($(this).is(':checked')) ? "3px" : "";
+		
+		if ($(this).is(':checked')) {
+			$("#showCheckboxWind").prop("checked", false);
+			$("#showCheckboxOnlyWind").prop("checked", false);
+			$("#showCheckboxHydro").prop("checked", false);
+			$("#showCheckboxOnlyHydro").prop("checked", false);
+			$("#wind-panel-app").css("border-color", "");
+			$("#hydro-panel-app").css("border-color", "");
+			$('#solar-panel-app').css("border-color", bg_col);
+			$('#solar-panel-app').css("border-width", border_width);
+			$("#showCheckboxSolar").prop("checked", true);
+			toggleHeatmapData(
+					$("#showCheckboxWind").is(':checked'),
+					$("#showCheckboxSolar").is(':checked'),
+					$("#showCheckboxHydro").is(':checked')
+			);
+		}
+	});
 
 	$("#showCheckboxHydro").click(function() {
 		var bg_col = ($(this).is(':checked')) ? "#F84684" : "";
 		var border_width = ($(this).is(':checked')) ? "3px" : "";
-		
-		//TEMP (to disallow multi-selection)
-		$("#showCheckboxWind").prop("checked", false);
-		$("#showCheckboxSolar").prop("checked", false);
-		$("#wind-panel-app").css("border-color", "");
-		$("#solar-panel-app").css("border-color", "");
-		$('#wind-panel-app').css("border-width", "");
-		$('#solar-panel-app').css("border-width", "");
-		
+
+		$("#showCheckboxOnlyWind").prop("checked", false);
+		$("#showCheckboxOnlySolar").prop("checked", false);
+
 		$('#hydro-panel-app').css("border-color", bg_col);
 		$('#hydro-panel-app').css("border-width", border_width);
 		toggleHeatmapData(
@@ -122,6 +150,28 @@ $(document).ready(function() {
 				$("#showCheckboxSolar").is(':checked'),
 				$(this).is(':checked')
 		);
+	});
+	
+	$("#showCheckboxOnlyHydro").click(function() {
+		var bg_col = ($(this).is(':checked')) ? "#F84684" : "";
+		var border_width = ($(this).is(':checked')) ? "3px" : "";
+		
+		if ($(this).is(':checked')) {
+			$("#showCheckboxWind").prop("checked", false);
+			$("#showCheckboxOnlyWind").prop("checked", false);
+			$("#showCheckboxSolar").prop("checked", false);
+			$("#showCheckboxOnlySolar").prop("checked", false);
+			$("#wind-panel-app").css("border-color", "");
+			$("#solar-panel-app").css("border-color", "");
+			$('#hydro-panel-app').css("border-color", bg_col);
+			$('#hydro-panel-app').css("border-width", border_width);
+			$("#showCheckboxHydro").prop("checked", true);
+			toggleHeatmapData(
+					$("#showCheckboxWind").is(':checked'),
+					$("#showCheckboxSolar").is(':checked'),
+					$("#showCheckboxHydro").is(':checked')
+			);
+		}
 	});
 
 	//HACK: Added a delay for when the panel is fully displayed or hidden, then the radio buttons/checkbox will show

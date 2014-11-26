@@ -89,9 +89,11 @@ var SOLAR_SCALING_DISTANCE = 1; /* Data point further away may have less impact 
 var MIN_DISPLAY_WEIGHT = 0.01; /* Don't add a point with less weight to heatmap */
 
 var WIND_SCALER = 8;
-var SOLAR_SCALER = 3.3;
+var SOLAR_SCALER = 1.5;
 var HYDRO_SCALER = 1000;
 var scaler = WIND_SCALER;
+
+var SOLAR_BOTTOM = 0;
 
 var HOUR_TO_YEAR = 8760;
 
@@ -185,6 +187,13 @@ function toggleHeatmapData(showWind, showSolar, showHydro) {
 	var neLng = getNELongitude(g_map);
 	var swLat = getSWLatitude(g_map);
 	var swLng = getSWLongitude(g_map);
+	
+	console.log("===============");
+	console.log("Data Toggled:");
+	console.log("  Wind? " + showWind);
+	console.log("  Solar? " + showSolar);
+	console.log("  Hydro? " + showHydro);
+	console.log("===============");
 
 	// throttle to prevent multiple requests at the same time
 	if (showWind) {

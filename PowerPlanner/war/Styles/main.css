@@ -205,6 +205,9 @@ body {
 .displayRadioButtons {
 	display: block !important;
 }
+.checkOptions {
+	margin-top: -10px !important;
+}
 .inputLabel {
 	float: left;
 	width: 167px !important;
@@ -233,7 +236,7 @@ body {
 	margin-right: auto;
 }
 .showAdvancedOptions {
-	width: 20% !important;
+	/*width: 10% !important;*/
 }
 .resourceBox, .resourceImg {
 	margin-top: 8px;
