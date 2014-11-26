@@ -45,7 +45,6 @@ body {
 	width: 300px;
 	color: #333;
 }
-
 .controls {
 	margin-top: 16px;
 	border: 1px solid transparent;
@@ -69,7 +68,7 @@ body {
 
 .resourceContainer div {
 	margin: 0.2em 0.2em;
-	border: 2px solid #999;
+	border: 3px solid #999;
 	border-radius: 7px;
 	box-shadow: 0 0 2px #555;
 }
@@ -169,7 +168,7 @@ body {
 	float: left;
 }
 
-#question-panel {
+#question-panel-app {
 	margin: 0.6em 0.2em;
 	border: 2px solid #444;
 	border-radius: 50%;
@@ -212,7 +211,7 @@ body {
 	margin-top: 0em !important;
 }
 .inputText {
-	width: 90% !important;
+	width: 168px !important;
 }
 .center {
 	text-align:center !important;
@@ -239,6 +238,9 @@ body {
 .resourceBox, .resourceImg {
 	margin-top: 8px;
 }
+.ui-controlgroup-controls {
+	width: 300px !important;
+}
 
 div.ui-input-text{
 	width: 170px !important;
@@ -260,6 +262,16 @@ div.ui-input-text{
 	font-family: 'Raleway', sans-serif !important;
 	font-weight: lighter !important;
 	margin-bottom: 25%;
+}
+.tour-button {
+	width: 130px;
+	color: #333 !important;
+	font-size: 21px !important;
+	background-color: #FAF84E !important;
+	border-color: #FADE4E !important;
+	border-radius: 12px;
+	font-family: 'Raleway', sans-serif !important;
+	font-weight: lighter !important;
 }
 .intro {
 	display: table;
@@ -309,6 +321,9 @@ p.intro-text, h3.intro-header, a.calc-text, p.calc-text, h3.calc-header, p.about
 p.intro-text {
 	color: rgb(253, 231, 2);
 }
+p.intro-main-text {
+	background: rgba(0, 0, 0, 0.5);
+}
 p.footer-text {
 	font-size:0.8em;
 	text-align: center;
@@ -328,7 +343,7 @@ h3.intro-header {
 
 h4.intro-subheading {
 	font-family: 'Raleway', sans-serif;
-	font-size: 30px;
+	font-size: 28px;
 	margin-bottom: -22px;
 	margin-top: 15px;
 }
@@ -400,6 +415,9 @@ h4.intro-subheading {
 	width: 238px;
 	height: 63px;
 }
+.tour-step-background {
+	display:none !important;
+}
 
 #img-container {
 	display: table;
@@ -419,9 +437,40 @@ h4.intro-subheading {
 	display: table-cell;
 	text-align: center;
 }
-
 p.howToUse {
 	margin-bottom: 3px !important;
+}
+.tour-backdrop {
+	margin: 0px !important;
+	border: 0px !important;
+	border-radius: 0px !important;
+	width: 100% !important;
+}
+.popover-title, .popover-content, .popover-navigation {
+	color: #333 !important;
+	text-shadow: 0px 0 #111 !important;	
+	font-family: 'Raleway', sans-serif !important;
+	font-weight: 200 !important;
+}
+.popover-title {
+	font-size: 24px !important;
+}
+.question-panel-open {
+	left: 346px !important;
+}
+.legendTourTip {
+	top: 25% !important;
+	left: 30% !important;
+}
+.feedbackHead {
+	margin-bottom: 0px !important;
+}
+.feedbackForm {
+	text-align: left !important;
+	width: 90% !important;
+}
+.feedbackText {
+	height: 100px !important;
 }
 
 /* Fix for info window showing scroll bar in Firefox */
@@ -486,7 +535,7 @@ p.howToUse {
 		bottom: 1em;
 	}
 	h3.intro-header {
-		font-size: 40px;
+		font-size: 35px;
 		margin: 20px 0px 10px 10px;
 	}
 	.wind {
@@ -512,6 +561,10 @@ p.howToUse {
 		width: 39px !important;
 		height: 39px !important;
 		float: left;
+	}
+	.legendTourTip {
+		top: 25% !important;
+		left: 4% !important;
 	}
 	#legend {
 		background: url(../images/power_legend_right.png) no-repeat bottom center scroll !important;
@@ -543,7 +596,7 @@ p.howToUse {
 		margin: 10px 0px 6px 0px;
 	}
 	h3.intro-header {
-		font-size: 48px;
+		font-size: 35px;
 		margin: 20px 0px 10px 10px;
 	}
 	p.intro-text {
@@ -605,9 +658,6 @@ p.howToUse {
 	}
 	.resources-panel {
 	  width:85%;
-	}
-	.start-button {
-		margin-top: 30px;
 	}
 }
 

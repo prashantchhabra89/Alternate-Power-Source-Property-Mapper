@@ -184,4 +184,3 @@ function changeMarkerIcon(energyLevel) {
 		console.log("High Energy Level**************************************************");
 	}
 }
-
