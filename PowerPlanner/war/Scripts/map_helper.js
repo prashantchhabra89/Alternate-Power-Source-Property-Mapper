@@ -64,11 +64,11 @@
 
 var g_map; /* The main map */
 var g_heatmap; /* The heatmap layer for the main map */
+var g_linemap; /* The secondary heatmap layer for the main map */
 
 var wind_data = []; /* The wind data for the current heatmap view */
 var solar_data = []; /* The solar data for the current heatmap view */
 var hydro_data = []; /* The hydro data for the current heatmap view */
-var streams_data = []; /* The streams data for where to draw hydro */
 
 var SMALL_VIEW = 0 /* State variable for have a small view (very zoomed in) */
 var AVE_VIEW = 1; /* State variable for having an average view */
@@ -137,6 +137,7 @@ function initializeMap() {
 function mapLoader() {
 	g_map = initializeMap();
 	g_heatmap = initHeatmap(g_map);
+	g_linemap = initHeatmap(g_map);
 	
 	initializeMarkers(g_map);
 	showHelpMarker();
@@ -181,7 +182,6 @@ function toggleHeatmapData(showWind, showSolar, showHydro) {
 	wind_data = [];
 	solar_data = [];
 	hydro_data = [];
-	streams_data = [];
 
 	var neLat = getNELatitude(g_map);
 	var neLng = getNELongitude(g_map);
@@ -320,16 +320,12 @@ function attachHeatmap(heatmap, map) {
 function updateHeatmap() {
 	var hm_data = wind_data;
 	hm_data = hm_data.concat(solar_data);
-	hm_data = hm_data.concat(hydro_data);
-
-	/*if (!POINT_DEBUGGER) {
-		g_heatmap.set('radius', MAX_DATA_WIDTH
-				/ Math.pow(2, (g_map.getZoom() - LEAST_ZOOM)) * 0.98);
-	}*/
-
 	console.log("Points on map: " + hm_data.length);
-
 	_updateHeatmap(g_heatmap, hm_data);
+	
+	hm_data = hydro_data;
+	console.log("Points on line map: " + hm_data.length);
+	_updateHeatmap(g_linemap, hm_data);
 }
 
 /*
@@ -353,18 +349,25 @@ function addHeatmapCoord(hm_data, lat, lng, weight) {
 	return hm_data;
 }
 
-function getHeatmapSize() {
-	return g_heatmap.get('radius');
+function getHeatmapSize(type) {
+	var radius = 0;
+	if (type == "HYDRO") {
+		radius = g_linemap.get('radius');
+	} else {
+		radius = g_heatmap.get('radius');
+	}
+	return radius;
 }
 
 function _setHeatmapSize(type) {
 	var radius = 0;
 	if (type == "HYDRO") {
 		radius = MAX_DATA_WIDTH / Math.pow(2, (g_map.getZoom() - LEAST_ZOOM)) * 0.08;
+		g_linemap.set('radius', radius);
 	} else {
 		radius = MAX_DATA_WIDTH / Math.pow(2, (g_map.getZoom() - LEAST_ZOOM)) * 0.98;
+		g_heatmap.set('radius', radius);
 	}
-	g_heatmap.set('radius', radius);
 	return radius;
 }
 

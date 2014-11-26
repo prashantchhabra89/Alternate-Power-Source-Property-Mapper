@@ -352,7 +352,7 @@ function startButtonClick() {
 				$("#showCheckboxSolar").is(':checked'),
 				$("#showCheckboxHydro").is(':checked')
 		);
-	});	
+	});
 }
 // This runs when the page loads or restarts; checks if any power is toggled
 function toggleHighlightCheck() {
@@ -374,7 +374,7 @@ function checkQuestionPanelOpen (){
 	if($("#questionPanel" ).hasClass( "ui-panel-open" )){
 		if($("#step-4").hasClass( "question-panel-open" ) == false){
 			$("#step-4").addClass('question-panel-open');
-		}		
+		}
 	}
 	else {
 		$("#step-4").removeClass('question-panel-open');
