@@ -62,8 +62,10 @@ function decodeURL() {
 		console.log(zoom[0]);
 		g_map.setZoom(Number(zoom[0]));
 	}
-	if (center != []) {
-		g_map.setCenter(new google.maps.LatLng(center[0].split(',')[0], center[0].split(',')[1]));
+	if (center) {
+		if (center.length > 0) {
+			g_map.setCenter(new google.maps.LatLng(center[0].split(',')[0], center[0].split(',')[1]));
+		}
 	}
 	for (var i = 0; i < markers.length; i++) {
 		console.log(markers[i]);
@@ -77,7 +79,10 @@ function decodeURL() {
 function getUrlParameter(sParam)
 {
     var sPageURL = window.location.hash.split('?',2)[1];
-    var sURLVariables = sPageURL.split('&');
+    var sURLVariables = [];
+    if (sPageURL) {
+    	sURLVariables = sPageURL.split('&');
+    }
     var returnArr = [];
     for (var i = 0; i < sURLVariables.length; i++) 
     {
