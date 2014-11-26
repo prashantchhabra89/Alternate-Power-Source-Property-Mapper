@@ -90,7 +90,7 @@ var MIN_DISPLAY_WEIGHT = 0.01; /* Don't add a point with less weight to heatmap 
 
 var WIND_SCALER = 8;
 var SOLAR_SCALER = 1.5;
-var HYDRO_SCALER = 1000;
+var HYDRO_SCALER = 8;
 var scaler = WIND_SCALER;
 
 var SOLAR_BOTTOM = 0;
