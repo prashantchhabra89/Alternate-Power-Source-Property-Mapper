@@ -57,12 +57,12 @@ function addMarker(map, loc) {
 	marker = new google.maps.Marker({
 		position : loc,
 		map : map,
-		icon : "http://www.google.com/intl/en_us/mapfiles/ms/micons/red-dot.png"		
+		icon : "../../images/icon_nopower.png"		
 	});
 	markerSet.push(marker);
 
 	// the object handle holding the data
-	var pointDataObject = getPointData(marker.getPosition().lat(), marker.getPosition().lng());		
+	var pointDataObject = getPointData(marker);		
 
 	// this is the bubble displayed when pin is dropped
 	// the function _balloonText() is called to get the string displayed in the balloon.
@@ -165,4 +165,19 @@ function _balloonText(div_id, pointDataObject) {
 	}
 	
 	return balloonString;
+}
+
+// change the marker's icon according to energy level.
+// this function is called by _tryPopulateTotalEnergy in data_common_functions.js.
+function changeMarkerIcon(marker, energyLevel) {
+	if (energyLevel < 0.5) {
+		marker.setIcon("../../images/icon_nopower.png");
+	} else if (energyLevel >= 0.5 && energyLevel < 0.8) {
+		marker.setIcon("../../images/icon_low.png");
+	} else if (energyLevel >= 0.8 && energyLevel < 1.45) {
+		marker.setIcon("../../images/icon_medium.png");
+	} else if (energyLevel >= 1.45) {
+		marker.setIcon("../../images/icon_high.png");
+		console.log("High Energy Level**************************************************");
+	}
 }
