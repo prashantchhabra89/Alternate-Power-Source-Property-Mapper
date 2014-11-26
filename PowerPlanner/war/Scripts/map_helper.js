@@ -98,6 +98,7 @@ var SOLAR_BOTTOM = 0;
 var HOUR_TO_YEAR = 8760;
 
 var POINT_DEBUGGER = false; /* true = view data points instead of interpolation */
+var ALLOW_QUERY = true;
 
 //View (or zoom) state of the map; used to implement different time saving
 //measures
@@ -163,6 +164,20 @@ function mapLoader() {
 		var bounds = g_map.getBounds();
 		searchBox.setBounds(bounds);
 	});
+	
+	/*
+	 * These listeners cause the map to reload data if the bounds change while
+	 * the map is not being moved.
+	 */
+	google.maps.event.addListener(g_map, 'idle', function() {
+		var bound_listener = google.maps.event.addListener(g_map, 'bounds_changed', function() {
+			_eventHeatmapDataToggler();
+		});
+		var this_listener = google.maps.event.addListener(g_map, 'dragstart', function() {
+				google.maps.event.removeListener(bound_listener);
+				google.maps.event.removeListener(this_listener);
+		});
+	});
 }
 
 /*
@@ -179,37 +194,39 @@ function _eventHeatmapDataToggler() {
  * types on and off.
  */
 function toggleHeatmapData(showWind, showSolar, showHydro) {
-	wind_data = [];
-	solar_data = [];
-	hydro_data = [];
-
-	var neLat = getNELatitude(g_map);
-	var neLng = getNELongitude(g_map);
-	var swLat = getSWLatitude(g_map);
-	var swLng = getSWLongitude(g_map);
+	if (ALLOW_QUERY) {
+		wind_data = [];
+		solar_data = [];
+		hydro_data = [];
 	
-	console.log("===============");
-	console.log("Data Toggled:");
-	console.log("  Wind? " + showWind);
-	console.log("  Solar? " + showSolar);
-	console.log("  Hydro? " + showHydro);
-	console.log("===============");
-
-	// throttle to prevent multiple requests at the same time
-	if (showWind) {
-		_.throttle(_getHeatmapData("WIND", neLat, neLng, swLat, swLng),500,{leading:false});
-	}
-
-	if (showSolar) {
-		_.throttle(_getHeatmapData("SOLAR", neLat, neLng, swLat, swLng),500,{leading:false});
-	}
-
-	if (showHydro) {
-		_.throttle(_getHeatmapData("HYDRO", neLat, neLng, swLat, swLng),500,{leading:false});
-	}
-
-	if (!showWind && !showSolar && !showHydro) {
-		updateHeatmap();
+		var neLat = getNELatitude(g_map);
+		var neLng = getNELongitude(g_map);
+		var swLat = getSWLatitude(g_map);
+		var swLng = getSWLongitude(g_map);
+		
+		console.log("===============");
+		console.log("Data Toggled:");
+		console.log("  Wind? " + showWind);
+		console.log("  Solar? " + showSolar);
+		console.log("  Hydro? " + showHydro);
+		console.log("===============");
+	
+		// throttle to prevent multiple requests at the same time
+		if (showWind) {
+			_.throttle(_getHeatmapData("WIND", neLat, neLng, swLat, swLng),500,{leading:false});
+		}
+	
+		if (showSolar) {
+			_.throttle(_getHeatmapData("SOLAR", neLat, neLng, swLat, swLng),500,{leading:false});
+		}
+	
+		if (showHydro) {
+			_.throttle(_getHeatmapData("HYDRO", neLat, neLng, swLat, swLng),500,{leading:false});
+		}
+	
+		if (!showWind && !showSolar && !showHydro) {
+			updateHeatmap();
+		}
 	}
 }
 
@@ -326,6 +343,19 @@ function updateHeatmap() {
 	hm_data = hydro_data;
 	console.log("Points on line map: " + hm_data.length);
 	_updateHeatmap(g_linemap, hm_data);
+}
+
+function suspendAndResumeHeatmap() {
+	wind_data = []
+	solar_data = []
+	hydro_data = []
+	updateHeatmap();
+	ALLOW_QUERY = false;
+	var blocker = google.maps.event.addListener(g_map, 'idle', function() {
+		ALLOW_QUERY = true;
+		_eventHeatmapDataToggler();
+		google.maps.event.removeListener(blocker);
+	});
 }
 
 /*

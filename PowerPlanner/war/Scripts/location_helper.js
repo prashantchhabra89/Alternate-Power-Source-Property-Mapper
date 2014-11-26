@@ -18,6 +18,7 @@ function initializeSearchBox(map, pushToMap, element_id) {
 	// Listen for the event fired when the user selects an item from the
 	// pick list. Retrieve the matching places for that item.	
 	google.maps.event.addListener(searchBox, 'places_changed', function() {
+		console.log("Changed!");
 		var places = searchBox.getPlaces();
 
 		if (places.length == 0) {
@@ -28,6 +29,7 @@ function initializeSearchBox(map, pushToMap, element_id) {
 			bounds.extend(place.geometry.location);
 		}
 
+		suspendAndResumeHeatmap();
 		map.fitBounds(bounds);
 	});
 	// [END region_getplaces]
