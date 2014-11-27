@@ -221,7 +221,8 @@ function coldLoadDecodeURL(map) {
 }
 
 function decodeURL() {
-	var url = window.location.origin + '/powerdb?' + window.location.hash.split('?')[1];
+	var hash = window.location.hash.split('?');
+	var url = window.location.origin + '/powerdb?' + hash[1];
 	var zoom = getUrlParameter('z');
 	var data = getUrlParameter('d');
 	var center = getUrlParameter('c');
@@ -249,6 +250,7 @@ function decodeURL() {
 		toggleHighlightCheck();
 		_eventHeatmapDataToggler();
 	}
+	document.location.hash = hash[0];
 }
 
 function getUrlParameter(sParam)
