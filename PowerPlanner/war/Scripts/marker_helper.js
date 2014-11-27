@@ -8,12 +8,11 @@
 // Yes, we created a bubble first, then we created a marker.
 // markerBalloon is declared global.
 var markerBalloon = new google.maps.InfoWindow();
+var markerSet = [];
 
 /* For unique ids */
 var markerHTMLIdSubscript = 0;
 
-// make marker variable global. gonna be used outside initializeMarkers(map) as well.
-var marker;
 // Code for get rid of top-left bug. Doesn't affect functions.
 // Explanation:
 // When an info window is created, it is not tied with any marker.
@@ -36,7 +35,7 @@ function initializeMarkers(map) {
 	testMarker = new google.maps.Marker({
 		position:map.getCenter(),
 		map : map,
-		icon : "../../images/icon_nopower_small.png"		
+		icon : "http://www.google.com/intl/en_us/mapfiles/ms/micons/red-dot.png"		
 	});
 	// tie our balloon with the temporary marker.
 	markerBalloon.setContent("1");
@@ -60,9 +59,10 @@ function addMarker(map, loc) {
 		map : map,
 		icon : "../../images/icon_nopower.png"		
 	});
+	markerSet.push(marker);
 
 	// the object handle holding the data
-	var pointDataObject = getPointData(marker.getPosition().lat(), marker.getPosition().lng());		
+	var pointDataObject = getPointData(marker);		
 
 	// this is the bubble displayed when pin is dropped
 	// the function _balloonText() is called to get the string displayed in the balloon.
@@ -72,14 +72,11 @@ function addMarker(map, loc) {
 	markerBalloon.bindTo('position', marker, 'position');
 	markerBalloon.open(map, marker);
 	populatePointData(pointDataObject, balloonUniqID);
-	
 
 	// this is the bubble displayed when pin is left-clicked.
 	// left click to toggle the bubble.
 	// if you left click another pin, the bubble on that pin will show up.
 	marker.addListener('click', function() {
-		//this.icon = "../../images/icon_low.png";
-
 		// if the current balloon is closed
 		if (markerBalloon.getContent()=="") {
 			markerBalloon.setContent(_balloonText(balloonUniqID, pointDataObject));
@@ -106,6 +103,7 @@ function addMarker(map, loc) {
 	marker.addListener('rightclick', function() {
 		// didn't actually delete or close the marker, just set it to invisible.
 		this.setVisible(false);
+		markerSet.pop(this);
 
 		// test if we are right clicking the pin with opening bubble.
 		// if we are, close the bubble. If we are not, don't do anything.
@@ -148,7 +146,6 @@ function _balloonText(div_id, pointDataObject) {
 		"<p><i>Right click on the pin to remove pin.</i></p>" +
 		"<p><i>Left click on the pin to toggle this window.</i></p></div>";
 	} else {
-		// I don't think this is ever entered.
 		var totalEnergy = pointDataObject.wind_raw + pointDataObject.solar_raw + 
 			pointDataObject.hydro_raw;
 		balloonString = "<div class=\"scrollFix\" id=\"" + div_id + "\">" + 
@@ -172,15 +169,14 @@ function _balloonText(div_id, pointDataObject) {
 
 // change the marker's icon according to energy level.
 // this function is called by _tryPopulateTotalEnergy in data_common_functions.js.
-function changeMarkerIcon(energyLevel) {
-	if (energyLevel < 0.33) {
+function changeMarkerIcon(marker, energyLevel) {
+	if (energyLevel < 0.5) {
 		marker.setIcon("../../images/icon_nopower.png");
-	} else if (energyLevel > 0.34 && energyLevel < 0.66) {
+	} else if (energyLevel >= 0.5 && energyLevel < 0.8) {
 		marker.setIcon("../../images/icon_low.png");
-	} else if (energyLevel > 0.67 && energyLevel < 1.00) {
+	} else if (energyLevel >= 0.8 && energyLevel < 1.45) {
 		marker.setIcon("../../images/icon_medium.png");
-	} else if (energyLevel > 1.00) {
+	} else if (energyLevel >= 1.45) {
 		marker.setIcon("../../images/icon_high.png");
-		console.log("High Energy Level**************************************************");
 	}
 }

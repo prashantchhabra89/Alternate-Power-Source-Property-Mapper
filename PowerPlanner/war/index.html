@@ -271,11 +271,14 @@
 			</fieldset>
 			<button class="ui-shadow ui-btn ui-corner-all">Export</button>
 			<h2>Share Link</h2>
-			<a href="#shareLink" data-rel="popup" class="ui-btn ui-corner-all ui-shadow ui-btn-inline" data-transition="pop">URL</a>
-			<div data-role="popup" id="shareLink">
-				<p class="popupText calc-text">Copy the link to Bookmark or Share.</p>
+			<a href="#shareLink" data-rel="popup" class="ui-btn ui-corner-all ui-shadow ui-btn-inline" 
+				data-transition="slide" id="shareLinkButton">
+				URL
+			</a>
+			<div data-role="popup" data-theme="b" data-overlay-theme="b" id="shareLink" >
+				<p class="url-text" data-theme="a">Copy the link to Bookmark or Share.</p>
 				
-				<p class="popupText calc-text">Copy Link:</p>
+				<p class="sub-url-text">Press Ctrl+C or right click and select Copy</p>
 				<div class="URLpopup center">
 					<input type="text" name="copyLink" id="copyLink" value="">
 				</div>
@@ -348,10 +351,26 @@
 							</div>
 						</div>
 					</div>
-					<!-- /grid-a -->					
-					<input type="checkbox"
-						name="showCheckboxWind" id="showCheckboxWind" data-mini="true">
-					<label class="showAdvancedOptions" for="showCheckboxWind">	Show</label>
+					<!-- /grid-a -->
+					<div class="ui-grid-a">
+						<div class="ui-block-a inputLabel">
+							<div data-role="fieldcontain">
+								<label class="inputLabel" for="showCheckboxWind">Display: </label>
+							</div>
+						</div>
+						<div class="ui-block-b checkOptions">
+							<div data-role="fieldcontain" class="ui-controlgroup-controls">
+								<fieldset data-role="controlgroup" data-type="horizontal">
+									<input type="checkbox"
+										name="showCheckboxWind" id="showCheckboxWind" data-mini="true">
+									<label for="showCheckboxWind">	Show Wind</label>
+									<input type="checkbox"
+										name="showCheckboxOnlyWind" id="showCheckboxOnlyWind" data-mini="true">
+									<label for="showCheckboxOnlyWind">	Only Wind</label>
+								</fieldset>
+							</div>
+						</div>
+					</div>
 				</form>
 			</div>
 			<div class="resources-panel" id="solarResource">
@@ -400,10 +419,25 @@
 						</div>
 					</div>
 					<!-- /grid-a -->
-					
-					<input type="checkbox"
-						name="showCheckboxSolar" id="showCheckboxSolar" data-mini="true">
-					<label class="showAdvancedOptions" for="showCheckboxSolar"> Show</label>
+					<div class="ui-grid-a">
+						<div class="ui-block-a inputLabel">
+							<div data-role="fieldcontain">
+								<label class="inputLabel" for="showCheckboxSolar">Display: </label>
+							</div>
+						</div>
+						<div class="ui-block-b checkOptions">
+							<div data-role="fieldcontain" class="ui-controlgroup-controls">
+								<fieldset data-role="controlgroup" data-type="horizontal">
+									<input type="checkbox"
+										name="showCheckboxSolar" id="showCheckboxSolar" data-mini="true">
+									<label for="showCheckboxSolar">	Show Solar</label>
+									<input type="checkbox"
+										name="showCheckboxOnlySolar" id="showCheckboxOnlySolar" data-mini="true">
+									<label for="showCheckboxOnlySolar">	Only Solar</label>
+								</fieldset>
+							</div>
+						</div>
+					</div>
 				</form>
 			</div>
 			<div class="resources-panel" id="hydroResource">
@@ -444,11 +478,26 @@
 							</div>
 						</div>
 					</div>
-					<!-- /grid-a -->					
-					<input type="checkbox"
-						name="showCheckboxHydro" id="showCheckboxHydro" data-mini="true">
-					<label class="showAdvancedOptions" for="showCheckboxHydro">
-						Show</label>
+					<!-- /grid-a -->
+					<div class="ui-grid-a">
+						<div class="ui-block-a inputLabel">
+							<div data-role="fieldcontain">
+								<label class="inputLabel" for="showCheckboxHydro">Display: </label>
+							</div>
+						</div>
+						<div class="ui-block-b checkOptions">
+							<div data-role="fieldcontain" class="ui-controlgroup-controls">
+								<fieldset data-role="controlgroup" data-type="horizontal">
+									<input type="checkbox"
+										name="showCheckboxHydro" id="showCheckboxHydro" data-mini="true">
+									<label for="showCheckboxHydro">	Show Hydro</label>
+									<input type="checkbox"
+										name="showCheckboxOnlyHydro" id="showCheckboxOnlyHydro" data-mini="true">
+									<label for="showCheckboxOnlyHydro">	Only Hydro</label>
+								</fieldset>
+							</div>
+						</div>
+					</div>
 				</form>
 			</div>
 		</div>

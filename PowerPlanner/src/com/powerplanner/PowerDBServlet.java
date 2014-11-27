@@ -16,9 +16,8 @@ public class PowerDBServlet extends HttpServlet {
 	
 	public void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws IOException {
-		
 	}
-	
+
 	/**
 	 * Post request for data. Request is expected to contain several
 	 * parameters, including:
@@ -57,7 +56,6 @@ public class PowerDBServlet extends HttpServlet {
 			jsonFiles = dbFind.hydroFileFinder(neLat, neLng, swLat, swLng, season);
 			System.out.println("FETCHED GRID FILES: ");
 			dbFind.displayHydroFileList();	
-			//sendStreams = false;
 		}
 
 		StringBuilder dataBuilder = new StringBuilder();

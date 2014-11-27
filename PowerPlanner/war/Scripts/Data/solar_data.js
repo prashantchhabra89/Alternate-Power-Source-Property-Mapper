@@ -7,7 +7,7 @@ function _filterSolarData(raw_data, push_data) {
 		push_data.push({
 			lat : raw_data[i].lat,
 			lng : raw_data[i].lon,
-			weight : solarPow(raw_data[i].deg45,0.9,1,0.75)
+			weight : solarPow(raw_data[i].deg45,0.2,1.25,0.9)
 		});
 	}
 }

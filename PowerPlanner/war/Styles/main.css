@@ -205,6 +205,9 @@ body {
 .displayRadioButtons {
 	display: block !important;
 }
+.checkOptions {
+	margin-top: -10px !important;
+}
 .inputLabel {
 	float: left;
 	width: 167px !important;
@@ -233,7 +236,7 @@ body {
 	margin-right: auto;
 }
 .showAdvancedOptions {
-	width: 20% !important;
+	/*width: 10% !important;*/
 }
 .resourceBox, .resourceImg {
 	margin-top: 8px;
@@ -313,6 +316,27 @@ p.intro-text, h3.intro-header, a.calc-text, p.calc-text, h3.calc-header, p.about
 	font-family: 'Raleway', sans-serif;
 	font-size: 24px;
 	font-weight: 200;
+	text-shadow: initial;
+	word-wrap: break-word;
+	margin-left: auto;
+	margin-right: auto;
+}
+.url-text {
+	font-family: 'Raleway', sans-serif;
+	font-size: 24px !important;
+	font-color: #FFF;	
+	font-weight: 200;
+	text-shadow: initial;
+	word-wrap: break-word;
+	margin-left: 8px;
+	margin-right: 8px;
+}
+.sub-url-text {
+	font-family: 'Raleway', sans-serif;
+	font-size: 12px !important;
+	font-color: #FFF;	
+	font-weight: 200;
+	font-style: italic;
 	text-shadow: initial;
 	word-wrap: break-word;
 	margin-left: auto;

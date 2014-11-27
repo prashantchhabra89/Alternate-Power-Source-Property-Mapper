@@ -1,20 +1,37 @@
 /******************************************************************************
  * Looking for a function or a global var? Here's a list of what's elsewhere!
+ * Note that this doesn't include the main page or intro. Or this file.
  * - (the minus symbol) indicates a function
  * = (the equals symbol) indicates a global var
  * 
  * server_query.js
- * - queryAndUpdate(season, neLat, neLng, swLat, swLng, lat_offset, lng_offset, type)
+ * = data_query_handler
+ * = passive_query_handler
+ * = dq_handler_id
+ * - launchQueryUpdate(season, types)
+ * - passiveQueryUpdate(season, types)
+ * - _requestPassiveQuery()
+ * - queryObjSetup(query_handler, season, types, neLat, neLng, swLat, swLng)
+ * - createQuerySet(wind, solar, hydro, neLat, neLng, swLat, swLng)
+ * - _requestHeatmapData(type, season, neLat, neLng, swLat, swLng, queryObj, callback)
+ * - _getHeatmapData(type, season, neLat, neLng, swLat, swLng, callback)
  * - queryAndCallback(season, neLat, neLng, swLat, swLng, lat_offset, lng_offset, type, callback)
+ * - _queryIsActive(queryObj)
+ * - _queryObjProgress(queryObj, type)
+ * - _tryUpdatingHeatmap(queryobj)
+ * - buildURL()
+ * - coldLoadDecodeURL(map)
+ * - decodeURL()
+ * - getUrlParameter(sParam)
  * 
  * cache_helper.js
  * = wind_cache
  * = solar_cache
  * = hydro_cache
  * = wind_data_bounds
- * - checkCache(neLat, neLng, swLat, swLng, type)
- * - fetchFromCache(neLat, neLng, swLat, swLng, type)
- * - addToCache(new_data, type)
+ * - checkCache(neLat, neLng, swLat, swLng, type, season)
+ * - fetchFromCache(neLat, neLng, swLat, swLng, type, season)
+ * - addToCache(new_data, type, season)
  * 
  * calculations.js
  * - windPow(precalc, eff, area)
@@ -26,27 +43,38 @@
  * - processData(raw_data, hm_data, neLat, neLng, swLat, swLng, type)
  * - set_scaler(type)
  * - apply_scaler(raw_weight, offset, type)
+ * - extract_raw_weight(scaled, scaler, offset, type)
  * - _filterData(raw_data, push_data, neLat, neLng, swLat, swLng, type)
  * - _interpolateData(hm_data, neLat, neLng, swLat, swLng, type)
+ * - _boundedInterpolation(hm_data, fill_data, lat_width, lng_width,
+ * 							lat_start, lng_start, latset, lngset, offset, type)
+ * - _lineInterpolation(fill_data, start_point, end_point, distance, diameter, weight)
  * - _createInterpolation(hm_data, fill_data, lat_width, lng_width,
  * 						  lat_start, lng_start, latset, lngset, offset, type)
+ * - _getLatBound(incr, desired)
+ * - _getLngBound(incr, desired)
+ * - getSafeBound(incr, start, desired)
  * - _binData(hm_data, neLat, neLng, swLat, swLng, data_lat_offset, data_lng_offset)
- * - _getNextStart(curr_start, end_point, increment)
- * - pointOnLine(lat, lng, point1, point2)
+ * - distanceTo(src_lat, src_lng, dest_lat, dest_lng)
+ * - pointIsOnPoint(lat, lng, point_lat, point_lng)
  * - getDataWeight(hm_data, lat, lng, type)
- * - getPointData(lat_point, lng_point)
+ * - getPointData(marker)
  * - populatePointData(pointDataObj, uniq_id)
  * - _tryPopulateTotalEnergy(pointDataObj, uniq_id)
+ * - parseSeason(season)
  * 
  * location_helper.js
  * - initializeSearchBox(map, pushToMap, element_id)
  * 
  * marker_helper.js
  * = markerBalloon
+ * = markerSet
+ * = markerHTMLIdSubscript
  * - initializeMarkers(map)
  * - addMarker(map, loc)
  * - showHelpMarker()
  * - _balloonText(div_id, pointDataObject)
+ * - changeMarkerIcon(marker, energyLevel)
  * 
  * wind_data.js
  * - _filterWindData(raw_data, push_data, neLat, neLng, swLat, swLng)
@@ -58,17 +86,18 @@
  * 
  * hydro_data.js
  * - _filterHydroData(raw_data, push_data, neLat, neLng, swLat, swLng)
+ * - _getRiverCenter(start_point, end_point)
  * - _getDataWeightHydro(hm_data, lat, lng)
  * 
  *****************************************************************************/
 
 var g_map; /* The main map */
 var g_heatmap; /* The heatmap layer for the main map */
+var g_linemap; /* The secondary heatmap layer for the main map */
 
 var wind_data = []; /* The wind data for the current heatmap view */
 var solar_data = []; /* The solar data for the current heatmap view */
 var hydro_data = []; /* The hydro data for the current heatmap view */
-var streams_data = []; /* The streams data for where to draw hydro */
 
 var SMALL_VIEW = 0 /* State variable for have a small view (very zoomed in) */
 var AVE_VIEW = 1; /* State variable for having an average view */
@@ -89,13 +118,16 @@ var SOLAR_SCALING_DISTANCE = 1; /* Data point further away may have less impact 
 var MIN_DISPLAY_WEIGHT = 0.01; /* Don't add a point with less weight to heatmap */
 
 var WIND_SCALER = 8;
-var SOLAR_SCALER = 3.3;
-var HYDRO_SCALER = 1000;
+var SOLAR_SCALER = 1.5;
+var HYDRO_SCALER = 8;
 var scaler = WIND_SCALER;
+
+var SOLAR_BOTTOM = 0;
 
 var HOUR_TO_YEAR = 8760;
 
 var POINT_DEBUGGER = false; /* true = view data points instead of interpolation */
+var ALLOW_QUERY = true;
 
 //View (or zoom) state of the map; used to implement different time saving
 //measures
@@ -135,6 +167,7 @@ function initializeMap() {
 function mapLoader() {
 	g_map = initializeMap();
 	g_heatmap = initHeatmap(g_map);
+	g_linemap = initHeatmap(g_map);
 	
 	initializeMarkers(g_map);
 	showHelpMarker();
@@ -147,7 +180,7 @@ function mapLoader() {
 	google.maps.event.addListener(g_map, 'dragend', _eventHeatmapDataToggler);
 	// Modify zoom state overhead when map is zoomed; load heatmap data
 	google.maps.event.addListener(g_map, 'zoom_changed', function() {
-		zoom = g_map.getZoom();
+		var zoom = g_map.getZoom();
 		view_state = (zoom <= CHANGETO_WIDE_VIEW ? 
 				(zoom <= CHANGETO_OVER_VIEW ? OVER_VIEW: WIDE_VIEW) : 
 					(zoom <= CHANGETO_AVE_VIEW ? AVE_VIEW : SMALL_VIEW));
@@ -160,6 +193,25 @@ function mapLoader() {
 		var bounds = g_map.getBounds();
 		searchBox.setBounds(bounds);
 	});
+	
+	/*
+	 * These listeners cause the map to reload data if the bounds change while
+	 * the map is not being moved.
+	 */
+	google.maps.event.addListener(g_map, 'idle', function() {
+		var zoom = g_map.getZoom();
+		var bound_listener = google.maps.event.addListener(g_map, 'bounds_changed', function() {
+			if (g_map.getZoom() == zoom) {
+				_eventHeatmapDataToggler();
+			}
+		});
+		var this_listener = google.maps.event.addListener(g_map, 'dragstart', function() {
+				google.maps.event.removeListener(bound_listener);
+				google.maps.event.removeListener(this_listener);
+		});
+	});
+	
+	coldLoadDecodeURL(g_map);
 }
 
 /*
@@ -176,71 +228,27 @@ function _eventHeatmapDataToggler() {
  * types on and off.
  */
 function toggleHeatmapData(showWind, showSolar, showHydro) {
-	wind_data = [];
-	solar_data = [];
-	hydro_data = [];
-	streams_data = [];
+	if (ALLOW_QUERY) {
+		wind_data = [];
+		solar_data = [];
+		hydro_data = [];
 
-	var neLat = getNELatitude(g_map);
-	var neLng = getNELongitude(g_map);
-	var swLat = getSWLatitude(g_map);
-	var swLng = getSWLongitude(g_map);
-
-	// throttle to prevent multiple requests at the same time
-	if (showWind) {
-		_.throttle(_getHeatmapData("WIND", neLat, neLng, swLat, swLng),500,{leading:false});
-	}
-
-	if (showSolar) {
-		_.throttle(_getHeatmapData("SOLAR", neLat, neLng, swLat, swLng),500,{leading:false});
-	}
-
-	if (showHydro) {
-		_.throttle(_getHeatmapData("HYDRO", neLat, neLng, swLat, swLng),500,{leading:false});
-	}
-
-	if (!showWind && !showSolar && !showHydro) {
-		updateHeatmap();
-	}
-}
-
-/*
- * Sends a POST request to the server for data within the provided latitude and
- * longitude bounds of a particular type. Acceptable types are WIND, SOLAR, and
- * HYDRO. Triggers a heatmap update upon server response.
- */
-function _getHeatmapData(type, neLat, neLng, swLat, swLng) {
-	console.time("_checkCacheData");
-	var lat_offset = getLatOffset(neLat, swLat);
-	var lng_offset = getLngOffset(neLng, swLng);
-
-	// requested grid
-	var neLat_w_off = (neLat + lat_offset);
-	var neLng_w_off = (neLng + lng_offset);
-	var swLat_w_off = (swLat - lat_offset);
-	var swLng_w_off = (swLng - lng_offset);
-	var neLat_floor = Math.floor(neLat_w_off);
-	var neLng_floor = Math.floor(neLng_w_off);
-	var swLat_floor = Math.floor(swLat_w_off);
-	var swLng_floor = Math.floor(swLng_w_off);
-
-	console.log("neLat: " + neLat_w_off);
-	console.log("neLng: " + neLng_w_off);
-	console.log("swLat: " + swLat_w_off);
-	console.log("swLng: " + swLng_w_off);
-
-	// Check whether cache has the requested data
-	var in_cache = checkCache(neLat_w_off, neLng_w_off, swLat_w_off, swLng_w_off, type);
-	
-	if(in_cache) {
-		console.log("IN CACHE");
-		var new_data = fetchFromCache(neLat_w_off, neLng_w_off, swLat_w_off, swLng_w_off, type);
-		updateData(new_data, neLat, neLng, swLat, swLng, type);
-		updateHeatmap();
-		console.timeEnd("_checkCacheData");
-	} else {
-		console.timeEnd("_checkCacheData");
-		queryAndUpdate('anu', neLat, neLng, swLat, swLng, lat_offset, lng_offset, type);
+		console.log("===============");
+		console.log("Data Toggled:");
+		console.log("  Wind? " + showWind);
+		console.log("  Solar? " + showSolar);
+		console.log("  Hydro? " + showHydro);
+		console.log("===============");
+		
+		if (showWind || showSolar || showHydro) {
+			launchQueryUpdate('anu', {
+				wind : showWind,
+				solar : showSolar,
+				hydro : showHydro 
+			});
+		} else {
+			updateHeatmap();
+		}
 	}
 }
 
@@ -311,16 +319,25 @@ function attachHeatmap(heatmap, map) {
 function updateHeatmap() {
 	var hm_data = wind_data;
 	hm_data = hm_data.concat(solar_data);
-	hm_data = hm_data.concat(hydro_data);
-
-	/*if (!POINT_DEBUGGER) {
-		g_heatmap.set('radius', MAX_DATA_WIDTH
-				/ Math.pow(2, (g_map.getZoom() - LEAST_ZOOM)) * 0.98);
-	}*/
-
 	console.log("Points on map: " + hm_data.length);
-
 	_updateHeatmap(g_heatmap, hm_data);
+	
+	hm_data = hydro_data;
+	console.log("Points on line map: " + hm_data.length);
+	_updateHeatmap(g_linemap, hm_data);
+}
+
+function suspendAndResumeHeatmap() {
+	wind_data = []
+	solar_data = []
+	hydro_data = []
+	updateHeatmap();
+	ALLOW_QUERY = false;
+	var blocker = google.maps.event.addListener(g_map, 'idle', function() {
+		ALLOW_QUERY = true;
+		_eventHeatmapDataToggler();
+		google.maps.event.removeListener(blocker);
+	});
 }
 
 /*
@@ -344,18 +361,25 @@ function addHeatmapCoord(hm_data, lat, lng, weight) {
 	return hm_data;
 }
 
-function getHeatmapSize() {
-	return g_heatmap.get('radius');
+function getHeatmapSize(type) {
+	var radius = 0;
+	if (type == "HYDRO") {
+		radius = g_linemap.get('radius');
+	} else {
+		radius = g_heatmap.get('radius');
+	}
+	return radius;
 }
 
 function _setHeatmapSize(type) {
 	var radius = 0;
 	if (type == "HYDRO") {
 		radius = MAX_DATA_WIDTH / Math.pow(2, (g_map.getZoom() - LEAST_ZOOM)) * 0.08;
+		g_linemap.set('radius', radius);
 	} else {
 		radius = MAX_DATA_WIDTH / Math.pow(2, (g_map.getZoom() - LEAST_ZOOM)) * 0.98;
+		g_heatmap.set('radius', radius);
 	}
-	g_heatmap.set('radius', radius);
 	return radius;
 }
 
