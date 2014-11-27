@@ -1,19 +1,37 @@
 /******************************************************************************
  * Looking for a function or a global var? Here's a list of what's elsewhere!
+ * Note that this doesn't include the main page or intro. Or this file.
  * - (the minus symbol) indicates a function
  * = (the equals symbol) indicates a global var
  * 
  * server_query.js
+ * = data_query_handler
+ * = passive_query_handler
+ * = dq_handler_id
+ * - launchQueryUpdate(season, types)
+ * - passiveQueryUpdate(season, types)
+ * - _requestPassiveQuery()
+ * - queryObjSetup(query_handler, season, types, neLat, neLng, swLat, swLng)
+ * - createQuerySet(wind, solar, hydro, neLat, neLng, swLat, swLng)
+ * - _requestHeatmapData(type, season, neLat, neLng, swLat, swLng, queryObj, callback)
+ * - _getHeatmapData(type, season, neLat, neLng, swLat, swLng, callback)
  * - queryAndCallback(season, neLat, neLng, swLat, swLng, lat_offset, lng_offset, type, callback)
+ * - _queryIsActive(queryObj)
+ * - _queryObjProgress(queryObj, type)
+ * - _tryUpdatingHeatmap(queryobj)
+ * - buildURL()
+ * - coldLoadDecodeURL(map)
+ * - decodeURL()
+ * - getUrlParameter(sParam)
  * 
  * cache_helper.js
  * = wind_cache
  * = solar_cache
  * = hydro_cache
  * = wind_data_bounds
- * - checkCache(neLat, neLng, swLat, swLng, type)
- * - fetchFromCache(neLat, neLng, swLat, swLng, type)
- * - addToCache(new_data, type)
+ * - checkCache(neLat, neLng, swLat, swLng, type, season)
+ * - fetchFromCache(neLat, neLng, swLat, swLng, type, season)
+ * - addToCache(new_data, type, season)
  * 
  * calculations.js
  * - windPow(precalc, eff, area)
@@ -25,26 +43,38 @@
  * - processData(raw_data, hm_data, neLat, neLng, swLat, swLng, type)
  * - set_scaler(type)
  * - apply_scaler(raw_weight, offset, type)
+ * - extract_raw_weight(scaled, scaler, offset, type)
  * - _filterData(raw_data, push_data, neLat, neLng, swLat, swLng, type)
  * - _interpolateData(hm_data, neLat, neLng, swLat, swLng, type)
+ * - _boundedInterpolation(hm_data, fill_data, lat_width, lng_width,
+ * 							lat_start, lng_start, latset, lngset, offset, type)
+ * - _lineInterpolation(fill_data, start_point, end_point, distance, diameter, weight)
  * - _createInterpolation(hm_data, fill_data, lat_width, lng_width,
  * 						  lat_start, lng_start, latset, lngset, offset, type)
+ * - _getLatBound(incr, desired)
+ * - _getLngBound(incr, desired)
+ * - getSafeBound(incr, start, desired)
  * - _binData(hm_data, neLat, neLng, swLat, swLng, data_lat_offset, data_lng_offset)
- * - pointOnLine(lat, lng, point1, point2)
+ * - distanceTo(src_lat, src_lng, dest_lat, dest_lng)
+ * - pointIsOnPoint(lat, lng, point_lat, point_lng)
  * - getDataWeight(hm_data, lat, lng, type)
- * - getPointData(lat_point, lng_point)
+ * - getPointData(marker)
  * - populatePointData(pointDataObj, uniq_id)
  * - _tryPopulateTotalEnergy(pointDataObj, uniq_id)
+ * - parseSeason(season)
  * 
  * location_helper.js
  * - initializeSearchBox(map, pushToMap, element_id)
  * 
  * marker_helper.js
  * = markerBalloon
+ * = markerSet
+ * = markerHTMLIdSubscript
  * - initializeMarkers(map)
  * - addMarker(map, loc)
  * - showHelpMarker()
  * - _balloonText(div_id, pointDataObject)
+ * - changeMarkerIcon(marker, energyLevel)
  * 
  * wind_data.js
  * - _filterWindData(raw_data, push_data, neLat, neLng, swLat, swLng)
@@ -56,6 +86,7 @@
  * 
  * hydro_data.js
  * - _filterHydroData(raw_data, push_data, neLat, neLng, swLat, swLng)
+ * - _getRiverCenter(start_point, end_point)
  * - _getDataWeightHydro(hm_data, lat, lng)
  * 
  *****************************************************************************/
