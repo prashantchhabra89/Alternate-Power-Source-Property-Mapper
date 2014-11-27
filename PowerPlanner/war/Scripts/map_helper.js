@@ -176,30 +176,48 @@ function _eventHeatmapDataToggler() {
  * types on and off.
  */
 function toggleHeatmapData(showWind, showSolar, showHydro) {
-	wind_data = [];
-	solar_data = [];
-	hydro_data = [];
-	streams_data = [];
+	//wind_data = [];
+	//solar_data = [];
+	//hydro_data = [];
+	//streams_data = [];
 
 	var neLat = getNELatitude(g_map);
 	var neLng = getNELongitude(g_map);
 	var swLat = getSWLatitude(g_map);
 	var swLng = getSWLongitude(g_map);
+	var season = "anu";
 
 	// throttle to prevent multiple requests at the same time
 	if (showWind) {
-		_.throttle(_getHeatmapData("WIND", neLat, neLng, swLat, swLng),500,{leading:false});
+		cleanInterpolatedCache("WIND");
+		if(grid_size.default_state || grid_size.type != "WIND") {
+			grid_size.reset_state();
+			grid_size.init(neLat, neLng, swLat, swLng, "WIND");
+		}
+		_.throttle(_getHeatmapData("WIND", neLat, neLng, swLat, swLng, season),1000,{leading:false});
 	}
 
 	if (showSolar) {
-		_.throttle(_getHeatmapData("SOLAR", neLat, neLng, swLat, swLng),500,{leading:false});
+		cleanInterpolatedCache("SOLAR");
+		if(grid_size.default_state || grid_size.type != "SOLAR") {
+			grid_size.reset_state();
+			grid_size.init(neLat, neLng, swLat, swLng, "SOLAR");
+		}
+		_.throttle(_getHeatmapData("SOLAR", neLat, neLng, swLat, swLng, season),1000,{leading:false});
 	}
 
 	if (showHydro) {
-		_.throttle(_getHeatmapData("HYDRO", neLat, neLng, swLat, swLng),500,{leading:false});
+		cleanInterpolatedCache("HYDRO");
+		if(grid_size.default_state || grid_size.type != "HYDRO") {
+			grid_size.reset_state();
+			grid_size.init(neLat, neLng, swLat, swLng, "HYDRO");
+		}
+		_.throttle(_getHeatmapData("HYDRO", neLat, neLng, swLat, swLng, season),1000,{leading:false});
 	}
 
 	if (!showWind && !showSolar && !showHydro) {
+		cleanInterpolatedCache("ALL");
+		grid_size.reset_state();
 		updateHeatmap();
 	}
 }
@@ -209,10 +227,10 @@ function toggleHeatmapData(showWind, showSolar, showHydro) {
  * longitude bounds of a particular type. Acceptable types are WIND, SOLAR, and
  * HYDRO. Triggers a heatmap update upon server response.
  */
-function _getHeatmapData(type, neLat, neLng, swLat, swLng) {
+function _getHeatmapData(type, neLat, neLng, swLat, swLng, season) {
 	console.time("_checkCacheData");
-	var lat_offset = getLatOffset(neLat, swLat);
-	var lng_offset = getLngOffset(neLng, swLng);
+	var lat_offset = getLatOffset();
+	var lng_offset = getLngOffset();
 
 	// requested grid
 	var neLat_w_off = (neLat + lat_offset);
@@ -230,17 +248,47 @@ function _getHeatmapData(type, neLat, neLng, swLat, swLng) {
 	console.log("swLng: " + swLng_w_off);
 
 	// Check whether cache has the requested data
-	var in_cache = checkCache(neLat_w_off, neLng_w_off, swLat_w_off, swLng_w_off, type);
+	var in_cache = checkCache(neLat_w_off, neLng_w_off, swLat_w_off, swLng_w_off, type, season);
 	
 	if(in_cache) {
 		console.log("IN CACHE");
-		var new_data = fetchFromCache(neLat_w_off, neLng_w_off, swLat_w_off, swLng_w_off, type);
-		updateData(new_data, neLat, neLng, swLat, swLng, type);
-		updateHeatmap();
+		
+		if(!interpolated_area.default_state) {
+			var has_interpolated_all = false;
+			has_interpolated_all = checkInterpolatedCache(neLat, neLng, swLat, swLng, type, season);
+			if(!has_interpolated_all) {
+				if(interpolated_area.season == season && interpolated_area.type == type) {
+					var new_area = interpolated_area.extraArea(neLat_w_off, neLng_w_off, swLat_w_off, swLng_w_off);
+					for(var i = 0; i < new_area.length; i++) {
+						in_cache = checkCache(new_area.neLat, new_area.neLng, new_area.swLat, new_area.swLng, type, season);
+						if(in_cache) {
+							var new_data = fetchFromCache(new_area.neLat, new_area.neLng, new_area.swLat, new_area.swLng, type, season);
+							updateData(new_data, new_area.neLat, new_area.neLng, new_area.swLat, new_area.swLng, type);
+							updateHeatmap();
+						} else {
+							queryAndUpdate_extra(season, new_area.neLat, new_area.neLng, new_area.swLat, new_area.swLng, type);
+						}
+					}
+				} else {
+					cleanInterpolatedCache("ALL");
+					interpolated_area.reset_values();
+					interpolated_area.season = season;
+					var new_data = fetchFromCache(neLat_w_off, neLng_w_off, swLat_w_off, swLng_w_off, type);
+					updateData(new_data, neLat, neLng, swLat, swLng, type);
+					updateHeatmap();
+					//do more
+				}
+			}
+		} else {
+			interpolated_area.season = season;
+			var new_data = fetchFromCache(neLat_w_off, neLng_w_off, swLat_w_off, swLng_w_off, type);
+			updateData(new_data, neLat, neLng, swLat, swLng, type);
+			updateHeatmap();
+		}
 		console.timeEnd("_checkCacheData");
 	} else {
 		console.timeEnd("_checkCacheData");
-		queryAndUpdate('anu', neLat, neLng, swLat, swLng, lat_offset, lng_offset, type);
+		queryAndUpdate(season, neLat, neLng, swLat, swLng, lat_offset, lng_offset, type);
 	}
 }
 
@@ -248,14 +296,14 @@ function _getHeatmapData(type, neLat, neLng, swLat, swLng) {
  * Gets the latitude offset for the provided latitude bounds based off the map's
  * current global view state.
  */
-function getLatOffset(northLat, southLat) {
-	var lat_offset = (northLat - southLat) * 2;
+function getLatOffset() {
+	var lat_offset = grid_size.lat;
 	if (view_state == WIDE_VIEW) {
-		lat_offset = lat_offset / 4;
+		lat_offset = lat_offset / 2;
 	} else if (view_state == SMALL_VIEW) {
-		lat_offset = lat_offset * 4;
+		lat_offset = lat_offset * 8;
 	} else if (view_state == OVER_VIEW) {
-		lat_offset = lat_offset / 8;
+		lat_offset = lat_offset / 4;
 	}
 	return lat_offset;
 }
@@ -264,14 +312,14 @@ function getLatOffset(northLat, southLat) {
  * Gets the longitude offset for the provided longitude bounds based off the
  * map's current global view state.
  */
-function getLngOffset(eastLng, westLng) {
-	var lng_offset = (eastLng - westLng) * 2;
+function getLngOffset() {
+	var lng_offset = grid_size.lng;
 	if (view_state == WIDE_VIEW) {
-		lng_offset = lng_offset / 4;
+		lng_offset = lng_offset / 2;
 	} else if (view_state == SMALL_VIEW) {
-		lng_offset = lng_offset * 4;
+		lng_offset = lng_offset * 8;
 	} else if (view_state == OVER_VIEW) {
-		lng_offset = lng_offset / 8;
+		lng_offset = lng_offset / 4;
 	}
 	return lng_offset;
 }

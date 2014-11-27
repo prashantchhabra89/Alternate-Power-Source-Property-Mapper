@@ -20,13 +20,15 @@ function updateData(raw_data, neLat, neLng, swLat, swLng, type) {
 			hydro_data = hm_data;
 		}
 	} else {
+		interpolated_area.process(neLat+getLatOffset(), neLng+getLngOffset(),
+				swLat-getLatOffset(), swLng-getLngOffset(), type);
 		console.time('_interpolateData');
 		if (type == "WIND") {
-			wind_data = _interpolateData(hm_data, neLat, neLng, swLat, swLng, type);
+			wind_data = _.union(wind_data,_interpolateData(hm_data, neLat, neLng, swLat, swLng, type));
 		} else if (type == "SOLAR") {
-			solar_data = _interpolateData(hm_data, neLat, neLng, swLat, swLng, type);
+			solar_data = _.union(solar_data,_interpolateData(hm_data, neLat, neLng, swLat, swLng, type));
 		} else if (type == "HYDRO") {
-			hydro_data = hm_data;
+			hydro_data = _.union(hydro_data,hm_data);
 		}
 		console.timeEnd('_interpolateData');
 	}
@@ -39,8 +41,8 @@ function updateData(raw_data, neLat, neLng, swLat, swLng, type) {
  * things like any other data type!
  */
 function processData(raw_data, hm_data, neLat, neLng, swLat, swLng, type) {
-	var lat_offset = getLatOffset(neLat, swLat);
-	var lng_offset = getLngOffset(neLng, swLng);
+	var lat_offset = getLatOffset();
+	var lng_offset = getLngOffset();
 	set_scaler(type);
 	
 	var usable_data = [];
@@ -119,7 +121,7 @@ function _interpolateData(hm_data, neLat, neLng, swLat, swLng, type) {
 	var lngset = MAX_DATA_WIDTH / Math.pow(2, (g_map.getZoom() - LEAST_ZOOM));
 	var latset = lngset / 2;
 	var offset = latset;
-
+	
 	var temp_data = [];
 
 	if (type == "WIND") {
@@ -129,8 +131,8 @@ function _interpolateData(hm_data, neLat, neLng, swLat, swLng, type) {
 					swLat - lat_offset, swLng - lng_offset, latset, lngset,
 					offset, type);
 		} else {
-			var d_lat_offset = getLatOffset(neLat, swLat);
-			var d_lng_offset = getLngOffset(neLng, swLng);
+			var d_lat_offset = getLatOffset();
+			var d_lng_offset = getLngOffset();
 			var data_bins = _binData(hm_data, neLat, neLng, swLat, swLng,
 					d_lat_offset, d_lng_offset);
 

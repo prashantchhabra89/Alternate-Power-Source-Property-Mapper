@@ -79,6 +79,42 @@ function checkCache(neLat, neLng, swLat, swLng, type, season) {
 	return cache_hit;
 }
 
+function checkInterpolatedCache(neLat, neLng, swLat, swLng, type, season) {
+	console.log("CHECKING INTERPOLATED CACHE");
+	if (type == "SOLAR") {
+		if (type == interpolated_area.type && season == interpolated_area.season) {
+			return true;
+		}
+	} else {
+		if (type == interpolated_area.type && season == interpolated_area.season &&
+				interpolated_area.neLat >= neLat && interpolated_area.neLng >= neLng &&
+				interpolated_area.swLat <= swLat && interpolated_area.swLng <= swLng) {
+			return true;
+		}
+	}
+	return false;
+}
+	
+function cleanInterpolatedCache(type) {
+	if (type == "WIND") {
+		solar_data = [];
+		hydro_data = [];
+		streams_data = [];
+	} else if (type == "SOLAR") {
+		wind_data = [];
+		hydro_data = [];
+		streams_data = [];
+	} else if (type == "HYDRO") {
+		wind_data = [];
+		solar_data = [];
+	} else {
+		wind_data = [];
+		solar_data = [];
+		hydro_data = [];
+		streams_data = [];
+	}
+}
+
 function fetchFromCache(neLat, neLng, swLat, swLng, type, season) {
 	var neLat_floor = Math.floor(neLat);
 	var neLng_floor = Math.floor(neLng);

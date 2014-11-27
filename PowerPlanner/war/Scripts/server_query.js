@@ -1,5 +1,5 @@
 function queryAndUpdate(season, neLat, neLng, swLat, swLng, lat_offset, lng_offset, type) {
-	console.time("_getHeatmapData");
+	console.time("_getInitialHeatmapData");
 	var neLat_w_off = (neLat + lat_offset);
 	var neLng_w_off = (neLng + lng_offset);
 	var swLat_w_off = (swLat - lat_offset);
@@ -36,7 +36,49 @@ function queryAndUpdate(season, neLat, neLng, swLat, swLng, lat_offset, lng_offs
 		},
 		complete : function() {
 			updateHeatmap();
-			console.timeEnd("_getHeatmapData");
+			console.timeEnd("_getInitialHeatmapData");
+			var extra_lat_offset = getExtraLatOffset(neLat, swLat);
+			var extra_lng_offset = getExtraLngOffset(neLng, swLng);
+			_queryAndUpdate('anu', neLat+extra_lat_offset, neLng+extra_lng_offset, 
+					swLat-extra_lat_offset, swLng-extra_lng_offset, type);
+		}
+	});
+}
+
+function queryAndUpdate_extra(season, neLat, neLng, swLat, swLng, type) {
+	console.time("_getExtraHeatmapData");
+	$.ajax({
+		url : '/powerdb',
+		type : 'POST',
+		data : {
+			type : type,
+			neLat : neLat,
+			neLng : neLng,
+			swLat : swLat,
+			swLng : swLng,
+			season : season
+		},
+		dataType : 'json',
+		success : function(data, status) {
+			if (status) {
+				console.log("Total Data Points: " + data.length);
+
+				// Cache all points
+				addToCache(data, type, season);
+				updateData(data, neLat, neLng, swLat, swLng, type);
+			}
+			else {
+				console.log("Status: " + status);
+			}
+		},
+		error : function(thing, status, error) {
+			console.log("Error!");
+			console.log(status);
+			console.log(error);
+		},
+		complete : function() {
+			updateHeatmap();
+			console.timeEnd("_getExtraHeatmapData");
 		}
 	});
 }
