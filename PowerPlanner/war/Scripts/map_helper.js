@@ -180,6 +180,8 @@ function mapLoader() {
 				google.maps.event.removeListener(this_listener);
 		});
 	});
+	
+	coldLoadDecodeURL(g_map);
 }
 
 /*

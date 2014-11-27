@@ -211,6 +211,13 @@ function buildURL() {
 	return builder;
 }
 
+function coldLoadDecodeURL(map) {
+	var this_listener = google.maps.event.addListener(map, 'idle', function() {
+		decodeURL();
+		google.maps.event.removeListener(this_listener);
+	});
+}
+
 function decodeURL() {
 	var url = window.location.origin + '/powerdb?' + window.location.hash.split('?')[1];
 	var zoom = getUrlParameter('z');
