@@ -338,6 +338,10 @@ p.calc-text, h3.calc-header {
 p.about-text, h3.about-header {
 	color: #fff;
 }
+p.equation-text {
+	margin-top: 30px !important;
+	margin-left: 44px !important;
+}
 
 h3.intro-header {
 	font-size: 60px;
@@ -405,18 +409,21 @@ h4.intro-subheading {
 }
 .windPowerCalc {
 	background: url(../images/windPowerCalc.png) no-repeat bottom scroll;
-	width: 281px;
-	height: 63px;
+	width: 262px;
+	height: 52px;
+	margin-bottom: 12px;
 }
 .solarPowerCalc {
 	background: url(../images/solarPowerCalc.png) no-repeat bottom scroll;
 	width: 238px;
 	height: 63px;
+	margin-bottom: 12px;
 }
 .hydroPowerCalc {
 	background: url(../images/hydroPowerCalc.png) no-repeat bottom scroll;
-	width: 238px;
+	width: 274px;
 	height: 63px;
+	margin-bottom: 12px;
 }
 .tour-step-background {
 	display:none !important;
@@ -474,6 +481,116 @@ p.howToUse {
 }
 .feedbackText {
 	height: 100px !important;
+}
+
+.URLpopup {
+	width: 90% !important;
+}
+.popupText {
+	font-size: 20px !important;
+	margin-left: 8px !important;
+	margin-right: 8px !important;
+}
+.equationBorder {
+	border-width: 1px;
+	border: #333;
+	border-style: solid;
+}
+.hydroEnergyOutput {
+	background: url(../images/hydro-energy-output.png) no-repeat bottom scroll;
+	width: 48px;
+	height: 50px;
+	float: left;
+}
+.hydraulicEff {
+	background: url(../images/hydraulic-efficiency.png) no-repeat bottom scroll;
+	width: 24px;
+	height: 48px;
+	float: left;
+}
+.waterDensity {
+	background: url(../images/water-density.png) no-repeat bottom scroll;
+	width: 23px;
+	height: 49px;
+	float: left;
+}
+.gravity {
+	background: url(../images/gravity.png) no-repeat bottom scroll;
+	width: 24px;
+	height: 47px;
+	float: left;
+}
+.hydroFlow {
+	background: url(../images/hydro-flow-rate.png) no-repeat bottom scroll;
+	width: 29px;
+	height: 48px;
+	float: left;
+}
+.heightDiff {
+	background: url(../images/hydro-height-diff.png) no-repeat bottom scroll;
+	width: 29px;
+	height: 42px;
+	float: left;
+}
+.solarEnergyOutput {
+	background: url(../images/solar-energy-output.png) no-repeat bottom scroll;
+	width: 54px;
+	height: 49px;
+	float: left;
+}
+.area {
+	background: url(../images/area.png) no-repeat bottom scroll;
+	width: 32px;
+	height: 47px;
+	float: left;
+}
+.solarPanelYield {
+	background: url(../images/solar-panel-yield.png) no-repeat bottom scroll;
+	width: 23px;
+	height: 49px;
+	float: left;
+}
+.solarRadiation {
+	background: url(../images/solar-radiation.png) no-repeat bottom scroll;
+	width: 41px;
+	height: 49px;
+	float: left;
+}
+.solarPrefRate {
+	background: url(../images/solar-preformance-ratio.png) no-repeat bottom scroll;
+	width: 30px;
+	height: 48px;
+	float: left;
+}
+.windEnergyOutput {
+	background: url(../images/wind-energy-output.png) no-repeat bottom scroll;
+	width: 46px;
+	height: 41px;
+	float: left;
+}
+.windRotArea {
+	background: url(../images/wind-rotor-area.png) no-repeat bottom scroll;
+	width: 24px;
+	height: 36px;
+	float: left;
+}
+.windAirDensity {
+	background: url(../images/water-density.png) no-repeat bottom scroll;
+	width: 23px;
+	height: 49px;
+	float: left;
+}
+.windSpeed {
+	background: url(../images/wind-speed.png) no-repeat bottom scroll;
+	width: 23px;
+	height: 37px;
+	float: left;
+}
+.windPowerCoeff {
+	background: url(../images/wind-power-coeff.png) no-repeat bottom scroll;
+	width: 41px;
+	height: 48px;
+	float: left;
 }
 
 /* Fix for info window showing scroll bar in Firefox */

@@ -110,8 +110,15 @@
 				<p class="intro-text calc-text">was applied to the 30m wind
 					speed to obtain approximations of wind speed at 5m, 10m, 15m, 20m,
 					and 25m. The value of the exponent coefficient, is assumed to be
-					0.14.<br> The power calculation equation:</p>
+					0.14.<br> The power calculation equation:</p>				
 				<div class="windPowerCalc center"></div>
+				<div class="equationBorder">
+					<span class="windEnergyOutput"></span><p class="intro-text calc-text equation-text"> is the wind energy output in <i>kWh</i></p>
+					<span class="windRotArea"></span><p class="intro-text calc-text equation-text"> is the rotor area of the wind turbine in m<sup>2</sup> (note: different brand different area)</p>
+					<span class="windAirDensity"></span><p class="intro-text calc-text equation-text"> is the density of air in kg/m3</p>
+					<span class="windSpeed"></span><p class="intro-text calc-text equation-text"> is the wind speed in m/s</p>
+					<span class="windPowerCoeff"></span><p class="intro-text calc-text equation-text"> is the power coefficient </p>
+				</div>
 				<p class="intro-text calc-text">For more information on how the original
 					wind data is obtained, please refer to</p>
 				<a href="http://www.windatlas.ca/en/methodology.php" class="calc-text center">http://www.windatlas.ca/en/methodology.php.</a>
@@ -130,6 +137,14 @@
 					The power calculation equation:
 				</p>
 				<div class="solarPowerCalc center"></div>
+				<div class="equationBorder">
+					<span class="solarEnergyOutput"></span><p class="intro-text calc-text equation-text"> is the solar energy output in <i>kWh</i>
+	</p>
+					<span class="area"></span><p class="intro-text calc-text equation-text"> is the total solar panel area in m<sup>2</sup></p>
+					<span class="solarPanelYield"></span><p class="intro-text calc-text equation-text"> is the solar panel yield</p>
+					<span class="solarRadiation"></span><p class="intro-text calc-text equation-text"> is the average solar radiation on tilted panels in kWh/m<sup>2</sup></p>
+					<span class="solarPrefRate"></span><p class="intro-text calc-text equation-text"> is the performance ratio coefficient for losses</p>
+				</div>
 				<p class="intro-text calc-text">For more information on how the original
 					solar data is obtained, please refer to</p>
 				<a href="http://pv.nrcan.gc.ca/?lang=e&m=e" class="calc-text center">http://pv.nrcan.gc.ca/?lang=e&m=e.</a>
@@ -155,6 +170,14 @@
 					streams shorter than roughly 2km were removed, and any bend in the
 					river less than 30&deg; was removed. The power calculation equation:</p>
 				<div class="hydroPowerCalc center"></div>
+				<div class="equationBorder">
+					<span class="hydroEnergyOutput"></span><p class="intro-text calc-text equation-text"> is the hydro energy output in kWh</p>
+					<span class="hydraulicEff"></span><p class="intro-text calc-text equation-text"> is the hydraulic efficiency of the turbine</p>
+					<span class="waterDensity"></span><p class="intro-text calc-text equation-text"> is the density of water in kg/m<sup>3</sup></p>
+					<span class="gravity"></span><p class="intro-text calc-text equation-text"> is the acceleration due to gravity in m/s<sup>2</sup></p>
+					<span class="hydroFlow"></span><p class="intro-text calc-text equation-text"> is the rate of flow of the water body in m<sup>3</sup>/s</p>
+					<span class="heightDiff"></span><p class="intro-text calc-text equation-text"> is height difference between inlet and outlet in m</p>
+				</div>
 				<p class="intro-text calc-text"> For more information on how the original
 					hydro data is obtained, please refer to </p>
 				<a href="http://www.ec.gc.ca/rhc-wsc/default.asp?lang=En&n=894E91BE-1" class="calc-text center">http://www.ec.gc.ca/rhc-wsc/default.asp?lang=En&n=894E91BE-1</a>
@@ -247,6 +270,16 @@
 			    <label for="pdfShowWindCol">Show Wind Column</label>
 			</fieldset>
 			<button class="ui-shadow ui-btn ui-corner-all">Export</button>
+			<h2>Share Link</h2>
+			<a href="#shareLink" data-rel="popup" class="ui-btn ui-corner-all ui-shadow ui-btn-inline" data-transition="pop">URL</a>
+			<div data-role="popup" id="shareLink">
+				<p class="popupText calc-text">Copy the link to Bookmark or Share.</p>
+				
+				<p class="popupText calc-text">Copy Link:</p>
+				<div class="URLpopup center">
+					<input type="text" name="copyLink" id="copyLink" value="">
+				</div>
+			</div>
 		</div>
 		<div data-role="header" data-position="fixed" data-theme="b">
 			<a href="#home"
@@ -256,7 +289,7 @@
 				Power <img id="logo-icon" src="images/PowerPlannerLogo-min.png"
 					data-thumb="" alt=""> Planner
 			</h1>
-			<a href="#pdfPanel" data-icon="action" data-theme="b">PDF</a>			
+			<a href="#pdfPanel" data-icon="action" data-theme="b">Export</a>			
 		</div>
 		<!-- /header -->
 		<div role="main" class="ui-content">
