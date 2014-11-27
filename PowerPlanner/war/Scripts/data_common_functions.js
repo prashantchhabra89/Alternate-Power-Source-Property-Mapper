@@ -96,7 +96,6 @@ function extract_raw_weight(scaled, scaler, offset, type) {
 	if (type == "SOLAR") {
 		raw = Math.log((scaled * Math.pow(10, scaler))/2.5)// + Math.pow(10, offset))
 				/ Math.log(10);
-		console.log(raw);
 	}
 	return (raw > 0 ? raw : 0);
 }
@@ -295,7 +294,7 @@ function getSafeBound(incr, start, desired) {
 	while (ret_val + incr < desired) {
 		ret_val += incr;
 	}
-	console.log("desired: " + desired + " | increment: " + incr + " | safe bound: " + ret_val);
+	//console.log("desired: " + desired + " | increment: " + incr + " | safe bound: " + ret_val);
 	return ret_val;
 }
 

@@ -178,6 +178,5 @@ function changeMarkerIcon(marker, energyLevel) {
 		marker.setIcon("../../images/icon_medium.png");
 	} else if (energyLevel >= 1.45) {
 		marker.setIcon("../../images/icon_high.png");
-		console.log("High Energy Level**************************************************");
 	}
 }

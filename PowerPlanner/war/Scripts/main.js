@@ -304,6 +304,14 @@ $(document).ready(function() {
 			}, 100);
 		}
 	});
+	
+	$('#shareLinkButton').on('click', function() {
+		$('#copyLink').val(buildURL());
+		setTimeout(function() {}, 5);
+		$('#copyLink').focus(function() {
+			this.select();
+		});
+	});
 });
 
 /*

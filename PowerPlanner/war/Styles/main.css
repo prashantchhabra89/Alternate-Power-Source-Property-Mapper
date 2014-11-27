@@ -321,6 +321,27 @@ p.intro-text, h3.intro-header, a.calc-text, p.calc-text, h3.calc-header, p.about
 	margin-left: auto;
 	margin-right: auto;
 }
+.url-text {
+	font-family: 'Raleway', sans-serif;
+	font-size: 24px !important;
+	font-color: #FFF;	
+	font-weight: 200;
+	text-shadow: initial;
+	word-wrap: break-word;
+	margin-left: 8px;
+	margin-right: 8px;
+}
+.sub-url-text {
+	font-family: 'Raleway', sans-serif;
+	font-size: 12px !important;
+	font-color: #FFF;	
+	font-weight: 200;
+	font-style: italic;
+	text-shadow: initial;
+	word-wrap: break-word;
+	margin-left: auto;
+	margin-right: auto;
+}
 p.intro-text {
 	color: rgb(253, 231, 2);
 }

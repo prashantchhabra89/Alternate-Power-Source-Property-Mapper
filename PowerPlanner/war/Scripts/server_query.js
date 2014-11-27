@@ -212,7 +212,9 @@ function buildURL() {
 }
 
 function coldLoadDecodeURL(map) {
+	console.log("Cold load launch time");
 	var this_listener = google.maps.event.addListener(map, 'idle', function() {
+		console.log("Cold load says we can now decode the URL!");
 		decodeURL();
 		google.maps.event.removeListener(this_listener);
 	});
@@ -228,18 +230,6 @@ function decodeURL() {
 		console.log(zoom[0]);
 		g_map.setZoom(Number(zoom[0]));
 	}
-	if (data && data.length > 0) {
-		$("#showCheckboxWind").prop("checked", (data[0].indexOf('w') !== -1));
-		$("#showCheckboxSolar").prop("checked", (data[0].indexOf('s') !== -1));
-		$("#showCheckboxHydro").prop("checked", (data[0].indexOf('h') !== -1));
-		toggleHighlightCheck();
-		_eventHeatmapDataToggler();
-	}
-	if (center) {
-		if (center.length > 0) {
-			g_map.setCenter(new google.maps.LatLng(center[0].split(',')[0], center[0].split(',')[1]));
-		}
-	}
 	for (var i = 0; i < markers.length; i++) {
 		console.log(markers[i]);
 		addMarker(g_map, new google.maps.LatLng(markers[i].split(',')[0], markers[i].split(',')[1]));
@@ -247,6 +237,18 @@ function decodeURL() {
 	
 	markerBalloon.setContent("");
 	markerBalloon.close();
+	if (center) {
+		if (center.length > 0) {
+			g_map.setCenter(new google.maps.LatLng(center[0].split(',')[0], center[0].split(',')[1]));
+		}
+	}
+	if (data && data.length > 0) {
+		$("#showCheckboxWind").prop("checked", (data[0].indexOf('w') !== -1));
+		$("#showCheckboxSolar").prop("checked", (data[0].indexOf('s') !== -1));
+		$("#showCheckboxHydro").prop("checked", (data[0].indexOf('h') !== -1));
+		toggleHighlightCheck();
+		_eventHeatmapDataToggler();
+	}
 }
 
 function getUrlParameter(sParam)

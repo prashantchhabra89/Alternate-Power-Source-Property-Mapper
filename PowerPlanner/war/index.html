@@ -271,11 +271,14 @@
 			</fieldset>
 			<button class="ui-shadow ui-btn ui-corner-all">Export</button>
 			<h2>Share Link</h2>
-			<a href="#shareLink" data-rel="popup" class="ui-btn ui-corner-all ui-shadow ui-btn-inline" data-transition="pop">URL</a>
-			<div data-role="popup" id="shareLink">
-				<p class="popupText calc-text">Copy the link to Bookmark or Share.</p>
+			<a href="#shareLink" data-rel="popup" class="ui-btn ui-corner-all ui-shadow ui-btn-inline" 
+				data-transition="slide" id="shareLinkButton">
+				URL
+			</a>
+			<div data-role="popup" data-theme="b" data-overlay-theme="b" id="shareLink" >
+				<p class="url-text" data-theme="a">Copy the link to Bookmark or Share.</p>
 				
-				<p class="popupText calc-text">Copy Link:</p>
+				<p class="sub-url-text">Press Ctrl+C or right click and select Copy</p>
 				<div class="URLpopup center">
 					<input type="text" name="copyLink" id="copyLink" value="">
 				</div>
