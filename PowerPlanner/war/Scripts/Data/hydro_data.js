@@ -8,9 +8,13 @@ function _filterHydroData(raw_data, push_data, neLat, neLng, swLat, swLng) {
 					raw_data[grid].data[i].points[raw_data[grid].data[i].points.length - 1]); 
 			if (river_center.lat > swLat && river_center.lat < neLat) {
 				if (river_center.lon > swLng && river_center.lon < neLng) {
+					var powerweight = raw_data[grid].data[i].weights['anu'];
+					if (powerweight < 0) {
+						powerweight = 0;
+					}
 					push_data.push({
 						points : raw_data[grid].data[i].points,
-						weight : hydroPow(raw_data[grid].data[i].weights['anu'], 0.9, 1)
+						weight : hydroPow(powerweight, 0.9, 0.5)
 					});
 				}
 			}
@@ -39,6 +43,5 @@ function _getDataWeightHydro(hm_data, lat, lng) {
 			break;
 		}
 	}
-
 	return final_weight;
 }

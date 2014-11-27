@@ -87,10 +87,19 @@ function set_scaler(type) {
 function apply_scaler(raw_weight, offset, type) {
 	var scaled = raw_weight / scaler;
 	if (type == "SOLAR") {
-		scaled = 2.5 * ((Math.pow(10, raw_weight) - Math.pow(10, offset))
+		scaled = 2.5 * ((Math.pow(10, raw_weight))// - Math.pow(10, offset))
 				/ Math.pow(10, scaler));
 	}
 	return scaled;
+}
+
+function extract_raw_weight(scaled, scaler, offset, type) {
+	var raw = scaled * scaler;
+	if (type == "SOLAR") {
+		raw = Math.log((scaled * Math.pow(10, scaler))/2.5)// + Math.pow(10, offset))
+				/ Math.log(10);
+	}
+	return (raw > 0 ? raw : 0);
 }
 
 function _filterData(raw_data, push_data, neLat, neLng, swLat, swLng, type) {
@@ -104,7 +113,8 @@ function _filterData(raw_data, push_data, neLat, neLng, swLat, swLng, type) {
 }
 
 /*
- * Fills in a grid of all the points visible on the screen as defined by the
+ * Fills in a grid of all the points visible on the scree
+ * n as defined by the
  * provided boundary coordinates (with a little bit of bleed over the boundaries
  * to prevent visible edge discolouration) by interpolating values from the
  * provided set of real data points based on a weighting algorithm. Returns the
@@ -153,12 +163,11 @@ function _interpolateData(hm_data, neLat, neLng, swLat, swLng, type) {
 					var next_inter = _createInterpolation(hm_bin, temp_data,
 							lat_increment, lng_increment, lat_start, lng_start,
 							latset, lngset, offset, type);
-					lat_start = next_inter.max_lat + latset;
+					lat_start = next_inter.next_lat + latset;
 					offset = next_inter.offset;
 				}
 				lat_start = swLat - lat_offset;
-				lng_start = _getNextStart(lng_start, lng_start + lng_increment,
-						lngset);
+				lng_start = _getLngBound(lngset, lng_start + lng_increment) + lngset; 
 				offset = latset; // reset offset
 			}
 		}
@@ -179,25 +188,27 @@ function _boundedInterpolation(hm_data, fill_data, lat_width,
 		lng_width, lat_start, lng_start, latset, lngset, offset, type) {
 	var diam = MAX_DATA_WIDTH / Math.pow(2, (g_map.getZoom() - LEAST_ZOOM)) * 0.08;
 	for (var i = 0; i < hm_data.length; i++) {
-		var curr_point = hm_data[i].points[0];
-		fill_data.push({
-			lat : hm_data[i].points[0].lat,
-			lng : hm_data[i].points[0].lon,
-			weight : hm_data[i].weight
-		});
-		for (var j = 1; j < hm_data[i].points.length; j++) {
-			var dist = distanceTo(curr_point.lat, curr_point.lon, 
-					hm_data[i].points[j].lat, hm_data[i].points[j].lon);
-			if (dist > diam) {
-				_lineInterpolation(fill_data, curr_point, hm_data[i].points[j], 
-							dist, diam, hm_data[i].weight);
-				curr_point = hm_data[i].points[j];
-				fill_data.push({
-					lat : hm_data[i].points[j].lat,
-					lng : hm_data[i].points[j].lon,
-					weight : hm_data[i].weight
-				});
-			} 
+		if (hm_data[i].weight > 0) {
+			var curr_point = hm_data[i].points[0];
+			fill_data.push({
+				lat : hm_data[i].points[0].lat,
+				lng : hm_data[i].points[0].lon,
+				weight : hm_data[i].weight
+			});
+			for (var j = 1; j < hm_data[i].points.length; j++) {
+				var dist = distanceTo(curr_point.lat, curr_point.lon, 
+						hm_data[i].points[j].lat, hm_data[i].points[j].lon);
+				if (dist > diam) {
+					_lineInterpolation(fill_data, curr_point, hm_data[i].points[j], 
+								dist, diam, hm_data[i].weight);
+					curr_point = hm_data[i].points[j];
+					fill_data.push({
+						lat : hm_data[i].points[j].lat,
+						lng : hm_data[i].points[j].lon,
+						weight : hm_data[i].weight
+					});
+				} 
+			}
 		}
 	}
 }
@@ -244,13 +255,18 @@ function _createInterpolation(hm_data, fill_data, lat_width, lng_width,
 	var curr_offset = offset;
 	var max_lat = -90;
 	var max_lng = -180;
+	
+	var safeLatStart = _getLatBound(latset, lat_start);
+	var safeLatEnd = _getLatBound(latset, lat_start + lat_width);
+	var safeLngStart = _getLngBound(lngset, lng_start);
+	var safeLngEnd = _getLngBound(lngset, lng_start + lng_width);
 
-	for (var i = 0.0; i <= lat_width; i += latset) {
-		for (var j = 0.0; j <= lng_width; j += lngset) {
-			var lat_point = i + lat_start;
-			var lng_point = j + curr_offset + lng_start;
-			max_lat = Math.max(max_lat, lat_point);
-			max_lng = Math.max(max_lng, lng_point);
+	for (var i = safeLatStart; i < safeLatEnd; i += latset) {
+		for (var j = safeLngStart; j < safeLngEnd; j += lngset) {
+			var lat_point = i;
+			var lng_point = j + curr_offset;
+			//max_lat = Math.max(max_lat, lat_point);
+			//max_lng = Math.max(max_lng, lng_point);
 			var weighted = getDataWeight(hm_data, lat_point, lng_point, type);
 			//console.log("Point Weight: " + weighted);
 			if (weighted > MIN_DISPLAY_WEIGHT) {
@@ -261,10 +277,27 @@ function _createInterpolation(hm_data, fill_data, lat_width, lng_width,
 	}
 
 	return {
-		max_lat : max_lat,
-		max_lng : max_lng,
+		next_lat : safeLatEnd,
+		next_lng : safeLngEnd,
 		offset : curr_offset
 	};
+}
+
+function _getLatBound(incr, desired) {
+	return getSafeBound(incr, -90, desired);
+}
+
+function _getLngBound(incr, desired){
+	return getSafeBound(incr, -180, desired);
+}
+
+function getSafeBound(incr, start, desired) {
+	var ret_val = start;
+	while (ret_val + incr < desired) {
+		ret_val += incr;
+	}
+	//console.log("desired: " + desired + " | increment: " + incr + " | safe bound: " + ret_val);
+	return ret_val;
 }
 
 /*
@@ -336,21 +369,6 @@ function _binData(hm_data, neLat, neLng, swLat, swLng, data_lat_offset,
 }
 
 /*
- * When binning, this safely gets you the next point you could safely draw,
- * based on where the next point would be if the view hadn't been cut into
- * sections. Pass in the current start point, the end point of the cut, and the
- * amount you increment by each step.
- */
-function _getNextStart(curr_start, end_point, increment) {
-	var next_start = curr_start;
-	while (next_start < end_point) {
-		next_start += increment;
-	}
-
-	return next_start;
-}
-
-/*
  * Find the distance from one provided point to another (assumes latitude and
  * longitude cover the same distance).
  */
@@ -366,7 +384,7 @@ function distanceTo(src_lat, src_lng, dest_lat, dest_lng) {
  * of the heatmap spots away from the lat and lng of a point.
  */
 function pointIsOnPoint(lat, lng, point_lat, point_lng) {
-	return distanceTo(lat, lng, point_lat, point_lng) <= getHeatmapSize() ?
+	return distanceTo(lat, lng, point_lat, point_lng) <= (getHeatmapSize("HYDRO") * 2) ?
 			true : false;
 }
 
@@ -400,10 +418,11 @@ function getDataWeight(hm_data, lat, lng, type) {
  * TODO: Tie this in with getDataWeight ... it's exactly what's needed, though
  * ajax calls will need to be handled here first.
  */
-function getPointData(lat_point, lng_point) {
+function getPointData(marker) {
 	return pointDataObj = {
-			lat : lat_point,
-			lng : lng_point,
+			marker : marker,
+			lat : marker.getPosition().lat(),
+			lng : marker.getPosition().lng(),
 			wind_raw : null,
 			solar_raw : null,
 			hydro_raw : null
@@ -418,7 +437,6 @@ function getPointData(lat_point, lng_point) {
  */
 function populatePointData(pointDataObj, uniq_id) {
 	var offset = 0.05;
-	var reset_weight = getHeatmapSize();
 	
 	var neLat = pointDataObj.lat + offset;
 	var neLng = pointDataObj.lng + offset;
@@ -451,8 +469,9 @@ function populatePointData(pointDataObj, uniq_id) {
 	}
 	
 	if (solar_data.length) {
-		pointDataObj.solar_raw = _getDataWeightSolar(solar_data, pointDataObj.lat, pointDataObj.lng)
-			* SOLAR_SCALER * HOUR_TO_YEAR;
+		pointDataObj.solar_raw = 
+			extract_raw_weight(_getDataWeightSolar(solar_data, pointDataObj.lat, pointDataObj.lng), 
+			SOLAR_SCALER, SOLAR_BOTTOM, "SOLAR") * HOUR_TO_YEAR;
 		$("#" + uniq_id + " .solarstring").html(pointDataObj.solar_raw.toFixed(2).toString());
 		_tryPopulateTotalEnergy(pointDataObj, uniq_id);
 	} else if (checkCache(neLat, neLng, swLat, swLng, "SOLAR")) {
@@ -460,21 +479,22 @@ function populatePointData(pointDataObj, uniq_id) {
 		var raw_data = fetchFromCache(pointDataObj.lat, pointDataObj.lng,
 				pointDataObj.lat, pointDataObj.lng, "SOLAR");
 		processData(raw_data, hm_data, neLat, neLng, swLat, swLng, "SOLAR");
-		pointDataObj.solar_raw = _getDataWeightSolar(hm_data, pointDataObj.lat, pointDataObj.lng)
-			* SOLAR_SCALER * HOUR_TO_YEAR;
+		pointDataObj.solar_raw = 
+			extract_raw_weight(_getDataWeightSolar(hm_data, pointDataObj.lat, pointDataObj.lng), 
+			SOLAR_SCALER, SOLAR_BOTTOM, "SOLAR") * HOUR_TO_YEAR;
 		$("#" + uniq_id + " .solarstring").html(pointDataObj.solar_raw.toFixed(2).toString());
 		_tryPopulateTotalEnergy(pointDataObj, uniq_id);
 	} else {
 		queryAndCallback('anu', neLat, neLng, swLat, swLng, 0, 0, "SOLAR", function(data) {
 			var hm_data = [];
 			processData(data, hm_data, neLat, neLng, swLat, swLng, "SOLAR");
-			pointDataObj.solar_raw = _getDataWeightSolar(hm_data, pointDataObj.lat, pointDataObj.lng)
-				* SOLAR_SCALER * HOUR_TO_YEAR;
+			pointDataObj.solar_raw = 
+				extract_raw_weight(_getDataWeightSolar(hm_data, pointDataObj.lat, pointDataObj.lng), 
+				SOLAR_SCALER, SOLAR_BOTTOM, "SOLAR") * HOUR_TO_YEAR;
 			$("#" + uniq_id + " .solarstring").html(pointDataObj.solar_raw.toFixed(2).toString());
 			_tryPopulateTotalEnergy(pointDataObj, uniq_id);
 		});
 	}
-	
 	if (hydro_data.length) {
 		pointDataObj.hydro_raw = _getDataWeightHydro(hydro_data, pointDataObj.lat, pointDataObj.lng)
 			* HYDRO_SCALER * HOUR_TO_YEAR;
@@ -485,7 +505,6 @@ function populatePointData(pointDataObj, uniq_id) {
 		var raw_data = fetchFromCache(pointDataObj.lat, pointDataObj.lng,
 				pointDataObj.lat, pointDataObj.lng, "HYDRO");
 		processData(raw_data, hm_data, neLat, neLng, swLat, swLng, "HYDRO");
-		g_heatmap.set('radius', reset_weight);
 		pointDataObj.hydro_raw = _getDataWeightHydro(hm_data, pointDataObj.lat, pointDataObj.lng)
 			* HYDRO_SCALER * HOUR_TO_YEAR;
 		$("#" + uniq_id + " .hydrostring").html(pointDataObj.hydro_raw.toFixed(2).toString());
@@ -494,7 +513,6 @@ function populatePointData(pointDataObj, uniq_id) {
 		queryAndCallback('anu', neLat, neLng, swLat, swLng, 0, 0, "HYDRO", function(data) {
 			var hm_data = [];
 			processData(data, hm_data, neLat, neLng, swLat, swLng, "HYDRO");
-			g_heatmap.set('radius', reset_weight);
 			pointDataObj.hydro_raw = _getDataWeightHydro(hm_data, pointDataObj.lat, pointDataObj.lng)
 				* HYDRO_SCALER * HOUR_TO_YEAR;
 			$("#" + uniq_id + " .hydrostring").html(pointDataObj.hydro_raw.toFixed(2).toString());
@@ -516,7 +534,7 @@ function _tryPopulateTotalEnergy(pointDataObj, uniq_id) {
 		$("#" + uniq_id + " .totalstring").html(totalEnergy.toFixed(2).toString());
 		
 		// when all energy types have a value, change the marker's icon.
-		changeMarkerIcon(totalEnergy/11000);
+		changeMarkerIcon(pointDataObj.marker, totalEnergy/11000);
 		
 	}
 }
