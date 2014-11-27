@@ -320,7 +320,12 @@ function prashant2(pixelx,pixely)
 	  var newLatInPx = (swBoundInPx.y - neBoundInPx.y) * procY + neBoundInPx.y;
 	var finalResult = new google.maps.Point(newLngInPx, newLatInPx);
 	var latlng = g_map.getProjection().fromPointToLatLng(finalResult);
-	console.log(latlng)
+	var lat = latlng.lat();
+	var lon = latlng.lng();
+	var mapurl = 'https://maps.googleapis.com/maps/api/staticmap?center='+lat+','+lon+'&zoom='+g_map.getZoom()+'&size=640x480';
+	console.log(mapurl);
+	return mapurl;
+	
 		}
 }
 function prashant()
@@ -342,6 +347,7 @@ function prashant()
 	var numypoints = newheight/480;
 	var xarray = new Array();
 	var yarray = new Array();
+	 
 	var addx = 640/2;
 	var addy = 480/2;
 	var xcounter =0;
@@ -361,19 +367,136 @@ function prashant()
 	console.log('arrayx '+xarray+' arrayy '+yarray);
 	var xpointcounter=0;
 	var ypointcounter=0;
+	var urlarray = new Array();
+	  for (var i = 0; i < xarray.length; i++) {
+	    urlarray[i] = new Array(yarray.length);
+	  }
 	while(xpointcounter<xarray.length)
 		{
 		ypointcounter=0;
 		while(ypointcounter<yarray.length)
 			{
-			prashant2(xarray[xpointcounter],yarray[ypointcounter]);
+			urlarray[xpointcounter][ypointcounter]=prashant2(xarray[xpointcounter],yarray[ypointcounter]);
 			ypointcounter++;
 			}
 		xpointcounter++;
 		}
 	console.log('zoom '+g_map.getZoom())//prashant2();
+	console.log(urlarray);
+	stichesimages(urlarray,xarray.length,yarray.length)
 	   
 	}
+function stichesimages(urlarray,xnum,ynum)
+{
+	/// create a new instance of easyCanvas using canvas with id "demo"
+	var ez = document.createElement("canvas");
+	  ez.width = xnum*640;
+	    ez.height = ynum*480;
+	
+	var ctx=ez.getContext("2d");
+	
+	
+
+	    /// define the image URLs
+	    
+
+	/// Use the built-in loader to load all the images
+	//ez.loadImages();
+
+	/// draw all images that was loaded
+	var xcor=0;
+	var ycor=0;
+	/*for(var i = 0; i<xnum; i++)
+	   {
+	   for(j=0;j<ynum;j++)
+		   {
+		   xcor= i*640;
+			   var ycor =j*480;
+		 var img = new Image();
+		   
+		 console.log("i and j"+i+''+j);
+		   img.src = urlarray[i][j];
+		 
+		   img.onload = function () {
+               //draw background image
+			  // ctx.drawImage(img, i*640, j*480);
+			   ctx.drawImage(img, xcor, ycor);
+			   var myImage = ez.toDataURL("image/png");
+			     window.open(myImage);
+			   console.log("i am running1");
+		   }
+		   
+		   }*/
+	
+    
+    
+	var img = new Image();
+	img.src = urlarray[0][0];
+	img.onload = function()
+	{
+		ctx.drawImage(img, 0, 0);
+		var img2 = new Image();
+		   img2.src = urlarray[0][1];
+			img2.onload = function()
+			{
+				ctx.drawImage(img2, 0, 480);
+				var img3 = new Image();
+				   img3.src = urlarray[1][0];
+					img3.onload = function()
+					{
+						ctx.drawImage(img3, 640, 0);
+						var img4 = new Image();
+						   img4.src = urlarray[1][1];
+							img4.onload = function()
+							{
+								ctx.drawImage(img4, 640, 480);
+								var myImage = ez.toDataURL("image/png");
+							     window.open(myImage);
+							}
+					}
+				
+			}
+			
+	}
+	   
+	
+	
+//ez.download('filename.png');
+
+	 /*   var i, t, x = 0, y = 0,
+	        w = ez.width * 0.333,  /// grid 3x3 assuming 9 images
+	        h = ez.height * 0.333,
+	        count = 0;
+
+	    /// fill canvas with a grid of the images
+	    for(i = 0; i < e.images.length; i++) {
+
+	        /// if image was successfully loaded image will not be null
+	        if (e.images[i] !== null) {
+	            ez.ctx.drawImage(e.images[i], x, y, w, h);
+	            count++;
+
+	            /// move to next spot for next image
+	            if (((i + 1) % 3) === 0) {
+	                x = 0;
+	                y += h;
+	            } else x += w;
+	        }
+	    }*/
+   
+	}
+function done(urlarray,xnum,ynum)
+{
+	for(var i=0;i<xnum;i++)
+	   {
+	   for(j=0;j<ynum;j++)
+		   {
+		   ez.ctx.drawImage(urlarray[i][j], x*640, y*480);
+		   }
+	   }
+ez.download('filename.png');
+	}
+	
 
 /*
  * Initializes heatmap with current basic settings.
