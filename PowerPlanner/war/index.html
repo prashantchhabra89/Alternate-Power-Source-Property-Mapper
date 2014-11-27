@@ -10,12 +10,14 @@
 <script src="Scripts/main.js"></script>
 <script src="Scripts/jquery.mobile-1.4.2.min.js"></script>
 <script src="Scripts/underscore-min.js"></script>
+<script src="Scripts/bootstrap-tour-standalone.min.js"></script>
 
 <link rel="stylesheet" type="text/css"
 	href="Styles/jquery.mobile.theme-1.4.2.min.css" />
 <link rel="stylesheet" type="text/css"
 	href="Styles/jquery.mobile-1.4.2.min.css" />
 <link rel="stylesheet" type="text/css" href="Styles/main.css">
+<link href="Styles/bootstrap-tour-standalone.min.css" rel="stylesheet">
 <link href='http://fonts.googleapis.com/css?family=Raleway:800, 200'
 	rel='stylesheet' type='text/css'>
 
@@ -31,19 +33,18 @@
 <script src="Scripts/Data/wind_data.js"></script>
 <script src="Scripts/Data/solar_data.js"></script>
 <script src="Scripts/Data/hydro_data.js"></script>
-
+<script src="Scripts/intro.js"></script>
 </head>
 
 <body>
 	<!-- Start of first page -->
 	<div data-role="page" id="home">
 		<!-- /header -->
-
 		<div role="main" class="ui-content">
 			<div class="intro">
 				<h1 class="intro-title">Power Planner</h1>
 				<div class="logo-small"></div>
-				<p class="intro-text">Putting power in people's hands for
+				<p class="intro-text intro-main-text">Putting power in people's hands for
 					finding sites for sustainable electricity generation.</p>
 				<div class="inputText searchBoxWidth center">
 					<input type="text" name="placesTextSearch" id="pac-input-intro"
@@ -54,7 +55,7 @@
 				 <a	href="#app" class="ui-btn ui-btn-inline start-button">Start</a>
 			</div>
 	
-			<div class="ui-content calc-background">
+			<div class="ui-content calc-background center">
 				<h3 class="intro-header calc-header">How to use</h3>
 				<h4 class="intro-subheading">
 					<strong>Description</strong>
@@ -80,6 +81,7 @@
 					for generating your own electricity. Modify the power calculations
 					to match your current - or future - solar panel, wind turbine,
 					and/or hydro turbine setup!</p>
+				<a	href="#app" class="tour-button ui-btn ui-btn-inline center">Take a tour!</a>
 			</div>
 			<div class="ui-content disclaimer-background">
 				<h3 class="intro-header about-header">Disclaimer</h3>
@@ -108,10 +110,16 @@
 				<p class="intro-text calc-text">was applied to the 30m wind
 					speed to obtain approximations of wind speed at 5m, 10m, 15m, 20m,
 					and 25m. The value of the exponent coefficient, is assumed to be
-					0.14.<br> The power calculation equation:</p>
+					0.14.<br> The power calculation equation:</p>				
 				<div class="windPowerCalc center"></div>
-				<p class="intro-text calc-text">(copy the stuffs from
-					equations&variables file) For more information on how the original
+				<div class="equationBorder">
+					<span class="windEnergyOutput"></span><p class="intro-text calc-text equation-text"> is the wind energy output in <i>kWh</i></p>
+					<span class="windRotArea"></span><p class="intro-text calc-text equation-text"> is the rotor area of the wind turbine in m<sup>2</sup> (note: different brand different area)</p>
+					<span class="windAirDensity"></span><p class="intro-text calc-text equation-text"> is the density of air in kg/m3</p>
+					<span class="windSpeed"></span><p class="intro-text calc-text equation-text"> is the wind speed in m/s</p>
+					<span class="windPowerCoeff"></span><p class="intro-text calc-text equation-text"> is the power coefficient </p>
+				</div>
+				<p class="intro-text calc-text">For more information on how the original
 					wind data is obtained, please refer to</p>
 				<a href="http://www.windatlas.ca/en/methodology.php" class="calc-text center">http://www.windatlas.ca/en/methodology.php.</a>
 				<hr>
@@ -129,8 +137,15 @@
 					The power calculation equation:
 				</p>
 				<div class="solarPowerCalc center"></div>
-				<p class="intro-text calc-text">(copy the stuffs from
-					equations&variables file) For more information on how the original
+				<div class="equationBorder">
+					<span class="solarEnergyOutput"></span><p class="intro-text calc-text equation-text"> is the solar energy output in <i>kWh</i>
+	</p>
+					<span class="area"></span><p class="intro-text calc-text equation-text"> is the total solar panel area in m<sup>2</sup></p>
+					<span class="solarPanelYield"></span><p class="intro-text calc-text equation-text"> is the solar panel yield</p>
+					<span class="solarRadiation"></span><p class="intro-text calc-text equation-text"> is the average solar radiation on tilted panels in kWh/m<sup>2</sup></p>
+					<span class="solarPrefRate"></span><p class="intro-text calc-text equation-text"> is the performance ratio coefficient for losses</p>
+				</div>
+				<p class="intro-text calc-text">For more information on how the original
 					solar data is obtained, please refer to</p>
 				<a href="http://pv.nrcan.gc.ca/?lang=e&m=e" class="calc-text center">http://pv.nrcan.gc.ca/?lang=e&m=e.</a>
 				<hr>
@@ -153,15 +168,22 @@
 					digital basemap representation of the aquatic features depicted on
 					NTS 1 to 50,000 scale maps. To reduce storage and complexity,
 					streams shorter than roughly 2km were removed, and any bend in the
-					river less than 30¢X was removed. The power calculation equation:</p>
+					river less than 30&deg; was removed. The power calculation equation:</p>
 				<div class="hydroPowerCalc center"></div>
-				<p class="intro-text calc-text"> (copy the stuffs from
-					equations&variables file) For more information on how the original
+				<div class="equationBorder">
+					<span class="hydroEnergyOutput"></span><p class="intro-text calc-text equation-text"> is the hydro energy output in kWh</p>
+					<span class="hydraulicEff"></span><p class="intro-text calc-text equation-text"> is the hydraulic efficiency of the turbine</p>
+					<span class="waterDensity"></span><p class="intro-text calc-text equation-text"> is the density of water in kg/m<sup>3</sup></p>
+					<span class="gravity"></span><p class="intro-text calc-text equation-text"> is the acceleration due to gravity in m/s<sup>2</sup></p>
+					<span class="hydroFlow"></span><p class="intro-text calc-text equation-text"> is the rate of flow of the water body in m<sup>3</sup>/s</p>
+					<span class="heightDiff"></span><p class="intro-text calc-text equation-text"> is height difference between inlet and outlet in m</p>
+				</div>
+				<p class="intro-text calc-text"> For more information on how the original
 					hydro data is obtained, please refer to </p>
 				<a href="http://www.ec.gc.ca/rhc-wsc/default.asp?lang=En&n=894E91BE-1" class="calc-text center">http://www.ec.gc.ca/rhc-wsc/default.asp?lang=En&n=894E91BE-1</a>
 			</div>
 			<div class="ui-content about-background">
-				<h3 class="intro-header about-header">Contact Us</h3>
+				<h3 class="intro-header about-header">About Us</h3>
 				<h4 class="intro-subheading">
 					<strong>The Team</strong>
 				</h4>
@@ -170,12 +192,43 @@
 				<br>
 				<div class="circular prashant"><p class="about-text teamMembers">Prashant Chhabra</p></div>				
 				<div class="circular chuan"><p class="about-text teamMembers">Chuan Yun Loe</p></div>				
-				<div class="circular jonathan"><p class="about-text teamMembers">Jonathan Lam</p></div>				
+				<div class="circular jonathan"><p class="about-text teamMembers">Jonathan Lam</p></div>	
+				<hr>
+				<h4 class="intro-subheading feedbackHead">
+					<strong>Feedback</strong>
+				</h4>
+				<div id="form" class="contact-us-form feedbackForm center">
+					<form id="feedback" target="_self" onsubmit=""
+						action="postContactToGoogle()">
+						<fieldset>
+							<label for="name">Name *</label> <input id="name"
+								type="text" name="name">
+						</fieldset>
+						<fieldset>
+							<label for="email">Email *</label> <input id="email"
+								type="text" name="email">
+						</fieldset>
+						<fieldset>
+							<label for="feed">Questions or Feedback?</label>
+							<textarea id="feed" name="feed" class="feedbackText"></textarea>
+						</fieldset>
+						<div style="text-align: right; padding-bottom: 15px;">* Required</div>
+						<div style="width: 100%; display: block; float: right;">
+							<button id="send" type="submit">Contact Us</button>
+						</div>
+						<div
+							style="width: 100%; display: block; float: right; padding-top: 15px;">
+							<div class="requestSubmited"
+								style="display: none; text-align: center;">Your request
+								has been sent!</div>
+						</div>
+					</form>
+				</div>
 			</div>
 			<!-- /content -->
 			<div data-role="footer" data-position="fixed" data-theme="b"
 				data-tap-toggle="false">
-				<p class="footer-text">Copyright &copy Power Planner 2014</p>
+				<p class="footer-text">Copyright &copy; Power Planner 2014</p>
 			</div>
 		</div>
 	</div>
@@ -217,26 +270,35 @@
 			    <label for="pdfShowWindCol">Show Wind Column</label>
 			</fieldset>
 			<button class="ui-shadow ui-btn ui-corner-all">Export</button>
+			<h2>Share Link</h2>
+			<a href="#shareLink" data-rel="popup" class="ui-btn ui-corner-all ui-shadow ui-btn-inline" data-transition="pop">URL</a>
+			<div data-role="popup" id="shareLink">
+				<p class="popupText calc-text">Copy the link to Bookmark or Share.</p>
+				
+				<p class="popupText calc-text">Copy Link:</p>
+				<div class="URLpopup center">
+					<input type="text" name="copyLink" id="copyLink" value="">
+				</div>
+			</div>
 		</div>
 		<div data-role="header" data-position="fixed" data-theme="b">
 			<a href="#home"
-				class="jqm-navmenu-link ui-nodisc-icon ui-btn-left ui-btn ui-icon-home ui-btn-icon-notext ui-corner-all"
-				data-icon="home" data-theme="c">About</a>
+				class="jqm-navmenu-link ui-nodisc-icon ui-btn-left ui-btn ui-icon-home ui-btn-icon-notext ui-corner-all home-button"
+				data-icon="home" data-theme="c">Home</a>
 			<h1 class="app-header">
 				Power <img id="logo-icon" src="images/PowerPlannerLogo-min.png"
 					data-thumb="" alt=""> Planner
 			</h1>
-			<a href="#pdfPanel" data-icon="action" data-theme="b">PDF</a>
-			
+			<a href="#pdfPanel" data-icon="action" data-theme="b">Export</a>			
 		</div>
 		<!-- /header -->
 		<div role="main" class="ui-content">
 			<div class="ui-block-a gMap" id="googleMap"></div>
 			<div class="resourceContainer">
-				<div id="wind-panel" class="wind windToggleButton"></div>
-				<div id="solar-panel" class="solar solarToggleButton"></div>
-				<div id="hydro-panel" class="hydro hydroToggleButton"></div>
-				<a href="#questionPanel" id="question-panel" class="question"></a>
+				<div id="wind-panel-app" class="wind windToggleButton"></div>
+				<div id="solar-panel-app" class="solar solarToggleButton"></div>
+				<div id="hydro-panel-app" class="hydro hydroToggleButton"></div>
+				<a href="#questionPanel" id="question-panel-app" class="question question-panel-app"></a>
 			</div>
 			<div class="legendContainer">
 				<div id="legend"></div>
@@ -265,9 +327,15 @@
 									class="ui-controlgroup ui-controlgroup-horizontal ui-corner-all">
 									<input class="ui-mini" type="radio" name="windView" id="windAnnual"
 										value="annual" checked="checked"  data-mini="true" /> <label
-										for="windAnnual">Annual</label> <input type="radio"
-										name="windView" id="windSeasonal" value="seasonal"  data-mini="true"/> <label
-										for="windSeasonal">Seasonal</label>
+										for="windAnnual" id="windAnnualLabel">Annual</label>
+									<label for="wind-seasonal" class="select" data-mini="true">Seasonal</label>
+									<select name="wind-seasonal" id="wind-seasonal" data-native-menu="false" data-mini="true">
+										<option>Seasonal</option>
+										<option value="spring">Spring</option>
+										<option value="summer">Summer</option>
+										<option value="fall">Fall</option>
+										<option value="winter">Winter</option>
+									</select>
 								</fieldset>
 							</div>
 							<div class="inputText">
@@ -310,9 +378,15 @@
 									class="ui-controlgroup ui-controlgroup-horizontal ui-corner-all">
 									<input type="radio" name="solarView" id="solarAnnual"
 										value="annual" checked="checked" data-mini="true"/> <label
-										for="solarAnnual">Annual</label> <input type="radio"
-										name="solarView" id="solarSeasonal" value="seasonal" data-mini="true"/> <label
-										for="solarSeasonal">Seasonal</label>
+										for="solarAnnual" id="solarAnnualLabel">Annual</label>
+									<label for="solar-seasonal" class="select" data-mini="true">Seasonal</label>
+									<select name="solar-seasonal" id="solar-seasonal" data-native-menu="false" data-mini="true">
+										<option>Seasonal</option>
+										<option value="spring">Spring</option>
+										<option value="summer">Summer</option>
+										<option value="fall">Fall</option>
+										<option value="winter">Winter</option>
+									</select>
 								</fieldset>
 							</div>
 							<div class="inputText">
@@ -353,9 +427,15 @@
 									class="ui-controlgroup ui-controlgroup-horizontal ui-corner-all">
 									<input type="radio" name="hydroView" id="hydroAnnual"
 										value="annual" checked="checked" data-mini="true"/> <label
-										for="hydroAnnual">Annual</label> <input type="radio"
-										name="hydroView" id="hydroSeasonal" value="seasonal" data-mini="true"/> <label
-										for="hydroSeasonal">Seasonal</label>
+										for="hydroAnnual" id="hydroAnnualLabel">Annual</label>
+									<label for="hydro-seasonal" class="select" data-mini="true">Seasonal</label>
+									<select name="hydro-seasonal" id="hydro-seasonal" data-native-menu="false" data-mini="true">
+										<option>Seasonal</option>
+										<option value="spring">Spring</option>
+										<option value="summer">Summer</option>
+										<option value="fall">Fall</option>
+										<option value="winter">Winter</option>
+									</select>
 								</fieldset>
 							</div>
 							<div class="inputText">
@@ -375,7 +455,7 @@
 		<!-- /content -->
 		<div data-role="footer" data-position="fixed" data-theme="b"
 			data-tap-toggle="false">
-			<p class="footer-text">Copyright &copy Power Planner 2014</p>
+			<p class="footer-text">Copyright &copy; Power Planner 2014</p>
 		</div>
 	</div>
 	<!-- /page -->

@@ -85,10 +85,10 @@ function queryAndUpdate_extra(season, neLat, neLng, swLat, swLng, type) {
 
 function queryAndCallback(season, neLat, neLng, swLat, swLng, lat_offset, lng_offset, type, callback) {
 	console.time("_queryServer");
-	var neLat_w_off = 49;//(neLat + lat_offset);
-	var neLng_w_off = -122;//(neLng + lng_offset);
-	var swLat_w_off = 48;//(swLat - lat_offset);
-	var swLng_w_off = -123;//(swLng - lng_offset);
+	var neLat_w_off = (neLat + lat_offset);
+	var neLng_w_off = (neLng + lng_offset);
+	var swLat_w_off = (swLat - lat_offset);
+	var swLng_w_off = (swLng - lng_offset);
 	
 	$.ajax({
 		url : '/powerdb',
