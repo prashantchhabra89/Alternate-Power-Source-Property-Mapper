@@ -301,10 +301,13 @@ function prashant2(pixelx,pixely)
 	  console.log('neboundpx '+neBoundInPx);
 	  var swBoundInPx = g_map.getProjection().fromLatLngToPoint(swBound);
 	  console.log('swBoundInPx '+swBoundInPx);
-	  // compute the percent of x and y coordinates related to the div containing the map; in my case the screen
-	  var procX = x/window.innerWidth;
+	  // compute the percent of x and y coordinates related to the div containing the map; 
+	  //in my case the screen
+	  var procX = x/(g_map.getDiv().offsetWidth);
+	  console.log('innerwidth '+window.innerWidth);
 	  console.log('x percentage '+procX);
-	  var procY = y/window.innerHeight;
+	  var procY = y/(g_map.getDiv().offsetHeight);
+	  console.log('innerheight '+window.innerHeight);
 	  console.log('y percentage '+procY);
 
 	  // compute new coordinates in pixels for lat and lng;
@@ -329,14 +332,11 @@ function prashant()
 	var widthremainder =	width%640;
 	console.log('h remainder '+heightremainder);
 	console.log('w remainder '+widthremainder);
-	if(heightremainder!=0)
-		{
+	
 		var newwidth = (width+640-(widthremainder));
-		}
-	if(widthremainder!=0)
-		{
+	
 		var newheight = (height+480-(heightremainder));
-		}
+	
 	console.log('new height '+ newheight+ ' new width '+newwidth);
 	var numxpoints = newwidth/640;
 	var numypoints = newheight/480;
