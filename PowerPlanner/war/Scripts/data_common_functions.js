@@ -162,12 +162,11 @@ function _interpolateData(hm_data, neLat, neLng, swLat, swLng, type) {
 					var next_inter = _createInterpolation(hm_bin, temp_data,
 							lat_increment, lng_increment, lat_start, lng_start,
 							latset, lngset, offset, type);
-					lat_start = next_inter.max_lat + latset;
+					lat_start = next_inter.next_lat + latset;
 					offset = next_inter.offset;
 				}
 				lat_start = swLat - lat_offset;
-				lng_start = _getNextStart(lng_start, lng_start + lng_increment,
-						lngset);
+				lng_start = _getLngBound(lngset, lng_start + lng_increment) + lngset; 
 				offset = latset; // reset offset
 			}
 		}
@@ -255,13 +254,18 @@ function _createInterpolation(hm_data, fill_data, lat_width, lng_width,
 	var curr_offset = offset;
 	var max_lat = -90;
 	var max_lng = -180;
+	
+	var safeLatStart = _getLatBound(latset, lat_start);
+	var safeLatEnd = _getLatBound(latset, lat_start + lat_width);
+	var safeLngStart = _getLngBound(lngset, lng_start);
+	var safeLngEnd = _getLngBound(lngset, lng_start + lng_width);
 
-	for (var i = 0.0; i <= lat_width; i += latset) {
-		for (var j = 0.0; j <= lng_width; j += lngset) {
-			var lat_point = i + lat_start;
-			var lng_point = j + curr_offset + lng_start;
-			max_lat = Math.max(max_lat, lat_point);
-			max_lng = Math.max(max_lng, lng_point);
+	for (var i = safeLatStart; i < safeLatEnd; i += latset) {
+		for (var j = safeLngStart; j < safeLngEnd; j += lngset) {
+			var lat_point = i;
+			var lng_point = j + curr_offset;
+			//max_lat = Math.max(max_lat, lat_point);
+			//max_lng = Math.max(max_lng, lng_point);
 			var weighted = getDataWeight(hm_data, lat_point, lng_point, type);
 			//console.log("Point Weight: " + weighted);
 			if (weighted > MIN_DISPLAY_WEIGHT) {
@@ -272,10 +276,27 @@ function _createInterpolation(hm_data, fill_data, lat_width, lng_width,
 	}
 
 	return {
-		max_lat : max_lat,
-		max_lng : max_lng,
+		next_lat : safeLatEnd,
+		next_lng : safeLngEnd,
 		offset : curr_offset
 	};
+}
+
+function _getLatBound(incr, desired) {
+	return getSafeBound(incr, -90, desired);
+}
+
+function _getLngBound(incr, desired){
+	return getSafeBound(incr, -180, desired);
+}
+
+function getSafeBound(incr, start, desired) {
+	var ret_val = start;
+	while (ret_val + incr < desired) {
+		ret_val += incr;
+	}
+	console.log("desired: " + desired + " | increment: " + incr + " | safe bound: " + ret_val);
+	return ret_val;
 }
 
 /*
@@ -344,21 +365,6 @@ function _binData(hm_data, neLat, neLng, swLat, swLng, data_lat_offset,
 	}
 
 	return data_bins;
-}
-
-/*
- * When binning, this safely gets you the next point you could safely draw,
- * based on where the next point would be if the view hadn't been cut into
- * sections. Pass in the current start point, the end point of the cut, and the
- * amount you increment by each step.
- */
-function _getNextStart(curr_start, end_point, increment) {
-	var next_start = curr_start;
-	while (next_start < end_point) {
-		next_start += increment;
-	}
-
-	return next_start;
 }
 
 /*

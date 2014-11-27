@@ -30,7 +30,6 @@
  * - _createInterpolation(hm_data, fill_data, lat_width, lng_width,
  * 						  lat_start, lng_start, latset, lngset, offset, type)
  * - _binData(hm_data, neLat, neLng, swLat, swLng, data_lat_offset, data_lng_offset)
- * - _getNextStart(curr_start, end_point, increment)
  * - pointOnLine(lat, lng, point1, point2)
  * - getDataWeight(hm_data, lat, lng, type)
  * - getPointData(lat_point, lng_point)

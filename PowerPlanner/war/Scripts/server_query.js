@@ -228,7 +228,7 @@ function decodeURL() {
 		console.log(zoom[0]);
 		g_map.setZoom(Number(zoom[0]));
 	}
-	if (data) {
+	if (data && data.length > 0) {
 		$("#showCheckboxWind").prop("checked", (data[0].indexOf('w') !== -1));
 		$("#showCheckboxSolar").prop("checked", (data[0].indexOf('s') !== -1));
 		$("#showCheckboxHydro").prop("checked", (data[0].indexOf('h') !== -1));
