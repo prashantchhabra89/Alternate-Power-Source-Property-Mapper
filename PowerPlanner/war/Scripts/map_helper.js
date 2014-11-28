@@ -135,6 +135,11 @@ var view_state = (DEFAULT_ZOOM <= CHANGETO_WIDE_VIEW ?
 		(DEFAULT_ZOOM <= CHANGETO_OVER_VIEW ? OVER_VIEW : WIDE_VIEW) : 
 			(DEFAULT_ZOOM <= CHANGETO_AVE_VIEW ? AVE_VIEW : SMALL_VIEW));
 
+/*
+ * This example adds a search box to a map, using the Google Place Autocomplete
+ * feature. People can enter geographical searches. The search box will return a
+ * pick list containing a mix of places and predicted search terms.
+ */
 function initializeMap() {
 	var map = new google.maps.Map(document.getElementById('googleMap'), {
 		mapTypeId : google.maps.MapTypeId.ROADMAP,
