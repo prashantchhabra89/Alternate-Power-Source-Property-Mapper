@@ -160,9 +160,18 @@ function _requestHeatmapData(type, season, neLat, neLng, swLat, swLng, queryObj,
  * HYDRO. Triggers a heatmap update upon server response.
  */
 function _getHeatmapData(type, season, neLat, neLng, swLat, swLng, callback) {
-	var lat_offset = getLatOffset(neLat, swLat);
-	var lng_offset = getLngOffset(neLng, swLng);
-	
+	var lat_offset = getLatOffset();
+	var lng_offset = getLngOffset();
+	var types = {
+		wind: false,
+		solar: false,
+		hydro: false
+	};
+	switch(type) {
+	case "WIND": types.wind = true; break;
+	case "SOLAR": types.solar = true; break;
+	case "HYDRO": types.hydro = true; break;
+	}
 	// requested grid
 	var neLat_w_off = (neLat + lat_offset);
 	var neLng_w_off = (neLng + lng_offset);
@@ -186,12 +195,14 @@ function _getHeatmapData(type, season, neLat, neLng, swLat, swLng, callback) {
 
 		if(!interpolated_area.default_state && passive_query_handler.length == 0) {
 			var has_interpolated_all = false;
-			has_interpolated_all = checkInterpolatedCache(neLat, neLng, swLat, swLng, type, season);
+			has_interpolated_all = checkInterpolatedCache(neLat_w_off, neLng_w_off, swLat_w_off, swLng_w_off, type, season);
 			if(!has_interpolated_all) {
 				if(interpolated_area.season == season && interpolated_area.isType(type)) {
 					passiveQueryUpdate(interpolated_area.extraArea(neLat_w_off, neLng_w_off, swLat_w_off, swLng_w_off),
-							season,type);
+							season,types);
 				}
+			} else {
+				updateHeatmap();
 			}
 		} else {
 			interpolated_area.season = season;
@@ -202,13 +213,14 @@ function _getHeatmapData(type, season, neLat, neLng, swLat, swLng, callback) {
 		console.timeEnd("_checkCacheData");
 	} else {
 		console.timeEnd("_checkCacheData");
-		if(interpolated_area.default_state) {
-			passiveQueryUpdate(calc_init_extra_area(neLat_w_off, neLng_w_off, swLat_w_off, swLng_w_off),season,type);
-		}
+		
 		queryAndCallback(season, neLat, neLng, swLat, swLng, 
 				lat_offset, lng_offset, type, function(data) {
 					callback(data);
 		});
+		if(interpolated_area.default_state) {
+			passiveQueryUpdate(calc_init_extra_area(neLat_w_off, neLng_w_off, swLat_w_off, swLng_w_off),season,types);
+		}
 	}
 }
 

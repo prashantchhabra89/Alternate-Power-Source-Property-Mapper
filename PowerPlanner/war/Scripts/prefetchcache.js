@@ -13,9 +13,9 @@ var interpolated_area = {
 	default_state: true,
 	isType: function(type) {
 		switch(type) {
-		case "WIND": return wind; break;
-		case "SOLAR": return solar; break;
-		case "HYDRO": return hydro; break;
+		case "WIND": return this.wind; break;
+		case "SOLAR": return this.solar; break;
+		case "HYDRO": return this.hydro; break;
 		}
 	},
 	reset_values: function() {

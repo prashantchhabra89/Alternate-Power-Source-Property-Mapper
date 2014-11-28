@@ -81,16 +81,22 @@ function checkCache(neLat, neLng, swLat, swLng, type, season) {
 
 function checkInterpolatedCache(neLat, neLng, swLat, swLng, type, season) {
 	console.log("CHECKING INTERPOLATED CACHE");
-	if (type == "SOLAR") {
-		if (type == interpolated_area.type && season == interpolated_area.season) {
-			return true;
-		}
-	} else {
-		if (type == interpolated_area.type && season == interpolated_area.season &&
-				interpolated_area.neLat >= neLat && interpolated_area.neLng >= neLng &&
-				interpolated_area.swLat <= swLat && interpolated_area.swLng <= swLng) {
-			return true;
-		}
+	if (type == "SOLAR" && interpolated_area.solar && season == interpolated_area.season) {
+		return true;
+	}
+	if (type == "WIND" && interpolated_area.wind && season == interpolated_area.season &&
+			interpolated_area.neLat >= neLat && interpolated_area.neLng >= neLng &&
+			interpolated_area.swLat <= swLat && interpolated_area.swLng <= swLng) {
+		console.log(interpolated_area.neLat + " " + neLat);
+		console.log(interpolated_area.neLng + " " + neLng);
+		console.log(interpolated_area.swLat + " " + swLat);
+		console.log(interpolated_area.swLng + " " + swLng);
+		return true;
+	}
+	if (type == "HYDRO" && interpolated_area.hydro && season == interpolated_area.season &&
+			interpolated_area.neLat >= neLat && interpolated_area.neLng >= neLng &&
+			interpolated_area.swLat <= swLat && interpolated_area.swLng <= swLng) {
+		return true;
 	}
 	return false;
 }

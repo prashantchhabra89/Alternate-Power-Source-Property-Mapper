@@ -24,11 +24,11 @@ function updateData(raw_data, neLat, neLng, swLat, swLng, type) {
 				swLat-getLatOffset(), swLng-getLngOffset(), type);
 		console.time('_interpolateData');
 		if (type == "WIND") {
-			wind_data = _.union(wind_data,_interpolateData(hm_data, neLat, neLng, swLat, swLng, type));
+			wind_data = wind_data.concat(_interpolateData(hm_data, neLat, neLng, swLat, swLng, type));
 		} else if (type == "SOLAR") {
-			solar_data = _.union(solar_data,_interpolateData(hm_data, neLat, neLng, swLat, swLng, type));
+			solar_data = solar_data.concat(_interpolateData(hm_data, neLat, neLng, swLat, swLng, type));
 		} else if (type == "HYDRO") {
-			hydro_data = _.union(hydro_data,hm_data);
+			hydro_data = hydro_data.concat(hm_data);
 		}
 		console.timeEnd('_interpolateData');
 	}
