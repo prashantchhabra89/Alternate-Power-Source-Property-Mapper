@@ -34,9 +34,11 @@
 <script src="Scripts/Data/solar_data.js"></script>
 <script src="Scripts/Data/hydro_data.js"></script>
 <script src="Scripts/intro.js"></script>
+<script src="Scripts/html2canvas.js"></script>
+<script src="Scripts/screenshotgenerator.js"></script>
 </head>
 
-<body>
+<body id="bodytag">
 	<!-- Start of first page -->
 	<div data-role="page" id="home">
 		<!-- /header -->
@@ -269,7 +271,7 @@
 			    <input type="checkbox" name="pdfShowWindCol" id="pdfShowWindCol">
 			    <label for="pdfShowWindCol">Show Wind Column</label>
 			</fieldset>
-			<button class="ui-shadow ui-btn ui-corner-all">Export</button>
+			<button class="ui-shadow ui-btn ui-corner-all" onclick="generateImage();">Export</button>
 			<h2>Share Link</h2>
 			<a href="#shareLink" data-rel="popup" class="ui-btn ui-corner-all ui-shadow ui-btn-inline" 
 				data-transition="slide" id="shareLinkButton">
