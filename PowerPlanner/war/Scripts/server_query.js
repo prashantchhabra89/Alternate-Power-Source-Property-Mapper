@@ -8,7 +8,7 @@ function launchQueryUpdate(season, types) {
 	var swLat = getSWLatitude(g_map);
 	var swLng = getSWLongitude(g_map);
 	
-	var queryObj = createQuerySet(types.wind, types.solar, types.hydro, true);
+	var queryObj = createQuerySet(types.wind, types.solar, types.hydro, false);
 	var dqh_l = data_query_handler.length;
 	if (dqh_l > 0) {
 		console.log("Query Updater: dropping " + dqh_l + (dqh_l > 1 ? " queries." : " query."));
@@ -53,23 +53,29 @@ function _requestPassiveQuery() {
 	// You'll probably want some sort of handling to deal with stopping these queries if they're
 	// interrupted. REMINDER - set passive_query_handler = [] to make running queries halt
 	if (passive_query_handler.length > 0) {
-		var queryObj = passive_query_handler.shift(); //gets first element
+		var queryObj = passive_query_handler[0]; //gets first element
 		if (queryObj.wind !== undefined) {
-			_requestHeatmapData("WIND", season, neLat, neLng, swLat, swLng, queryObj, function(e) {
+			_requestHeatmapData("WIND", queryObj.season, 
+					queryObj.neLat, queryObj.neLng, 
+					queryObj.swLat, queryObj.swLng, queryObj, function(e) {
 				if (e === true) {
 					_requestPassiveQuery();
 				}
 			});
 		}
 		if (queryObj.solar !== undefined) {
-			_requestHeatmapData("SOLAR", season, neLat, neLng, swLat, swLng, queryObj, function(e) {
+			_requestHeatmapData("SOLAR", queryObj.season, 
+					queryObj.neLat, queryObj.neLng, 
+					queryObj.swLat, queryObj.swLng, queryObj, function(e) {
 				if (e === true) {
 					_requestPassiveQuery();
 				}
 			});
 		}
 		if (queryObj.hydro !== undefined) {
-			_requestHeatmapData("HYDRO", season, neLat, neLng, swLat, swLng, queryObj, function(e) {
+			_requestHeatmapData("HYDRO", queryObj.season, 
+					queryObj.neLat, queryObj.neLng, 
+					queryObj.swLat, queryObj.swLng, queryObj, function(e) {
 				if (e === true) {
 					_requestPassiveQuery();
 				}
@@ -84,16 +90,19 @@ function _requestPassiveQuery() {
  */
 function queryObjSetup(query_handler, primary_query, season, types, neLat, neLng, swLat, swLng) {
 	var queryObj = createQuerySet(types.wind, types.solar, types.hydro, 
-			primary_query, neLat, neLng, swLat, swLng);
+			primary_query, season, neLat, neLng, swLat, swLng);
 	query_handler.push(queryObj);
 }
 
-function createQuerySet(wind, solar, hydro, primary_query, neLat, neLng, swLat, swLng) {
+function createQuerySet(wind, solar, hydro, primary_query, season, neLat, neLng, swLat, swLng) {
 	queryObj = { 
 		query_id : dq_handler_id++,
 		primary : primary_query
 	};
 	
+	if (season) {
+		queryObj["season"] = season;
+	}
 	if (wind) {
 		queryObj["wind"] = false;
 	}
@@ -113,9 +122,9 @@ function createQuerySet(wind, solar, hydro, primary_query, neLat, neLng, swLat, 
 		queryObj['swLat'] = swLat;
 	}
 	if (swLng !== undefined) {
-		queryObj['swLng '] = swLng;
+		queryObj['swLng'] = swLng;
 	}
-	
+	console.log(queryObj);
 	return queryObj;
 }
 
@@ -148,10 +157,9 @@ function _requestHeatmapData(type, season, neLat, neLng, swLat, swLng, queryObj,
  * HYDRO. Triggers a heatmap update upon server response.
  */
 function _getHeatmapData(type, season, neLat, neLng, swLat, swLng, callback) {
-	console.time("_checkCacheData");
 	var lat_offset = getLatOffset(neLat, swLat);
 	var lng_offset = getLngOffset(neLng, swLng);
-
+	
 	// requested grid
 	var neLat_w_off = (neLat + lat_offset);
 	var neLng_w_off = (neLng + lng_offset);
@@ -270,6 +278,8 @@ function _tryUpdateHeatmap(queryObj) {
 					break;
 				}
 			}
+		} else {
+			passive_query_handler.splice(i, 1);
 		}
 	}
 	return did_update;
