@@ -306,6 +306,95 @@ function initHeatmap(map) {
 	return heatmap;
 }
 
+/*this functions calculates the centre of blocks in terms of pixels to be fetched 
+from google static maps api*/
+function pixelsCalculatorForStaticmaps()
+{
+	console.log("original pixels widgth " + g_map.getDiv().offsetWidth + "height"+ g_map.getDiv().offsetHeight);
+	var width= g_map.getDiv().offsetWidth;
+	var height = g_map.getDiv().offsetHeight;
+	var heightremainder = height%480;
+	var widthremainder =	width%640;
+	console.log('h remainder '+heightremainder);
+	console.log('w remainder '+widthremainder);
+		var newwidth = (width+640-(widthremainder));
+		var newheight = (height+480-(heightremainder));
+	console.log('new height '+ newheight+ ' new width '+newwidth);
+	var numxpoints = newwidth/640;
+	var numypoints = newheight/480;
+	var xarray = new Array();
+	var yarray = new Array();
+	var addx = 640/2;
+	var addy = 480/2;
+	var xcounter =0;
+	var ycounter =0;
+	while(numxpoints>0)
+		{
+		xarray[xarray.length] = addx+xcounter;
+			numxpoints--;
+			xcounter+=640;
+		}
+	while(numypoints>0)
+	{
+	yarray[yarray.length] = addy+ycounter;
+		numypoints--;
+		ycounter+=480;
+	}
+	console.log('arrayx '+xarray+' arrayy '+yarray);
+	var xpointcounter=0;
+	var ypointcounter=0;
+	while(xpointcounter<xarray.length)
+		{
+		ypointcounter=0;
+		while(ypointcounter<yarray.length)
+			{
+			pixelToLatLngConverter(xarray[xpointcounter],yarray[ypointcounter]);
+			ypointcounter++;
+			}
+		xpointcounter++;
+		}
+	console.log('zoom '+g_map.getZoom())   
+	}
+
+
+/*latlong calculator of new blocks to be fetched from google static maps api 
+ */
+function pixelToLatLngConverter(pixelx,pixely)
+{
+	var latLngBounds = g_map.getBounds();
+	var x=pixelx;
+	var y=pixely;
+	if(typeof latLngBounds!=='undefined')
+		{
+	  var neBound = latLngBounds.getNorthEast();
+	  console.log('nebound '+neBound);
+	  var swBound = latLngBounds.getSouthWest();
+	  console.log('swbound '+swBound);
+	// convert the bounds in pixels
+	  var neBoundInPx = g_map.getProjection().fromLatLngToPoint(neBound);
+	  console.log('neboundpx '+neBoundInPx);
+	  var swBoundInPx = g_map.getProjection().fromLatLngToPoint(swBound);
+	  console.log('swBoundInPx '+swBoundInPx);
+	  // compute the percent of x and y coordinates related to the div containing the map; in my case the screen
+	  var procX = x/(g_map.getDiv().offsetWidth);
+	  console.log('x percentage '+procX);
+	  var procY = y/(g_map.getDiv().offsetHeight);
+	  console.log('y percentage '+procY);
+
+	  // compute new coordinates in pixels for lat and lng;
+	  // for lng : subtract from the right edge of the container the left edge, 
+	  // multiply it by the percentage where the x coordinate was on the screen
+	  // related to the container in which the map is placed and add back the left boundary
+	  // you should now have the Lng coordinate in pixels
+	  // do the same for lat
+	  var newLngInPx = (neBoundInPx.x - swBoundInPx.x) * procX + swBoundInPx.x;
+	  var newLatInPx = (swBoundInPx.y - neBoundInPx.y) * procY + neBoundInPx.y;
+	var finalResult = new google.maps.Point(newLngInPx, newLatInPx);
+	var latlng = g_map.getProjection().fromPointToLatLng(finalResult);
+	console.log(latlng)
+		}
+}
+
 /*
  * Attach a heatmap to a map.
  */
@@ -440,3 +529,7 @@ google.maps.event.addDomListener(window, 'resize', function() {
 		g_map.setCenter(center);
 	}
 });
+
+
+
+
