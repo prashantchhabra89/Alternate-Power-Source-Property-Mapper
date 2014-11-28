@@ -162,11 +162,9 @@ function _interpolateData(hm_data, neLat, neLng, swLat, swLng, type) {
 							lat_increment, lng_increment, lat_start, lng_start,
 							latset, lngset, offset, type);
 					lat_start = next_inter.next_lat + latset;
-					offset = next_inter.offset;
 				}
 				lat_start = swLat - lat_offset;
 				lng_start = _getLngBound(lngset, lng_start + lng_increment) + lngset; 
-				offset = latset; // reset offset
 			}
 		}
 	} else if (type == "HYDRO") {
@@ -250,7 +248,7 @@ function _lineInterpolation(fill_data, start_point, end_point, distance, diamete
  */
 function _createInterpolation(hm_data, fill_data, lat_width, lng_width,
 		lat_start, lng_start, latset, lngset, offset, type) {
-	var curr_offset = offset;
+	var curr_offset = (getIsOffset(lngset, lng_start) ? latset : 0.0);
 	var max_lat = -90;
 	var max_lng = -180;
 	
@@ -263,10 +261,7 @@ function _createInterpolation(hm_data, fill_data, lat_width, lng_width,
 		for (var j = safeLngStart; j < safeLngEnd; j += lngset) {
 			var lat_point = i;
 			var lng_point = j + curr_offset;
-			//max_lat = Math.max(max_lat, lat_point);
-			//max_lng = Math.max(max_lng, lng_point);
 			var weighted = getDataWeight(hm_data, lat_point, lng_point, type);
-			//console.log("Point Weight: " + weighted);
 			if (weighted > MIN_DISPLAY_WEIGHT) {
 				addHeatmapCoord(fill_data, lat_point, lng_point, weighted);
 			}
@@ -276,8 +271,7 @@ function _createInterpolation(hm_data, fill_data, lat_width, lng_width,
 
 	return {
 		next_lat : safeLatEnd,
-		next_lng : safeLngEnd,
-		offset : curr_offset
+		next_lng : safeLngEnd
 	};
 }
 
@@ -287,6 +281,16 @@ function _getLatBound(incr, desired) {
 
 function _getLngBound(incr, desired){
 	return getSafeBound(incr, -180, desired);
+}
+
+function getIsOffset(incr, desired) {
+	var ret_val = false;
+	var incr_val = -180;
+	while (incr_val < desired) {
+		incr_val += incr;
+		ret_val = !ret_val;
+	}
+	return ret_val;
 }
 
 function getSafeBound(incr, start, desired) {
