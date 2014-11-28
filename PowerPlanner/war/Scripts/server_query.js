@@ -34,6 +34,7 @@ function launchQueryUpdate(season, types) {
 }
 
 function passiveQueryUpdate(grids, season, types) {
+	console.log("LAUNCHING PASSIVE QUERY");
 	for(var i = 0; i < grids.length; i++) {
 		queryObjSetup(passive_query_handler, false, season, types, grids[i].neLat, grids[i].neLng,
 				grids[i].swLat, grids[i].swLng);
@@ -42,11 +43,15 @@ function passiveQueryUpdate(grids, season, types) {
 }
 
 function _requestPassiveQuery() {
+	console.log("PASSIVELY QUERYING...");
 	// You'll probably want some sort of handling to deal with stopping these queries if they're
 	// interrupted. REMINDER - set passive_query_handler = [] to make running queries halt
 	if (passive_query_handler.length > 0) {
+		console.log("PASSIVE LENGTH: " + passive_query_handler.length);
 		var queryObj = passive_query_handler[0]; //gets first element
+		console.log(queryObj);
 		if (queryObj.wind !== undefined) {
+			console.log("PASSIVELY WIND");
 			_requestHeatmapData("WIND", queryObj.season, 
 					queryObj.neLat, queryObj.neLng, 
 					queryObj.swLat, queryObj.swLng, queryObj, function(e) {
@@ -56,6 +61,7 @@ function _requestPassiveQuery() {
 			});
 		}
 		if (queryObj.solar !== undefined) {
+			console.log("PASSIVELY SOLAR");
 			_requestHeatmapData("SOLAR", queryObj.season, 
 					queryObj.neLat, queryObj.neLng, 
 					queryObj.swLat, queryObj.swLng, queryObj, function(e) {
@@ -65,6 +71,7 @@ function _requestPassiveQuery() {
 			});
 		}
 		if (queryObj.hydro !== undefined) {
+			console.log("PASSIVELY HYDRO");
 			_requestHeatmapData("HYDRO", queryObj.season, 
 					queryObj.neLat, queryObj.neLng, 
 					queryObj.swLat, queryObj.swLng, queryObj, function(e) {
@@ -81,7 +88,7 @@ function _requestPassiveQuery() {
  * Add to the passed in array (query_handler)
  */
 function queryObjSetup(query_handler, primary_query, season, types, neLat, neLng, swLat, swLng) {
-	var queryObj = createQuerySet(types, primary_query, neLat, neLng, swLat, swLng);
+	var queryObj = createQuerySet(types, primary_query, season, neLat, neLng, swLat, swLng);
 	query_handler.push(queryObj);
 }
 
@@ -132,8 +139,10 @@ function createQuerySet(types, primary_query, season, neLat, neLng, swLat, swLng
 }
 
 function _requestHeatmapData(type, season, neLat, neLng, swLat, swLng, queryObj, callback) {
+	console.log(callback);
 	_.throttle(
 			_getHeatmapData(type, season, neLat, neLng, swLat, swLng, function(data) {
+				console.log(callback);
 				if (!_queryIsActive(queryObj)) {
 					console.log("Query object was dropped. Halting " + type + " process of id " +
 							queryObj.query_id);
@@ -149,6 +158,8 @@ function _requestHeatmapData(type, season, neLat, neLng, swLat, swLng, queryObj,
 				var success = _tryUpdateHeatmap(queryObj);
 				if (callback !== undefined) {
 					callback(success);
+				} else {
+					console.log("UNDEFINED CALLBACK!");
 				}
 			}),
 			500,{leading:false});
@@ -190,7 +201,7 @@ function _getHeatmapData(type, season, neLat, neLng, swLat, swLng, callback) {
 			if(!has_interpolated_all) {
 				if(interpolated_area.season == season && interpolated_area.isType(type)) {
 					passiveQueryUpdate(interpolated_area.extraArea(neLat_w_off, neLng_w_off, swLat_w_off, swLng_w_off),
-							season,type);
+							season,{ wind : (type=="WIND"),	solar : (type=="SOLAR"), hydro : (type=="HYDRO")});
 				}
 			}
 		} else {
@@ -203,7 +214,8 @@ function _getHeatmapData(type, season, neLat, neLng, swLat, swLng, callback) {
 	} else {
 		console.timeEnd("_checkCacheData");
 		if(interpolated_area.default_state) {
-			passiveQueryUpdate(calc_init_extra_area(neLat_w_off, neLng_w_off, swLat_w_off, swLng_w_off),season,type);
+			passiveQueryUpdate(calc_init_extra_area(neLat_w_off, neLng_w_off, swLat_w_off, swLng_w_off),season,
+					{ wind : (type=="WIND"),	solar : (type=="SOLAR"), hydro : (type=="HYDRO")});
 		}
 		queryAndCallback(season, neLat, neLng, swLat, swLng, 
 				lat_offset, lng_offset, type, function(data) {
@@ -291,14 +303,16 @@ function _tryUpdateHeatmap(queryObj) {
 		updateHeatmap();
 		did_update = true;
 		if (_queryIsActive(queryObj)) {
-			for (var i = 0; i < data_query_handler.length; i++) {
-				if (data_query_handler[i].query_id === queryObj.query_id) {
-					data_query_handler.splice(i, 1);
-					break;
+			if (queryObj.primary === true) {
+				for (var i = 0; i < data_query_handler.length; i++) {
+					if (data_query_handler[i].query_id === queryObj.query_id) {
+						data_query_handler.splice(i, 1);
+						break;
+					}
 				}
+			} else {
+				passive_query_handler.splice(i, 1);
 			}
-		} else {
-			passive_query_handler.splice(i, 1);
 		}
 	}
 	return did_update;
