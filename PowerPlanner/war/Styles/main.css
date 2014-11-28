@@ -156,9 +156,9 @@ body {
 	float: left;
 }
 .question {
-	background: url(../images/question-icon.png) no-repeat bottom center scroll !important;
-	width: 55px !important;
-	height: 55px !important;
+	background: url(../images/question-mark-gray.png) no-repeat bottom center scroll !important;
+	width: 33px !important;
+	height: 33px !important;
 	float: left;
 }
 #legend {
@@ -169,10 +169,10 @@ body {
 }
 
 #question-panel-app {
-	margin: 0.6em 0.2em;
-	border: 2px solid #444;
+	margin: 0.8em 0.2em;
+	border: 2px solid #778;
 	border-radius: 50%;
-	box-shadow: 0 0 5px #555;
+	box-shadow: 0 0 3px #556;
 }
 #wind-panel {
 	margin: 0px 10px 0px 0px !important;
@@ -184,9 +184,9 @@ body {
 	margin: 0px 10px 0px 0px !important;
 }
 
-#question-panel:HOVER {
-	border-color: #3A27DA;
-	box-shadow: 0 0 5px #3A27DA;
+#question-panel-app:HOVER {
+	border-color: #5599DA;
+	box-shadow: 0 0 7px #5599DA;
 }
 
 .ui-content {

@@ -288,6 +288,7 @@ function buildURL() {
 	var builder = window.location.origin + '/#app?';
 	builder = builder + 'z=' + g_map.getZoom();
 	builder = builder + '&c=' + g_map.getCenter().lat() + ',' + g_map.getCenter().lng();
+	builder = builder + '&s=' + getSeason($("#wind-seasonal").val());
 	for (var i = 0; i < markerSet.length; i++) {
 		builder = builder + '&m=' + 
 					markerSet[i].getPosition().lat() + ',' +
@@ -333,9 +334,23 @@ function decodeURL() {
 	var data = getUrlParameter('d');
 	var center = getUrlParameter('c');
 	var markers = getUrlParameter('m');
-	if (zoom[0] >= LEAST_ZOOM && zoom[0] <= MAX_ZOOM) {
+	var season = getUrlParameter('s');
+	if (zoom && zoom[0] >= LEAST_ZOOM && zoom[0] <= MAX_ZOOM) {
 		console.log(zoom[0]);
 		g_map.setZoom(Number(zoom[0]));
+	}
+	if (season && season.length > 0) {
+		var s_val = 'Seasonal';
+		switch (season[0]) {
+		case "mam": s_val = "spring"; break;
+		case "jja": s_val = "summer"; break;
+		case "son": s_val = "fall"; break;
+		case "djf": s_val = "winter"; break;
+		}
+		console.log("url season " + s_val);
+		$("#wind-seasonal").val(s_val);
+		$("#solar-seasonal").val(s_val);
+		$("#hydro-seasonal").val(s_val);
 	}
 	for (var i = 0; i < markers.length; i++) {
 		console.log(markers[i]);
