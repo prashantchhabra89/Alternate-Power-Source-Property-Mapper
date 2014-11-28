@@ -252,7 +252,7 @@ var grid_size = {
 		this.hydro = false;
 		this.default_state = true;
 	}
-}
+};
 
 function calc_init_extra_area(new_neLat,new_neLng,new_swLat,new_swLng) {
 	var areas = [];

@@ -243,7 +243,11 @@ function toggleHeatmapData(showWind, showSolar, showHydro) {
 				hydro : showHydro 
 			});
 		} else {
-			cleanInterpolatedCache("ALL");
+			cleanInterpolatedCache({
+				wind : showWind,
+				solar : showSolar,
+				hydro : showHydro 
+			});
 			grid_size.reset_state();
 			updateHeatmap();
 		}

@@ -7,8 +7,8 @@ function launchQueryUpdate(season, types) {
 	var neLng = getNELongitude(g_map);
 	var swLat = getSWLatitude(g_map);
 	var swLng = getSWLongitude(g_map);
-	
-	var queryObj = createQuerySet(types.wind, types.solar, types.hydro, true);
+	cleanInterpolatedCache(types);
+	var queryObj = createQuerySet(types, true, neLat, neLng, swLat, swLng);
 	var dqh_l = data_query_handler.length;
 	if (dqh_l > 0) {
 		console.log("Query Updater: dropping " + dqh_l + (dqh_l > 1 ? " queries." : " query."));
@@ -31,22 +31,12 @@ function launchQueryUpdate(season, types) {
 	}
 }
 
-function passiveQueryUpdate(season, types) {
-	/*
-	 * Run some loop to figure out your bounds.
-	 * 
-	 * pseudo code:
-	 * 
-	 * for each set of bounds (start with the first one you want to load):
-	 *     apply offsets to your lat/lng values to counter the automatic offsets
-	 *     offset_neLat = neLat - lat_offset
-	 *     offset_neLng = neLng - lng_offset
-	 *     offset_swLat = swLat + lat_offset
-	 *     offset_swLng = swLng + lng_offset
-	 *     queryObjSetup(passive_query_handler, false, season, types, offsets ... you get the idea)
-	 *     
-	 * _requestPassiveQuery();
-	 */
+function passiveQueryUpdate(grids, season, types) {
+	for(var i = 0; i < grids.length; i++) {
+		queryObjSetup(passive_query_handler, false, season, types, grids[i].neLat, grids[i].neLng,
+				grids[i].swLat, grids[i].swLng);
+	}
+	_requestPassiveQuery();
 }
 
 function _requestPassiveQuery() {
@@ -83,39 +73,35 @@ function _requestPassiveQuery() {
  * Add to the passed in array (query_handler)
  */
 function queryObjSetup(query_handler, primary_query, season, types, neLat, neLng, swLat, swLng) {
-	var queryObj = createQuerySet(types.wind, types.solar, types.hydro, 
-			primary_query, neLat, neLng, swLat, swLng);
+	var queryObj = createQuerySet(types, primary_query, neLat, neLng, swLat, swLng);
 	query_handler.push(queryObj);
 }
 
-function createQuerySet(wind, solar, hydro, primary_query, neLat, neLng, swLat, swLng) {
+function createQuerySet(types, primary_query, neLat, neLng, swLat, swLng) {
 	queryObj = { 
 		query_id : dq_handler_id++,
 		primary : primary_query
 	};
-	
-	if (wind) {
-		queryObj["wind"] = false;
-		cleanInterpolatedCache("WIND");
-		if(grid_size.default_state || grid_size.type != "WIND") {
+
+	if (types.wind) {
+		queryObj["wind"] = false;	
+		if(grid_size.default_state || !grid_size.wind) {
 			grid_size.reset_state();
-			grid_size.init(neLat, neLng, swLat, swLng, "WIND");
+			grid_size.init(neLat, neLng, swLat, swLng, types);
 		}
 	}
-	if (solar) {
+	if (types.solar) {
 		queryObj["solar"] = false;
-		cleanInterpolatedCache("SOLAR");
-		if(grid_size.default_state || grid_size.type != "SOLAR") {
+		if(grid_size.default_state || !grid_size.solar) {
 			grid_size.reset_state();
-			grid_size.init(neLat, neLng, swLat, swLng, "SOLAR");
+			grid_size.init(neLat, neLng, swLat, swLng, types);
 		}
 	}
-	if (hydro) {
+	if (types.hydro) {
 		queryObj["hydro"] = false;
-		cleanInterpolatedCache("HYDRO");
-		if(grid_size.default_state || grid_size.type != "HYDRO") {
+		if(grid_size.default_state || !grid_size.hydro) {
 			grid_size.reset_state();
-			grid_size.init(neLat, neLng, swLat, swLng, "HYDRO");
+			grid_size.init(neLat, neLng, swLat, swLng, types);
 		}
 	}
 	if (neLat !== undefined) {
@@ -223,6 +209,9 @@ function _getHeatmapData(type, season, neLat, neLng, swLat, swLng, callback) {
 		console.timeEnd("_checkCacheData");
 	} else {
 		console.timeEnd("_checkCacheData");
+		if(interpolated_area.default_state) {
+			passiveQueryUpdate(calc_init_extra_area(neLat_w_off, neLng_w_off, swLat_w_off, swLng_w_off),season,type);
+		}
 		queryAndCallback(season, neLat, neLng, swLat, swLng, 
 				lat_offset, lng_offset, type, function(data) {
 					callback(data);

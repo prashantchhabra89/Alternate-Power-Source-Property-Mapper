@@ -96,22 +96,25 @@ function checkInterpolatedCache(neLat, neLng, swLat, swLng, type, season) {
 }
 	
 function cleanInterpolatedCache(types) {
-	if (types.wind == grid_size.wind && !types.solar && !types.hydro) {
+	if (types.wind && !types.solar && !types.hydro) {
 		solar_data = [];
 		hydro_data = [];
-		streams_data = [];
-	} else if (!types.wind && types.solar == grid_size.solar && !types.hydro) {
+	} else if (!types.wind && types.solar && !types.hydro) {
 		wind_data = [];
 		hydro_data = [];
-		streams_data = [];
-	} else if (!types.wind && types.solar == grid_size.solar && !types.hydro) {
+	} else if (!types.wind && !types.solar && types.hydro) {
 		wind_data = [];
 		solar_data = [];
-	} else {
+	} else if (types.wind && types.solar && !types.hydro) {
+		hydro_data = [];
+	} else if (!types.wind && types.solar && types.hydro) {
+		wind_data = [];
+	} else if (types.wind && !types.solar && types.hydro) {
+		solar_data = [];
+	} else if (!types.wind && !types.solar && !types.hydro) {
 		wind_data = [];
 		solar_data = [];
 		hydro_data = [];
-		streams_data = [];
 	}
 }
 
