@@ -170,7 +170,7 @@ function mapLoader() {
 	g_linemap = initHeatmap(g_map);
 	
 	initializeMarkers(g_map);
-	showHelpMarker();
+	//showHelpMarker();
 	searchBoxIntro = initializeSearchBox(g_map, false, 'pac-input-intro');
 	searchBox = initializeSearchBox(g_map, true, 'pac-input');
 
@@ -220,14 +220,14 @@ function mapLoader() {
 function _eventHeatmapDataToggler() {
 	toggleHeatmapData($("#showCheckboxWind").is(':checked'), $(
 	"#showCheckboxSolar").is(':checked'), $("#showCheckboxHydro").is(
-	':checked'));
+	':checked'), getSeason($("#wind-seasonal").val()));
 }
 
 /*
  * Map data toggle function. Takes boolean values for turning different energy
  * types on and off.
  */
-function toggleHeatmapData(showWind, showSolar, showHydro) {
+function toggleHeatmapData(showWind, showSolar, showHydro, season) {
 	if (ALLOW_QUERY) {
 		console.log("===============");
 		console.log("Data Toggled:");
@@ -237,7 +237,7 @@ function toggleHeatmapData(showWind, showSolar, showHydro) {
 		console.log("===============");
 		
 		if (showWind || showSolar || showHydro) {
-			launchQueryUpdate('anu', {
+			launchQueryUpdate(season, {
 				wind : showWind,
 				solar : showSolar,
 				hydro : showHydro 

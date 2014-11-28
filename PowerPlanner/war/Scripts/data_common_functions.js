@@ -553,3 +553,15 @@ function parseSeason(season) {
 	}
 	return season_index;
 }
+
+function getSeason(val) {
+	var season = 'anu';
+	switch(val) {
+	case "spring": season = "mam"; break;
+	case "summer": season = "jja"; break;
+	case "fall": season = "son"; break;
+	case "winter": season = "djf"; break;
+	}
+	console.log("season: " + season);
+	return season;
+}
