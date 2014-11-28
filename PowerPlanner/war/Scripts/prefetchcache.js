@@ -231,19 +231,25 @@ var grid_size = {
 	lat: 0,
 	lng: 0,
 	default_state: true,
-	type: "NONE",
-	init: function(neLat,neLng,swLat,swLng,new_type) {
+	wind: false,
+	solar: false,
+	hydro: false,
+	init: function(neLat,neLng,swLat,swLng,type) {
 		if(this.default_state) {
 			this.lat = neLat-swLat;
 			this.lng = neLng-swLng;
-			this.type = new_type;
+			this.wind = type.wind;
+			this.solar = type.solar;
+			this.hydro = type.hydro;
 			this.default_state = false;
 		}
 	},
 	reset_state: function() {
 		this.lat = 0;
 		this.lng = 0;
-		this.type = "NONE";
+		this.wind = false;
+		this.solar = false;
+		this.hydro = false;
 		this.default_state = true;
 	}
 }

@@ -95,16 +95,16 @@ function checkInterpolatedCache(neLat, neLng, swLat, swLng, type, season) {
 	return false;
 }
 	
-function cleanInterpolatedCache(type) {
-	if (type == "WIND") {
+function cleanInterpolatedCache(types) {
+	if (types.wind == grid_size.wind && !types.solar && !types.hydro) {
 		solar_data = [];
 		hydro_data = [];
 		streams_data = [];
-	} else if (type == "SOLAR") {
+	} else if (!types.wind && types.solar == grid_size.solar && !types.hydro) {
 		wind_data = [];
 		hydro_data = [];
 		streams_data = [];
-	} else if (type == "HYDRO") {
+	} else if (!types.wind && types.solar == grid_size.solar && !types.hydro) {
 		wind_data = [];
 		solar_data = [];
 	} else {
