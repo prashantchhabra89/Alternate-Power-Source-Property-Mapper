@@ -6,15 +6,26 @@ var interpolated_area = {
 	neLng: -180,
 	swLat: 90,
 	swLng: 180,
-	type: "WIND",
+	wind: false,
+	solar: false,
+	hydro: false,
 	season: "anu",
 	default_state: true,
+	isType: function(type) {
+		switch(type) {
+		case "WIND": return wind; break;
+		case "SOLAR": return solar; break;
+		case "HYDRO": return hydro; break;
+		}
+	},
 	reset_values: function() {
 		this.neLat = -90;
 		this.neLng = -180;
 		this.swLat = 90;
 		this.swLng = 180;
-		this.type = "WIND";
+		this.wind = false;
+		this.solar = false;
+		this.hydro = false;
 		this.season = "anu";
 		this.default_state = true;
 	},
@@ -22,14 +33,22 @@ var interpolated_area = {
 		if(this.neLat <= new_neLat && this.neLng <= new_neLng) {
 			this.neLat = new_neLat;
 			this.neLng = new_neLng;
-			this.type = new_type;
 			this.default_state = false;
+			switch(new_type) {
+			case "WIND": this.wind = true; break;
+			case "SOLAR": this.wind = true; break;
+			case "HYDRO": this.wind = true; break;
+			}
 		}
 		if(this.swLat >= new_swLat && this.swLng >= new_swLng) {
 			this.swLat = new_swLat;
 			this.swLng = new_swLng;
-			this.type = new_type;
 			this.default_state = false;
+			switch(new_type) {
+			case "WIND": this.wind = true; break;
+			case "SOLAR": this.wind = true; break;
+			case "HYDRO": this.wind = true; break;
+			}
 		}
 	},
 	extraArea: function(new_neLat,new_neLng,new_swLat,new_swLng) {

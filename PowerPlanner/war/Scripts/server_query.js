@@ -173,31 +173,13 @@ function _getHeatmapData(type, season, neLat, neLng, swLat, swLng, callback) {
 	
 	if(in_cache) {
 		console.log("IN CACHE");
-
-		if(!interpolated_area.default_state) {
+		if(!interpolated_area.default_state && passive_query_handler.length == 0) {
 			var has_interpolated_all = false;
 			has_interpolated_all = checkInterpolatedCache(neLat, neLng, swLat, swLng, type, season);
 			if(!has_interpolated_all) {
-				if(interpolated_area.season == season && interpolated_area.type == type) {
-					var new_area = interpolated_area.extraArea(neLat_w_off, neLng_w_off, swLat_w_off, swLng_w_off);
-					for(var i = 0; i < new_area.length; i++) {
-						in_cache = checkCache(new_area.neLat, new_area.neLng, new_area.swLat, new_area.swLng, type, season);
-						if(in_cache) {
-							var new_data = fetchFromCache(new_area.neLat, new_area.neLng, new_area.swLat, new_area.swLng, type, season);
-							updateData(new_data, new_area.neLat, new_area.neLng, new_area.swLat, new_area.swLng, type);
-							updateHeatmap();
-						} else {
-							queryAndUpdate_extra(season, new_area.neLat, new_area.neLng, new_area.swLat, new_area.swLng, type);
-						}
-					}
-				} else {
-					cleanInterpolatedCache("ALL");
-					interpolated_area.reset_values();
-					interpolated_area.season = season;
-					var new_data = fetchFromCache(neLat_w_off, neLng_w_off, swLat_w_off, swLng_w_off, type);
-					updateData(new_data, neLat, neLng, swLat, swLng, type);
-					updateHeatmap();
-					//do more
+				if(interpolated_area.season == season && interpolated_area.isType(type)) {
+					passiveQueryUpdate(interpolated_area.extraArea(neLat_w_off, neLng_w_off, swLat_w_off, swLng_w_off),
+							season,type);
 				}
 			}
 		} else {
