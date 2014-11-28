@@ -186,6 +186,11 @@ function mapLoader() {
 					(zoom <= CHANGETO_AVE_VIEW ? AVE_VIEW : SMALL_VIEW));
 		console.log("View state: " + view_state);
 		_eventHeatmapDataToggler();
+		grid_size.reset_state();
+		interpolated_area.reset_values();
+		wind_data = [];
+		solar_data = [];
+		hydro_data = [];
 	});
 	// Bias the SearchBox results towards places that are within the bounds of
 	// the current map's viewport.

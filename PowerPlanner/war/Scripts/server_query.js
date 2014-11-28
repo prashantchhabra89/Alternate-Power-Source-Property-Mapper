@@ -39,7 +39,6 @@ function passiveQueryUpdate(grids, season, types) {
 		queryObjSetup(passive_query_handler, false, season, types, grids[i].neLat, grids[i].neLng,
 				grids[i].swLat, grids[i].swLng);
 	}
-	_requestPassiveQuery();
 }
 
 function _requestPassiveQuery() {
@@ -49,7 +48,7 @@ function _requestPassiveQuery() {
 	if (passive_query_handler.length > 0) {
 		console.log("PASSIVE LENGTH: " + passive_query_handler.length);
 		var queryObj = passive_query_handler[0]; //gets first element
-		console.log(queryObj);
+		//console.log(queryObj);
 		if (queryObj.wind !== undefined) {
 			console.log("PASSIVELY WIND");
 			_requestHeatmapData("WIND", queryObj.season, 
@@ -134,12 +133,10 @@ function createQuerySet(types, primary_query, season, neLat, neLng, swLat, swLng
 	if (swLng !== undefined) {
 		queryObj['swLng'] = swLng;
 	}
-
 	return queryObj;
 }
 
 function _requestHeatmapData(type, season, neLat, neLng, swLat, swLng, queryObj, callback) {
-	console.log(callback);
 	_.throttle(
 			_getHeatmapData(type, season, neLat, neLng, swLat, swLng, function(data) {
 				console.log(callback);
@@ -184,11 +181,6 @@ function _getHeatmapData(type, season, neLat, neLng, swLat, swLng, callback) {
 	var swLat_floor = Math.floor(swLat_w_off);
 	var swLng_floor = Math.floor(swLng_w_off);
 
-	console.log("neLat: " + neLat_w_off);
-	console.log("neLng: " + neLng_w_off);
-	console.log("swLat: " + swLat_w_off);
-	console.log("swLng: " + swLng_w_off);
-
 	// Check whether cache has the requested data
 	var in_cache = checkCache(neLat_w_off, neLng_w_off, swLat_w_off, swLng_w_off, type, season);
 	
@@ -197,11 +189,13 @@ function _getHeatmapData(type, season, neLat, neLng, swLat, swLng, callback) {
 
 		if(!interpolated_area.default_state && passive_query_handler.length == 0) {
 			var has_interpolated_all = false;
-			has_interpolated_all = checkInterpolatedCache(neLat_w_off, neLng_w_off, swLat_w_off, swLng_w_off, type, season);
+			has_interpolated_all = checkInterpolatedCache(neLat+grid_size.lat, neLng+grid_size.lng,
+					swLat-grid_size.lat, swLng-grid_size.lng, type, season);
 			if(!has_interpolated_all) {
 				if(interpolated_area.season == season && interpolated_area.isType(type)) {
-					passiveQueryUpdate(interpolated_area.extraArea(neLat_w_off, neLng_w_off, swLat_w_off, swLng_w_off),
-							season,{ wind : (type=="WIND"),	solar : (type=="SOLAR"), hydro : (type=="HYDRO")});
+					//passiveQueryUpdate(interpolated_area.extraArea(neLat+grid_size.lat, neLng+grid_size.lng,
+					//		swLat-grid_size.lat, swLng-grid_size.lng), season,
+					//		{ wind : (type=="WIND"),	solar : (type=="SOLAR"), hydro : (type=="HYDRO")});
 				}
 			} else {
 				updateHeatmap();
@@ -209,21 +203,23 @@ function _getHeatmapData(type, season, neLat, neLng, swLat, swLng, callback) {
 		} else {
 			interpolated_area.season = season;
 			var new_data = fetchFromCache(neLat_w_off, neLng_w_off, swLat_w_off, swLng_w_off, type, season);
-			updateData(new_data, neLat, neLng, swLat, swLng, type);
 			callback(new_data);
+			if(interpolated_area.default_state) {
+				passiveQueryUpdate(calc_init_extra_area(neLat, neLng, swLat, swLng),season,
+						{ wind : (type=="WIND"),	solar : (type=="SOLAR"), hydro : (type=="HYDRO")});
+			}
 		}
 		console.timeEnd("_checkCacheData");
 	} else {
 		console.timeEnd("_checkCacheData");
-		if(interpolated_area.default_state) {
-			passiveQueryUpdate(calc_init_extra_area(neLat_w_off, neLng_w_off, swLat_w_off, swLng_w_off),season,
-					{ wind : (type=="WIND"),	solar : (type=="SOLAR"), hydro : (type=="HYDRO")});
-		}
-
 		queryAndCallback(season, neLat, neLng, swLat, swLng, 
 				lat_offset, lng_offset, type, function(data) {
 					callback(data);
 		});
+		if(interpolated_area.default_state) {
+			passiveQueryUpdate(calc_init_extra_area(neLat, neLng, swLat, swLng),season,
+					{ wind : (type=="WIND"),	solar : (type=="SOLAR"), hydro : (type=="HYDRO")});
+		}
 	}
 }
 
@@ -314,8 +310,12 @@ function _tryUpdateHeatmap(queryObj) {
 					}
 				}
 			} else {
-				passive_query_handler.splice(i, 1);
+				passive_query_handler.splice(0, 1);
 			}
+		}
+		if (queryObj.primary == true) {
+			_requestPassiveQuery();
+			updateHeatmap();
 		}
 	}
 	return did_update;
