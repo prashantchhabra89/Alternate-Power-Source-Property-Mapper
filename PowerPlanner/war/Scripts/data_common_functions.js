@@ -440,25 +440,27 @@ function populatePointData(pointDataObj, uniq_id) {
 	var neLng = pointDataObj.lng + offset;
 	var swLat = pointDataObj.lat - offset;
 	var swLng = pointDataObj.lng - offset;
+	
+	var season = getSeason($("#wind-seasonal").val());
 
 	if (wind_data.length) {
 		pointDataObj.wind_raw = _getDataWeightWind(wind_data, pointDataObj.lat, pointDataObj.lng)
 			* WIND_SCALER * HOUR_TO_YEAR;
 		$("#" + uniq_id + " .windstring").html(pointDataObj.wind_raw.toFixed(2).toString());
 		_tryPopulateTotalEnergy(pointDataObj, uniq_id);
-	} else if (checkCache(neLat, neLng, swLat, swLng, "WIND")) {
+	} else if (checkCache(neLat, neLng, swLat, swLng, "WIND", season)) {
 		var hm_data = [];
 		var raw_data = fetchFromCache(pointDataObj.lat, pointDataObj.lng, 
-				pointDataObj.lat, pointDataObj.lng, "WIND");
-		processData(raw_data, hm_data, neLat, neLng, swLat, swLng, "WIND");
+				pointDataObj.lat, pointDataObj.lng, "WIND", season);
+		processData(raw_data, hm_data, neLat, neLng, swLat, swLng, "WIND", season);
 		pointDataObj.wind_raw = _getDataWeightWind(hm_data, pointDataObj.lat, pointDataObj.lng)
 			* WIND_SCALER * HOUR_TO_YEAR;
 		$("#" + uniq_id + " .windstring").html(pointDataObj.wind_raw.toFixed(2).toString());
 		_tryPopulateTotalEnergy(pointDataObj, uniq_id);
 	} else {
-		queryAndCallback('anu', neLat, neLng, swLat, swLng, 0, 0, "WIND", function(data) {
+		queryAndCallback(season, neLat, neLng, swLat, swLng, 0, 0, "WIND", function(data) {
 			var hm_data = [];
-			processData(data, hm_data, neLat, neLng, swLat, swLng, "WIND");
+			processData(data, hm_data, neLat, neLng, swLat, swLng, "WIND", season);
 			pointDataObj.wind_raw = _getDataWeightWind(hm_data, pointDataObj.lat, pointDataObj.lng)
 				* WIND_SCALER * HOUR_TO_YEAR;
 			$("#" + uniq_id + " .windstring").html(pointDataObj.wind_raw.toFixed(2).toString());
@@ -472,20 +474,20 @@ function populatePointData(pointDataObj, uniq_id) {
 			SOLAR_SCALER, SOLAR_BOTTOM, "SOLAR") * HOUR_TO_YEAR;
 		$("#" + uniq_id + " .solarstring").html(pointDataObj.solar_raw.toFixed(2).toString());
 		_tryPopulateTotalEnergy(pointDataObj, uniq_id);
-	} else if (checkCache(neLat, neLng, swLat, swLng, "SOLAR")) {
+	} else if (checkCache(neLat, neLng, swLat, swLng, "SOLAR", season)) {
 		var hm_data = [];
 		var raw_data = fetchFromCache(pointDataObj.lat, pointDataObj.lng,
-				pointDataObj.lat, pointDataObj.lng, "SOLAR");
-		processData(raw_data, hm_data, neLat, neLng, swLat, swLng, "SOLAR");
+				pointDataObj.lat, pointDataObj.lng, "SOLAR", season);
+		processData(raw_data, hm_data, neLat, neLng, swLat, swLng, "SOLAR", season);
 		pointDataObj.solar_raw = 
 			extract_raw_weight(_getDataWeightSolar(hm_data, pointDataObj.lat, pointDataObj.lng), 
 			SOLAR_SCALER, SOLAR_BOTTOM, "SOLAR") * HOUR_TO_YEAR;
 		$("#" + uniq_id + " .solarstring").html(pointDataObj.solar_raw.toFixed(2).toString());
 		_tryPopulateTotalEnergy(pointDataObj, uniq_id);
 	} else {
-		queryAndCallback('anu', neLat, neLng, swLat, swLng, 0, 0, "SOLAR", function(data) {
+		queryAndCallback(season, neLat, neLng, swLat, swLng, 0, 0, "SOLAR", function(data) {
 			var hm_data = [];
-			processData(data, hm_data, neLat, neLng, swLat, swLng, "SOLAR");
+			processData(data, hm_data, neLat, neLng, swLat, swLng, "SOLAR", season);
 			pointDataObj.solar_raw = 
 				extract_raw_weight(_getDataWeightSolar(hm_data, pointDataObj.lat, pointDataObj.lng), 
 				SOLAR_SCALER, SOLAR_BOTTOM, "SOLAR") * HOUR_TO_YEAR;
@@ -498,19 +500,19 @@ function populatePointData(pointDataObj, uniq_id) {
 			* HYDRO_SCALER * HOUR_TO_YEAR;
 		$("#" + uniq_id + " .hydrostring").html(pointDataObj.hydro_raw.toFixed(2).toString());
 		_tryPopulateTotalEnergy(pointDataObj, uniq_id);
-	} else if (checkCache(neLat, neLng, swLat, swLng, "HYDRO")) {
+	} else if (checkCache(neLat, neLng, swLat, swLng, "HYDRO", season)) {
 		var hm_data = [];
 		var raw_data = fetchFromCache(pointDataObj.lat, pointDataObj.lng,
-				pointDataObj.lat, pointDataObj.lng, "HYDRO");
-		processData(raw_data, hm_data, neLat, neLng, swLat, swLng, "HYDRO");
+				pointDataObj.lat, pointDataObj.lng, "HYDRO", season);
+		processData(raw_data, hm_data, neLat, neLng, swLat, swLng, "HYDRO", season);
 		pointDataObj.hydro_raw = _getDataWeightHydro(hm_data, pointDataObj.lat, pointDataObj.lng)
 			* HYDRO_SCALER * HOUR_TO_YEAR;
 		$("#" + uniq_id + " .hydrostring").html(pointDataObj.hydro_raw.toFixed(2).toString());
 		_tryPopulateTotalEnergy(pointDataObj, uniq_id);
 	}  else {
-		queryAndCallback('anu', neLat, neLng, swLat, swLng, 0, 0, "HYDRO", function(data) {
+		queryAndCallback(season, neLat, neLng, swLat, swLng, 0, 0, "HYDRO", function(data) {
 			var hm_data = [];
-			processData(data, hm_data, neLat, neLng, swLat, swLng, "HYDRO");
+			processData(data, hm_data, neLat, neLng, swLat, swLng, "HYDRO", season);
 			pointDataObj.hydro_raw = _getDataWeightHydro(hm_data, pointDataObj.lat, pointDataObj.lng)
 				* HYDRO_SCALER * HOUR_TO_YEAR;
 			$("#" + uniq_id + " .hydrostring").html(pointDataObj.hydro_raw.toFixed(2).toString());
