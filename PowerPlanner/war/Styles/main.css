@@ -264,7 +264,7 @@ div.ui-input-text{
 	border-radius: 12px;
 	font-family: 'Raleway', sans-serif !important;
 	font-weight: lighter !important;
-	margin-bottom: 25%;
+	margin-bottom: -1%;
 }
 .tour-button {
 	width: 130px;
@@ -616,6 +616,13 @@ p.howToUse {
 .hide {
 	display: none !important;
 }
+.down-arrow {
+	background: url(../images/down-arrow.png) no-repeat bottom scroll;
+	width: 64px;
+	height: 64px;
+	margin-bottom: 6%;
+	margin-top: 8%;
+}
 
 /* Fix for info window showing scroll bar in Firefox */
 .scrollFix {
@@ -639,7 +646,7 @@ p.howToUse {
 	}
 	#pac-input {
 		margin-top: 16px;
-		width: 210px;
+		width: 238px;
 	}
 	#pac-input:focus {
 		width: 210px !important;
@@ -716,19 +723,25 @@ p.howToUse {
 	  width:100%;
 	}
 	.start-button {
-		margin-bottom: 40% !important;
+		margin-bottom: -3% !important;
 	}
 	.show-description {
 		height: 250px !important;
 		display: inline;
 	}
-
 	.inputLabel {
 		width: 87px !important;
 	}
 	.ui-block-b {
 		width: 62% !important;
 	}	
+	.down-arrow {
+		background: url(../images/down-arrow-mini.png) no-repeat bottom scroll;
+		width: 48px;
+		height: 48px;
+		margin-bottom: 30%;
+		margin-top: 0%;
+	}
 }
 @media all and (min-width: 416px) {
 	h1.intro-title {
@@ -801,6 +814,15 @@ p.howToUse {
 	}
 }
 
+@media only screen and (min-width: 930px) {
+	.down-arrow {
+		background: url(../images/down-arrow.png) no-repeat bottom scroll;
+		width: 64px;
+		height: 64px;
+		margin-bottom: 15%;
+		margin-top: 8%;
+	}
+}
 /* 769px - 1024px */
 @media only screen and (min-width: 1024px) {
 	h1.intro-title {
@@ -808,6 +830,13 @@ p.howToUse {
 	}
 	.resources-panel {
 	  width:85%;
+	}
+	.down-arrow {
+		background: url(../images/down-arrow.png) no-repeat bottom scroll;
+		width: 64px;
+		height: 64px;
+		margin-bottom: 15%;
+		margin-top: 8%;
 	}
 }
 
