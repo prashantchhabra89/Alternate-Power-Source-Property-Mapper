@@ -339,6 +339,14 @@ function decodeURL() {
 		console.log(zoom[0]);
 		g_map.setZoom(Number(zoom[0]));
 	}
+	if (markers) {
+		for (var i = 0; i < markers.length; i++) {
+			console.log(markers[i]);
+			addMarker(g_map, new google.maps.LatLng(markers[i].split(',')[0], markers[i].split(',')[1]));
+		}
+	}
+	markerBalloon.setContent("");
+	markerBalloon.open(null);
 	if (season && season.length > 0) {
 		var s_val = 'Seasonal';
 		switch (season[0]) {
@@ -347,18 +355,10 @@ function decodeURL() {
 		case "son": s_val = "fall"; break;
 		case "djf": s_val = "winter"; break;
 		}
-		console.log("url season " + s_val);
 		$("#wind-seasonal").val(s_val);
 		$("#solar-seasonal").val(s_val);
 		$("#hydro-seasonal").val(s_val);
 	}
-	for (var i = 0; i < markers.length; i++) {
-		console.log(markers[i]);
-		addMarker(g_map, new google.maps.LatLng(markers[i].split(',')[0], markers[i].split(',')[1]));
-		markerBalloon.setContent("");
-		markerBalloon.open(null);
-	}
-	
 	if (center) {
 		if (center.length > 0) {
 			g_map.setCenter(new google.maps.LatLng(center[0].split(',')[0], center[0].split(',')[1]));
