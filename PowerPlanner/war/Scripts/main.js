@@ -389,8 +389,10 @@ function checkQuestionPanelOpen (){
 	}
 }
 function checkLegend() {
-	if($(".arrow").attr('style').indexOf('top') !== -1) {
-		$(".arrow").addClass('hide');
+	if ($(".arrow").attr('style') !== undefined) { 
+		if($(".arrow").attr('style').indexOf('top') !== -1) {
+			$(".arrow").addClass('hide');
+		}
 	}
 }
 function resetIntro() {
