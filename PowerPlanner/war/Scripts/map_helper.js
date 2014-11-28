@@ -343,21 +343,27 @@ function pixelsCalculatorForStaticmaps()
 	console.log('arrayx '+xarray+' arrayy '+yarray);
 	var xpointcounter=0;
 	var ypointcounter=0;
+	var urlarray = new Array();
+	 for (var i = 0; i < xarray.length; i++) {
+	   urlarray[i] = new Array(yarray.length);
+	 }
 	while(xpointcounter<xarray.length)
 		{
 		ypointcounter=0;
 		while(ypointcounter<yarray.length)
 			{
-			pixelToLatLngConverter(xarray[xpointcounter],yarray[ypointcounter]);
+			urlarray[xpointcounter][ypointcounter]=pixelToLatLngConverter(xarray[xpointcounter],yarray[ypointcounter]);
 			ypointcounter++;
 			}
 		xpointcounter++;
 		}
-	console.log('zoom '+g_map.getZoom())   
+	console.log('zoom '+g_map.getZoom());
+	console.log(urlarray);
 	}
 
 
 /*latlong calculator of new blocks to be fetched from google static maps api 
+ * it actually returns an array of url for google static maps api
  */
 function pixelToLatLngConverter(pixelx,pixely)
 {
@@ -391,7 +397,12 @@ function pixelToLatLngConverter(pixelx,pixely)
 	  var newLatInPx = (swBoundInPx.y - neBoundInPx.y) * procY + neBoundInPx.y;
 	var finalResult = new google.maps.Point(newLngInPx, newLatInPx);
 	var latlng = g_map.getProjection().fromPointToLatLng(finalResult);
-	console.log(latlng)
+	console.log(latlng);
+	var lat = latlng.lat();
+	var lon = latlng.lng();
+	var mapurl = 'https://maps.googleapis.com/maps/api/staticmap?center='+lat+','+lon+'&zoom='+g_map.getZoom()+'&size=640x480';
+	console.log(mapurl);
+	return mapurl;
 		}
 }
 
