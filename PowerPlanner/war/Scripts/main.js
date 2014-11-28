@@ -33,6 +33,7 @@ $(document).ready(function() {
 			$("#solar-seasonal").val($("#wind-seasonal").val());
 			$("#hydro-seasonal").val($("#wind-seasonal").val());
 		}
+		_eventHeatmapDataToggler();
 	});
 	//If Annual is clicked, unhighlight Seasonal and reset Seasonal value.
 	$("#windAnnualLabel").click(function() {
@@ -40,9 +41,8 @@ $(document).ready(function() {
 		$("#wind-seasonal").val(null);
 		$("#wind-seasonal").selectmenu("refresh");
 		$("#solar-seasonal").val(null);
-		$("#solar-seasonal-button").prop("checked", true);
 		$("#hydro-seasonal").val(null);
-		$("#hydro-seasonal-button").prop("checked", true);
+		_eventHeatmapDataToggler();
 	});
 	$("#solar-seasonal").change(function() {
 		viewAnnualSeasonal('#solarAnnual', '#solarAnnualLabel', 
@@ -51,6 +51,7 @@ $(document).ready(function() {
 			$("#wind-seasonal").val($("#solar-seasonal").val());
 			$("#hydro-seasonal").val($("#solar-seasonal").val());
 		}
+		_eventHeatmapDataToggler();
 	});
 	$("#solarAnnualLabel").click(function() {
 		$("#solar-seasonal-button").removeClass('ui-btn-active');
@@ -58,6 +59,7 @@ $(document).ready(function() {
 		$("#solar-seasonal").selectmenu("refresh");
 		$("#wind-seasonal").val(null);
 		$("#hydro-seasonal").val(null);
+		_eventHeatmapDataToggler();
 	});
 	$("#hydro-seasonal").change(function() {
 		viewAnnualSeasonal('#hydroAnnual', '#hydroAnnualLabel', 
@@ -66,6 +68,7 @@ $(document).ready(function() {
 			$("#wind-seasonal").val($("#hydro-seasonal").val());
 			$("#solar-seasonal").val($("#hydro-seasonal").val());
 		}
+		_eventHeatmapDataToggler();
 	});
 	$("#hydroAnnualLabel").click(function() {
 		$("#hydro-seasonal-button").removeClass('ui-btn-active');
@@ -73,6 +76,7 @@ $(document).ready(function() {
 		$("#hydro-seasonal").selectmenu("refresh");
 		$("#wind-seasonal").val(null);
 		$("#solar-seasonal").val(null);
+		_eventHeatmapDataToggler();
 	});
 	
 	$("#showCheckboxWind").click(function() {
@@ -89,11 +93,7 @@ $(document).ready(function() {
 		
 		$('#wind-panel-app').css("border-color", bg_col);
 		$('#wind-panel-app').css("border-width", border_width);
-		toggleHeatmapData(
-				$(this).is(':checked'),
-				$("#showCheckboxSolar").is(':checked'),
-				$("#showCheckboxHydro").is(':checked')
-		);
+		_eventHeatmapDataToggler();
 	});
 	
 	$("#showCheckboxOnlyWind").click(function() {
@@ -111,11 +111,7 @@ $(document).ready(function() {
 			$('#wind-panel-app').css("border-width", border_width);
 			$("#showCheckboxWind").prop("checked", true);
 			$('#showCheckboxWind').checkboxradio("refresh");
-			toggleHeatmapData(
-					$("#showCheckboxWind").is(':checked'),
-					$("#showCheckboxSolar").is(':checked'),
-					$("#showCheckboxHydro").is(':checked')
-			);
+			_eventHeatmapDataToggler();
 		}
 	});
 
@@ -133,11 +129,7 @@ $(document).ready(function() {
 		
 		$('#solar-panel-app').css("border-color", bg_col);
 		$('#solar-panel-app').css("border-width", border_width);
-		toggleHeatmapData(
-				$("#showCheckboxWind").is(':checked'),
-				$(this).is(':checked'),
-				$("#showCheckboxHydro").is(':checked')
-		);
+		_eventHeatmapDataToggler();
 	});
 	
 	$("#showCheckboxOnlySolar").click(function() {
@@ -155,11 +147,7 @@ $(document).ready(function() {
 			$('#solar-panel-app').css("border-width", border_width);
 			$("#showCheckboxSolar").prop("checked", true);
 			$('#showCheckboxSolar').checkboxradio("refresh");
-			toggleHeatmapData(
-					$("#showCheckboxWind").is(':checked'),
-					$("#showCheckboxSolar").is(':checked'),
-					$("#showCheckboxHydro").is(':checked')
-			);
+			_eventHeatmapDataToggler();
 		}
 	});
 
@@ -178,11 +166,7 @@ $(document).ready(function() {
 			$('#showCheckboxOnlyHydro').checkboxradio("refresh");
 		}
 		
-		toggleHeatmapData(
-				$("#showCheckboxWind").is(':checked'),
-				$("#showCheckboxSolar").is(':checked'),
-				$(this).is(':checked')
-		);
+		_eventHeatmapDataToggler();
 	});
 	
 	$("#showCheckboxOnlyHydro").click(function() {
@@ -200,11 +184,7 @@ $(document).ready(function() {
 			$('#hydro-panel-app').css("border-width", border_width);
 			$("#showCheckboxHydro").prop("checked", true);
 			$('#showCheckboxHydro').checkboxradio("refresh");
-			toggleHeatmapData(
-					$("#showCheckboxWind").is(':checked'),
-					$("#showCheckboxSolar").is(':checked'),
-					$("#showCheckboxHydro").is(':checked')
-			);
+			_eventHeatmapDataToggler();
 		}
 	});
 
@@ -387,14 +367,8 @@ function startButtonClick() {
 		var center = g_map.getCenter();
 		google.maps.event.trigger(g_map, 'resize');
 		g_map.setCenter(center);
-		markerBalloon.open(g_map);
-		markerBalloon.setPosition(g_map.getCenter());
 		
-		toggleHeatmapData(
-				$("#showCheckboxWind").is(':checked'),
-				$("#showCheckboxSolar").is(':checked'),
-				$("#showCheckboxHydro").is(':checked')
-		);
+		_eventHeatmapDataToggler();
 	});
 }
 // This runs when the page loads or restarts; checks if any power is toggled

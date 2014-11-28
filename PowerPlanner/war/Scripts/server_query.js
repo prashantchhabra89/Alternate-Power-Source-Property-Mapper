@@ -168,11 +168,11 @@ function _getHeatmapData(type, season, neLat, neLng, swLat, swLng, callback) {
 	console.log("swLng: " + swLng_w_off);
 
 	// Check whether cache has the requested data
-	var in_cache = checkCache(neLat_w_off, neLng_w_off, swLat_w_off, swLng_w_off, type);
+	var in_cache = checkCache(neLat_w_off, neLng_w_off, swLat_w_off, swLng_w_off, type, season);
 	
 	if(in_cache) {
 		console.log("IN CACHE");
-		var new_data = fetchFromCache(neLat_w_off, neLng_w_off, swLat_w_off, swLng_w_off, type);
+		var new_data = fetchFromCache(neLat_w_off, neLng_w_off, swLat_w_off, swLng_w_off, type, season);
 		updateData(new_data, neLat, neLng, swLat, swLng, type);
 		callback(new_data);
 		console.timeEnd("_checkCacheData");
@@ -263,6 +263,14 @@ function _tryUpdateHeatmap(queryObj) {
 		console.log("Query object success! Updating heatmap.");
 		updateHeatmap();
 		did_update = true;
+		if (_queryIsActive(queryObj)) {
+			for (var i = 0; i < data_query_handler.length; i++) {
+				if (data_query_handler[i].query_id === queryObj.query_id) {
+					data_query_handler.splice(i, 1);
+					break;
+				}
+			}
+		}
 	}
 	return did_update;
 }
@@ -323,10 +331,10 @@ function decodeURL() {
 	for (var i = 0; i < markers.length; i++) {
 		console.log(markers[i]);
 		addMarker(g_map, new google.maps.LatLng(markers[i].split(',')[0], markers[i].split(',')[1]));
+		markerBalloon.setContent("");
+		markerBalloon.open(null);
 	}
 	
-	markerBalloon.setContent("");
-	markerBalloon.close();
 	if (center) {
 		if (center.length > 0) {
 			g_map.setCenter(new google.maps.LatLng(center[0].split(',')[0], center[0].split(',')[1]));
