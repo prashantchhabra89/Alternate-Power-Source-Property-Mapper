@@ -35,7 +35,7 @@ function initializeMarkers(map) {
 	testMarker = new google.maps.Marker({
 		position:map.getCenter(),
 		map : map,
-		icon : "http://www.google.com/intl/en_us/mapfiles/ms/micons/red-dot.png"		
+		icon : "../../images/icon_nopower.png"	
 	});
 	// tie our balloon with the temporary marker.
 	markerBalloon.setContent("1");
@@ -54,6 +54,10 @@ function initializeMarkers(map) {
 }
 
 function addMarker(map, loc) {
+	if (markerBalloon === undefined) {
+		console.log("Initializing marker balloon!");
+		markerBalloon = new google.maps.InfoWindow();
+	}
 	marker = new google.maps.Marker({
 		position : loc,
 		map : map,

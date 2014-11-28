@@ -2,10 +2,10 @@
  * Call this to update global data arrays based on raw data. Will process, interpolate,
  * and assign data to matching global array.
  */
-function updateData(raw_data, neLat, neLng, swLat, swLng, type) {
+function updateData(raw_data, neLat, neLng, swLat, swLng, type, season) {
 	var hm_data = [];
 	_setHeatmapSize(type);
-	processData(raw_data, hm_data, neLat, neLng, swLat, swLng, type);
+	processData(raw_data, hm_data, neLat, neLng, swLat, swLng, type, season);
 	
 	console.log("Data Points on Screen: " + hm_data.length);
 	console.log("Scaler: " + scaler);
@@ -38,7 +38,7 @@ function updateData(raw_data, neLat, neLng, swLat, swLng, type) {
  * determining weights. Note that hydro data is a real troublemaker and doesn't do
  * things like any other data type!
  */
-function processData(raw_data, hm_data, neLat, neLng, swLat, swLng, type) {
+function processData(raw_data, hm_data, neLat, neLng, swLat, swLng, type, season) {
 	var lat_offset = getLatOffset(neLat, swLat);
 	var lng_offset = getLngOffset(neLng, swLng);
 	set_scaler(type);
@@ -49,7 +49,7 @@ function processData(raw_data, hm_data, neLat, neLng, swLat, swLng, type) {
 			neLng + lng_offset,
 			swLat - lat_offset,
 			swLng - lng_offset,
-			type);
+			type, season);
 	
 	var weight_points = [];
 	for (var i = 0; i < usable_data.length; i++) {
@@ -100,13 +100,13 @@ function extract_raw_weight(scaled, scaler, offset, type) {
 	return (raw > 0 ? raw : 0);
 }
 
-function _filterData(raw_data, push_data, neLat, neLng, swLat, swLng, type) {
+function _filterData(raw_data, push_data, neLat, neLng, swLat, swLng, type, season) {
 	if (type == "WIND") {
 		_filterWindData(raw_data, push_data, neLat, neLng, swLat, swLng);
 	} else if (type == "SOLAR") {
 		_filterSolarData(raw_data, push_data);
 	} else if (type == "HYDRO") {
-		_filterHydroData(raw_data, push_data, neLat, neLng, swLat, swLng);
+		_filterHydroData(raw_data, push_data, neLat, neLng, swLat, swLng, season);
 	}
 }
 
@@ -162,11 +162,9 @@ function _interpolateData(hm_data, neLat, neLng, swLat, swLng, type) {
 							lat_increment, lng_increment, lat_start, lng_start,
 							latset, lngset, offset, type);
 					lat_start = next_inter.next_lat + latset;
-					offset = next_inter.offset;
 				}
 				lat_start = swLat - lat_offset;
 				lng_start = _getLngBound(lngset, lng_start + lng_increment) + lngset; 
-				offset = latset; // reset offset
 			}
 		}
 	} else if (type == "HYDRO") {
@@ -250,7 +248,7 @@ function _lineInterpolation(fill_data, start_point, end_point, distance, diamete
  */
 function _createInterpolation(hm_data, fill_data, lat_width, lng_width,
 		lat_start, lng_start, latset, lngset, offset, type) {
-	var curr_offset = offset;
+	var curr_offset = (getIsOffset(lngset, lng_start) ? latset : 0.0);
 	var max_lat = -90;
 	var max_lng = -180;
 	
@@ -263,10 +261,7 @@ function _createInterpolation(hm_data, fill_data, lat_width, lng_width,
 		for (var j = safeLngStart; j < safeLngEnd; j += lngset) {
 			var lat_point = i;
 			var lng_point = j + curr_offset;
-			//max_lat = Math.max(max_lat, lat_point);
-			//max_lng = Math.max(max_lng, lng_point);
 			var weighted = getDataWeight(hm_data, lat_point, lng_point, type);
-			//console.log("Point Weight: " + weighted);
 			if (weighted > MIN_DISPLAY_WEIGHT) {
 				addHeatmapCoord(fill_data, lat_point, lng_point, weighted);
 			}
@@ -276,8 +271,7 @@ function _createInterpolation(hm_data, fill_data, lat_width, lng_width,
 
 	return {
 		next_lat : safeLatEnd,
-		next_lng : safeLngEnd,
-		offset : curr_offset
+		next_lng : safeLngEnd
 	};
 }
 
@@ -287,6 +281,16 @@ function _getLatBound(incr, desired) {
 
 function _getLngBound(incr, desired){
 	return getSafeBound(incr, -180, desired);
+}
+
+function getIsOffset(incr, desired) {
+	var ret_val = false;
+	var incr_val = -180;
+	while (incr_val < desired) {
+		incr_val += incr;
+		ret_val = !ret_val;
+	}
+	return ret_val;
 }
 
 function getSafeBound(incr, start, desired) {
@@ -440,25 +444,27 @@ function populatePointData(pointDataObj, uniq_id) {
 	var neLng = pointDataObj.lng + offset;
 	var swLat = pointDataObj.lat - offset;
 	var swLng = pointDataObj.lng - offset;
+	
+	var season = getSeason($("#wind-seasonal").val());
 
 	if (wind_data.length) {
 		pointDataObj.wind_raw = _getDataWeightWind(wind_data, pointDataObj.lat, pointDataObj.lng)
 			* WIND_SCALER * HOUR_TO_YEAR;
 		$("#" + uniq_id + " .windstring").html(pointDataObj.wind_raw.toFixed(2).toString());
 		_tryPopulateTotalEnergy(pointDataObj, uniq_id);
-	} else if (checkCache(neLat, neLng, swLat, swLng, "WIND")) {
+	} else if (checkCache(neLat, neLng, swLat, swLng, "WIND", season)) {
 		var hm_data = [];
 		var raw_data = fetchFromCache(pointDataObj.lat, pointDataObj.lng, 
-				pointDataObj.lat, pointDataObj.lng, "WIND");
-		processData(raw_data, hm_data, neLat, neLng, swLat, swLng, "WIND");
+				pointDataObj.lat, pointDataObj.lng, "WIND", season);
+		processData(raw_data, hm_data, neLat, neLng, swLat, swLng, "WIND", season);
 		pointDataObj.wind_raw = _getDataWeightWind(hm_data, pointDataObj.lat, pointDataObj.lng)
 			* WIND_SCALER * HOUR_TO_YEAR;
 		$("#" + uniq_id + " .windstring").html(pointDataObj.wind_raw.toFixed(2).toString());
 		_tryPopulateTotalEnergy(pointDataObj, uniq_id);
 	} else {
-		queryAndCallback('anu', neLat, neLng, swLat, swLng, 0, 0, "WIND", function(data) {
+		queryAndCallback(season, neLat, neLng, swLat, swLng, 0, 0, "WIND", function(data) {
 			var hm_data = [];
-			processData(data, hm_data, neLat, neLng, swLat, swLng, "WIND");
+			processData(data, hm_data, neLat, neLng, swLat, swLng, "WIND", season);
 			pointDataObj.wind_raw = _getDataWeightWind(hm_data, pointDataObj.lat, pointDataObj.lng)
 				* WIND_SCALER * HOUR_TO_YEAR;
 			$("#" + uniq_id + " .windstring").html(pointDataObj.wind_raw.toFixed(2).toString());
@@ -472,20 +478,20 @@ function populatePointData(pointDataObj, uniq_id) {
 			SOLAR_SCALER, SOLAR_BOTTOM, "SOLAR") * HOUR_TO_YEAR;
 		$("#" + uniq_id + " .solarstring").html(pointDataObj.solar_raw.toFixed(2).toString());
 		_tryPopulateTotalEnergy(pointDataObj, uniq_id);
-	} else if (checkCache(neLat, neLng, swLat, swLng, "SOLAR")) {
+	} else if (checkCache(neLat, neLng, swLat, swLng, "SOLAR", season)) {
 		var hm_data = [];
 		var raw_data = fetchFromCache(pointDataObj.lat, pointDataObj.lng,
-				pointDataObj.lat, pointDataObj.lng, "SOLAR");
-		processData(raw_data, hm_data, neLat, neLng, swLat, swLng, "SOLAR");
+				pointDataObj.lat, pointDataObj.lng, "SOLAR", season);
+		processData(raw_data, hm_data, neLat, neLng, swLat, swLng, "SOLAR", season);
 		pointDataObj.solar_raw = 
 			extract_raw_weight(_getDataWeightSolar(hm_data, pointDataObj.lat, pointDataObj.lng), 
 			SOLAR_SCALER, SOLAR_BOTTOM, "SOLAR") * HOUR_TO_YEAR;
 		$("#" + uniq_id + " .solarstring").html(pointDataObj.solar_raw.toFixed(2).toString());
 		_tryPopulateTotalEnergy(pointDataObj, uniq_id);
 	} else {
-		queryAndCallback('anu', neLat, neLng, swLat, swLng, 0, 0, "SOLAR", function(data) {
+		queryAndCallback(season, neLat, neLng, swLat, swLng, 0, 0, "SOLAR", function(data) {
 			var hm_data = [];
-			processData(data, hm_data, neLat, neLng, swLat, swLng, "SOLAR");
+			processData(data, hm_data, neLat, neLng, swLat, swLng, "SOLAR", season);
 			pointDataObj.solar_raw = 
 				extract_raw_weight(_getDataWeightSolar(hm_data, pointDataObj.lat, pointDataObj.lng), 
 				SOLAR_SCALER, SOLAR_BOTTOM, "SOLAR") * HOUR_TO_YEAR;
@@ -498,19 +504,19 @@ function populatePointData(pointDataObj, uniq_id) {
 			* HYDRO_SCALER * HOUR_TO_YEAR;
 		$("#" + uniq_id + " .hydrostring").html(pointDataObj.hydro_raw.toFixed(2).toString());
 		_tryPopulateTotalEnergy(pointDataObj, uniq_id);
-	} else if (checkCache(neLat, neLng, swLat, swLng, "HYDRO")) {
+	} else if (checkCache(neLat, neLng, swLat, swLng, "HYDRO", season)) {
 		var hm_data = [];
 		var raw_data = fetchFromCache(pointDataObj.lat, pointDataObj.lng,
-				pointDataObj.lat, pointDataObj.lng, "HYDRO");
-		processData(raw_data, hm_data, neLat, neLng, swLat, swLng, "HYDRO");
+				pointDataObj.lat, pointDataObj.lng, "HYDRO", season);
+		processData(raw_data, hm_data, neLat, neLng, swLat, swLng, "HYDRO", season);
 		pointDataObj.hydro_raw = _getDataWeightHydro(hm_data, pointDataObj.lat, pointDataObj.lng)
 			* HYDRO_SCALER * HOUR_TO_YEAR;
 		$("#" + uniq_id + " .hydrostring").html(pointDataObj.hydro_raw.toFixed(2).toString());
 		_tryPopulateTotalEnergy(pointDataObj, uniq_id);
 	}  else {
-		queryAndCallback('anu', neLat, neLng, swLat, swLng, 0, 0, "HYDRO", function(data) {
+		queryAndCallback(season, neLat, neLng, swLat, swLng, 0, 0, "HYDRO", function(data) {
 			var hm_data = [];
-			processData(data, hm_data, neLat, neLng, swLat, swLng, "HYDRO");
+			processData(data, hm_data, neLat, neLng, swLat, swLng, "HYDRO", season);
 			pointDataObj.hydro_raw = _getDataWeightHydro(hm_data, pointDataObj.lat, pointDataObj.lng)
 				* HYDRO_SCALER * HOUR_TO_YEAR;
 			$("#" + uniq_id + " .hydrostring").html(pointDataObj.hydro_raw.toFixed(2).toString());
@@ -550,4 +556,16 @@ function parseSeason(season) {
 	case "son": season_index = 4; break;
 	}
 	return season_index;
+}
+
+function getSeason(val) {
+	var season = 'anu';
+	switch(val) {
+	case "spring": season = "mam"; break;
+	case "summer": season = "jja"; break;
+	case "fall": season = "son"; break;
+	case "winter": season = "djf"; break;
+	}
+	console.log("season: " + season);
+	return season;
 }

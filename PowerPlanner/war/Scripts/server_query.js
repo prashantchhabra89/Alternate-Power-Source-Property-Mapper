@@ -53,23 +53,29 @@ function _requestPassiveQuery() {
 	// You'll probably want some sort of handling to deal with stopping these queries if they're
 	// interrupted. REMINDER - set passive_query_handler = [] to make running queries halt
 	if (passive_query_handler.length > 0) {
-		var queryObj = passive_query_handler.shift(); //gets first element
+		var queryObj = passive_query_handler[0]; //gets first element
 		if (queryObj.wind !== undefined) {
-			_requestHeatmapData("WIND", season, neLat, neLng, swLat, swLng, queryObj, function(e) {
+			_requestHeatmapData("WIND", queryObj.season, 
+					queryObj.neLat, queryObj.neLng, 
+					queryObj.swLat, queryObj.swLng, queryObj, function(e) {
 				if (e === true) {
 					_requestPassiveQuery();
 				}
 			});
 		}
 		if (queryObj.solar !== undefined) {
-			_requestHeatmapData("SOLAR", season, neLat, neLng, swLat, swLng, queryObj, function(e) {
+			_requestHeatmapData("SOLAR", queryObj.season, 
+					queryObj.neLat, queryObj.neLng, 
+					queryObj.swLat, queryObj.swLng, queryObj, function(e) {
 				if (e === true) {
 					_requestPassiveQuery();
 				}
 			});
 		}
 		if (queryObj.hydro !== undefined) {
-			_requestHeatmapData("HYDRO", season, neLat, neLng, swLat, swLng, queryObj, function(e) {
+			_requestHeatmapData("HYDRO", queryObj.season, 
+					queryObj.neLat, queryObj.neLng, 
+					queryObj.swLat, queryObj.swLng, queryObj, function(e) {
 				if (e === true) {
 					_requestPassiveQuery();
 				}
@@ -84,16 +90,19 @@ function _requestPassiveQuery() {
  */
 function queryObjSetup(query_handler, primary_query, season, types, neLat, neLng, swLat, swLng) {
 	var queryObj = createQuerySet(types.wind, types.solar, types.hydro, 
-			primary_query, neLat, neLng, swLat, swLng);
+			primary_query, season, neLat, neLng, swLat, swLng);
 	query_handler.push(queryObj);
 }
 
-function createQuerySet(wind, solar, hydro, primary_query, neLat, neLng, swLat, swLng) {
+function createQuerySet(wind, solar, hydro, primary_query, season, neLat, neLng, swLat, swLng) {
 	queryObj = { 
 		query_id : dq_handler_id++,
 		primary : primary_query
 	};
 	
+	if (season) {
+		queryObj["season"] = season;
+	}
 	if (wind) {
 		queryObj["wind"] = false;
 	}
@@ -113,9 +122,8 @@ function createQuerySet(wind, solar, hydro, primary_query, neLat, neLng, swLat, 
 		queryObj['swLat'] = swLat;
 	}
 	if (swLng !== undefined) {
-		queryObj['swLng '] = swLng;
+		queryObj['swLng'] = swLng;
 	}
-	
 	return queryObj;
 }
 
@@ -127,7 +135,7 @@ function _requestHeatmapData(type, season, neLat, neLng, swLat, swLng, queryObj,
 							queryObj.query_id);
 					return;
 				}
-				updateData(data, neLat, neLng, swLat, swLng, type);
+				updateData(data, neLat, neLng, swLat, swLng, type, season);
 				if (!_queryIsActive(queryObj)) {
 					console.log("Query object was dropped. Halting " + type + " process of id " +
 							queryObj.query_id);
@@ -148,10 +156,9 @@ function _requestHeatmapData(type, season, neLat, neLng, swLat, swLng, queryObj,
  * HYDRO. Triggers a heatmap update upon server response.
  */
 function _getHeatmapData(type, season, neLat, neLng, swLat, swLng, callback) {
-	console.time("_checkCacheData");
 	var lat_offset = getLatOffset(neLat, swLat);
 	var lng_offset = getLngOffset(neLng, swLng);
-
+	
 	// requested grid
 	var neLat_w_off = (neLat + lat_offset);
 	var neLng_w_off = (neLng + lng_offset);
@@ -168,12 +175,12 @@ function _getHeatmapData(type, season, neLat, neLng, swLat, swLng, callback) {
 	console.log("swLng: " + swLng_w_off);
 
 	// Check whether cache has the requested data
-	var in_cache = checkCache(neLat_w_off, neLng_w_off, swLat_w_off, swLng_w_off, type);
+	var in_cache = checkCache(neLat_w_off, neLng_w_off, swLat_w_off, swLng_w_off, type, season);
 	
 	if(in_cache) {
 		console.log("IN CACHE");
-		var new_data = fetchFromCache(neLat_w_off, neLng_w_off, swLat_w_off, swLng_w_off, type);
-		updateData(new_data, neLat, neLng, swLat, swLng, type);
+		var new_data = fetchFromCache(neLat_w_off, neLng_w_off, swLat_w_off, swLng_w_off, type, season);
+		updateData(new_data, neLat, neLng, swLat, swLng, type, season);
 		callback(new_data);
 		console.timeEnd("_checkCacheData");
 	} else {
@@ -263,6 +270,16 @@ function _tryUpdateHeatmap(queryObj) {
 		console.log("Query object success! Updating heatmap.");
 		updateHeatmap();
 		did_update = true;
+		if (_queryIsActive(queryObj)) {
+			for (var i = 0; i < data_query_handler.length; i++) {
+				if (data_query_handler[i].query_id === queryObj.query_id) {
+					data_query_handler.splice(i, 1);
+					break;
+				}
+			}
+		} else {
+			passive_query_handler.splice(i, 1);
+		}
 	}
 	return did_update;
 }
@@ -271,6 +288,7 @@ function buildURL() {
 	var builder = window.location.origin + '/#app?';
 	builder = builder + 'z=' + g_map.getZoom();
 	builder = builder + '&c=' + g_map.getCenter().lat() + ',' + g_map.getCenter().lng();
+	builder = builder + '&s=' + getSeason($("#wind-seasonal").val());
 	for (var i = 0; i < markerSet.length; i++) {
 		builder = builder + '&m=' + 
 					markerSet[i].getPosition().lat() + ',' +
@@ -316,20 +334,36 @@ function decodeURL() {
 	var data = getUrlParameter('d');
 	var center = getUrlParameter('c');
 	var markers = getUrlParameter('m');
-	if (zoom[0] >= LEAST_ZOOM && zoom[0] <= MAX_ZOOM) {
+	var season = getUrlParameter('s');
+	if (zoom && zoom[0] >= LEAST_ZOOM && zoom[0] <= MAX_ZOOM) {
 		console.log(zoom[0]);
 		g_map.setZoom(Number(zoom[0]));
 	}
+	if (season && season.length > 0) {
+		var s_val = 'Seasonal';
+		switch (season[0]) {
+		case "mam": s_val = "spring"; break;
+		case "jja": s_val = "summer"; break;
+		case "son": s_val = "fall"; break;
+		case "djf": s_val = "winter"; break;
+		}
+		console.log("url season " + s_val);
+		$("#wind-seasonal").val(s_val);
+		$("#solar-seasonal").val(s_val);
+		$("#hydro-seasonal").val(s_val);
+	}
 	for (var i = 0; i < markers.length; i++) {
 		console.log(markers[i]);
-		addMarker(g_map, new google.maps.LatLng(markers[i].split(',')[0], markers[i].split(',')[1]));
+		addMarker(g_map, new google.maps.LatLng(parseFloat(markers[i].split(',')[0]), 
+				parseFloat(markers[i].split(',')[1])));
 	}
-	
 	markerBalloon.setContent("");
-	markerBalloon.close();
+	markerBalloon.open(null);
+	
 	if (center) {
 		if (center.length > 0) {
-			g_map.setCenter(new google.maps.LatLng(center[0].split(',')[0], center[0].split(',')[1]));
+			g_map.setCenter(new google.maps.LatLng(parseFloat(center[0].split(',')[0])
+					, parseFloat(center[0].split(',')[1])));
 		}
 	}
 	if (data && data.length > 0) {

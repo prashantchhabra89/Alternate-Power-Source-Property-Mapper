@@ -1,14 +1,14 @@
 /*
  * TODO: Add in other metrics for calculations.
  */
-function _filterHydroData(raw_data, push_data, neLat, neLng, swLat, swLng) {
+function _filterHydroData(raw_data, push_data, neLat, neLng, swLat, swLng, season) {
 	for (var grid = 0; grid < raw_data.length; grid++) {
 		for (var i = 0; i < raw_data[grid].data.length; i++) {
 			var river_center = _getRiverCenter(raw_data[grid].data[i].points[0],
 					raw_data[grid].data[i].points[raw_data[grid].data[i].points.length - 1]); 
 			if (river_center.lat > swLat && river_center.lat < neLat) {
 				if (river_center.lon > swLng && river_center.lon < neLng) {
-					var powerweight = raw_data[grid].data[i].weights['anu'];
+					var powerweight = raw_data[grid].data[i].weights[season];
 					if (powerweight < 0) {
 						powerweight = 0;
 					}

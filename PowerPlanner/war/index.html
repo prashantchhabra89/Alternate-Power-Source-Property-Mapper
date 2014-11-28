@@ -259,9 +259,9 @@
 		</div>
 		<div data-role="panel" data-position="right" data-display="push" data-theme="b"
 			id="pdfPanel">
+			<!--
 			<h2>PDF Export</h2>
 			<fieldset data-role="controlgroup">
-			    <!--<legend>Title:</legend>-->
 			    <input type="checkbox" name="pdfShowAll" id="pdfShowAll" checked="">
 			    <label for="pdfShowAll">Show All</label>
 			    <input type="checkbox" name="pdfShowCord" id="pdfShowCord">
@@ -270,11 +270,16 @@
 			    <label for="pdfShowWindCol">Show Wind Column</label>
 			</fieldset>
 			<button class="ui-shadow ui-btn ui-corner-all">Export</button>
+			-->
 			<h2>Share Link</h2>
 			<a href="#shareLink" data-rel="popup" class="ui-btn ui-corner-all ui-shadow ui-btn-inline" 
 				data-transition="slide" id="shareLinkButton">
-				URL
+				Get URL
 			</a>
+			<p class="howToUse">
+				Use this to save or share the current state of your map! This will preserve your
+				zoom level, map position, markers placed, heatmaps visible, and season settings!
+			</p> 
 			<div data-role="popup" data-theme="b" data-overlay-theme="b" id="shareLink" >
 				<p class="url-text" data-theme="a">Copy the link to Bookmark or Share.</p>
 				
@@ -317,12 +322,14 @@
 							<div data-role="fieldcontain">
 								<label class="inputLabel" for="windView">View: </label>
 							</div>
+							<!--
 							<div data-role="fieldcontain">
 								<label class="inputLabel" for="windRotorArea">Rotor Area: </label>
 							</div>
 							<div data-role="fieldcontain">
 								<label class="inputLabel" for="windEfficiency">Efficiency: </label>
 							</div>
+							-->
 						</div>
 						<div class="ui-block-b">
 							<div class="ui-field-contain" id="opt-navbars">
@@ -341,14 +348,16 @@
 									</select>
 								</fieldset>
 							</div>
+							<!-- 
 							<div class="inputText">
 								<input type="text" name="windRotorArea" id="windRotorArea" value=""
-									placeholder="units in m2">
+									placeholder="units in m^2">
 							</div>
 							<div class="inputText">
 								<input class="resourcesInput" type="text" name="windEfficiency" id="windEfficiency" value=""
 									placeholder="Power Coefficient">
 							</div>
+							 -->
 						</div>
 					</div>
 					<!-- /grid-a -->
@@ -384,12 +393,14 @@
 							<div data-role="fieldcontain">
 								<label class="inputLabel" for="solarView">View: </label>
 							</div>
+							<!-- 
 							<div data-role="fieldcontain">
 								<label class="inputLabel" for="solarArea">Panel Area: </label>
 							</div>
 							<div data-role="fieldcontain">
 								<label class="inputLabel" for="solarEfficiency">Efficiency: </label>
 							</div>
+							 -->
 						</div>
 						<div class="ui-block-b">
 							<div class="ui-field-contain" id="opt-navbars">
@@ -408,14 +419,16 @@
 									</select>
 								</fieldset>
 							</div>
+							<!--
 							<div class="inputText">
 								<input type="text" name="solarArea" id="solarArea" value=""
-									placeholder="units in m2">
+									placeholder="units in m^2">
 							</div>
 							<div class="inputText">
 								<input type="text" name="solarEfficiency" id="solarEfficiency" value=""
 									placeholder="Power Coefficient">
 							</div>
+							-->
 						</div>
 					</div>
 					<!-- /grid-a -->
@@ -451,9 +464,11 @@
 							<div data-role="fieldcontain">
 								<label class="inputLabel" for="hydroView">View: </label>
 							</div>
+							<!-- 
 							<div data-role="fieldcontain">
 								<label class="inputLabel" for="hydroEfficiency">Efficiency: </label>
 							</div>
+							 -->
 						</div>
 						<div class="ui-block-b">
 							<div class="ui-field-contain" id="opt-navbars">
@@ -472,10 +487,12 @@
 									</select>
 								</fieldset>
 							</div>
+							<!-- 
 							<div class="inputText">
 								<input type="text" name="hydroEfficiency" id="hydroEfficiency" value=""
 									placeholder="Turbine Efficiency">
 							</div>
+							 -->
 						</div>
 					</div>
 					<!-- /grid-a -->
