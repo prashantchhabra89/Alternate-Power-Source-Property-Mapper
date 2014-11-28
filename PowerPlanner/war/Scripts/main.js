@@ -389,8 +389,9 @@ function checkQuestionPanelOpen (){
 	}
 }
 function checkLegend() {
-	$("#step-5").removeClass('right');
-	$("#step-5").addClass('legendTourTip');
+	if($(".arrow").attr('style').indexOf('top') !== -1) {
+		$(".arrow").addClass('hide');
+	}
 }
 function resetIntro() {
 	endIntro();

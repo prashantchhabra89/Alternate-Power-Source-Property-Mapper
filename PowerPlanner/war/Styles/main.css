@@ -613,6 +613,9 @@ p.howToUse {
 	height: 48px;
 	float: left;
 }
+.hide {
+	display: none !important;
+}
 
 /* Fix for info window showing scroll bar in Firefox */
 .scrollFix {
@@ -702,10 +705,6 @@ p.howToUse {
 		width: 39px !important;
 		height: 39px !important;
 		float: left;
-	}
-	.legendTourTip {
-		top: 25% !important;
-		left: 4% !important;
 	}
 	#legend {
 		background: url(../images/power_legend_right.png) no-repeat bottom center scroll !important;
