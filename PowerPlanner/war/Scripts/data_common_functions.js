@@ -2,10 +2,10 @@
  * Call this to update global data arrays based on raw data. Will process, interpolate,
  * and assign data to matching global array.
  */
-function updateData(raw_data, neLat, neLng, swLat, swLng, type) {
+function updateData(raw_data, neLat, neLng, swLat, swLng, type, season) {
 	var hm_data = [];
 	_setHeatmapSize(type);
-	processData(raw_data, hm_data, neLat, neLng, swLat, swLng, type);
+	processData(raw_data, hm_data, neLat, neLng, swLat, swLng, type, season);
 	
 	console.log("Data Points on Screen: " + hm_data.length);
 	console.log("Scaler: " + scaler);
@@ -38,7 +38,7 @@ function updateData(raw_data, neLat, neLng, swLat, swLng, type) {
  * determining weights. Note that hydro data is a real troublemaker and doesn't do
  * things like any other data type!
  */
-function processData(raw_data, hm_data, neLat, neLng, swLat, swLng, type) {
+function processData(raw_data, hm_data, neLat, neLng, swLat, swLng, type, season) {
 	var lat_offset = getLatOffset(neLat, swLat);
 	var lng_offset = getLngOffset(neLng, swLng);
 	set_scaler(type);
@@ -49,7 +49,7 @@ function processData(raw_data, hm_data, neLat, neLng, swLat, swLng, type) {
 			neLng + lng_offset,
 			swLat - lat_offset,
 			swLng - lng_offset,
-			type);
+			type, season);
 	
 	var weight_points = [];
 	for (var i = 0; i < usable_data.length; i++) {
@@ -100,13 +100,13 @@ function extract_raw_weight(scaled, scaler, offset, type) {
 	return (raw > 0 ? raw : 0);
 }
 
-function _filterData(raw_data, push_data, neLat, neLng, swLat, swLng, type) {
+function _filterData(raw_data, push_data, neLat, neLng, swLat, swLng, type, season) {
 	if (type == "WIND") {
 		_filterWindData(raw_data, push_data, neLat, neLng, swLat, swLng);
 	} else if (type == "SOLAR") {
 		_filterSolarData(raw_data, push_data);
 	} else if (type == "HYDRO") {
-		_filterHydroData(raw_data, push_data, neLat, neLng, swLat, swLng);
+		_filterHydroData(raw_data, push_data, neLat, neLng, swLat, swLng, season);
 	}
 }
 
