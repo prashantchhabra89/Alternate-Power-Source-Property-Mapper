@@ -8,7 +8,7 @@ function launchQueryUpdate(season, types) {
 	var swLat = getSWLatitude(g_map);
 	var swLng = getSWLongitude(g_map);
 	
-	var queryObj = createQuerySet(types.wind, types.solar, types.hydro);
+	var queryObj = createQuerySet(types.wind, types.solar, types.hydro, true);
 	var dqh_l = data_query_handler.length;
 	if (dqh_l > 0) {
 		console.log("Query Updater: dropping " + dqh_l + (dqh_l > 1 ? " queries." : " query."));
@@ -43,7 +43,7 @@ function passiveQueryUpdate(season, types) {
 	 *     offset_neLng = neLng - lng_offset
 	 *     offset_swLat = swLat + lat_offset
 	 *     offset_swLng = swLng + lng_offset
-	 *     queryObjSetup(passive_query_handler, season, types, offset_neLat, offset... you get the idea)
+	 *     queryObjSetup(passive_query_handler, false, season, types, offsets ... you get the idea)
 	 *     
 	 * _requestPassiveQuery();
 	 */
@@ -51,7 +51,7 @@ function passiveQueryUpdate(season, types) {
 
 function _requestPassiveQuery() {
 	// You'll probably want some sort of handling to deal with stopping these queries if they're
-	// interrupted
+	// interrupted. REMINDER - set passive_query_handler = [] to make running queries halt
 	if (passive_query_handler.length > 0) {
 		var queryObj = passive_query_handler.shift(); //gets first element
 		if (queryObj.wind !== undefined) {
@@ -82,13 +82,17 @@ function _requestPassiveQuery() {
  * Make query object (holds data type(s), season, and bounds)
  * Add to the passed in array (query_handler)
  */
-function queryObjSetup(query_handler, season, types, neLat, neLng, swLat, swLng) {
-	var queryObj = createQuerySet(types.wind, types.solar, types.hydro, neLat, neLng, swLat, swLng);
+function queryObjSetup(query_handler, primary_query, season, types, neLat, neLng, swLat, swLng) {
+	var queryObj = createQuerySet(types.wind, types.solar, types.hydro, 
+			primary_query, neLat, neLng, swLat, swLng);
 	query_handler.push(queryObj);
 }
 
-function createQuerySet(wind, solar, hydro, neLat, neLng, swLat, swLng) {
-	queryObj = { query_id : dq_handler_id++ };
+function createQuerySet(wind, solar, hydro, primary_query, neLat, neLng, swLat, swLng) {
+	queryObj = { 
+		query_id : dq_handler_id++,
+		primary : primary_query
+	};
 	
 	if (wind) {
 		queryObj["wind"] = false;
@@ -225,10 +229,19 @@ function queryAndCallback(season, neLat, neLng, swLat, swLng, lat_offset, lng_of
 
 function _queryIsActive(queryObj) {
 	var isActive = false;
-	for (var i = 0; i < data_query_handler.length; i++) {
-		if (data_query_handler[i].query_id === queryObj.query_id) {
-			isActive = true;
-			break;
+	if (queryObj.primary === false) {
+		for (var i = 0; i < passive_query_handler.length; i++) {
+			if (passive_query_handler[i].query_id === queryObj.query_id) {
+				isActive = true;
+				break;
+			}
+		}
+	} else {
+		for (var i = 0; i < data_query_handler.length; i++) {
+			if (data_query_handler[i].query_id === queryObj.query_id) {
+				isActive = true;
+				break;
+			}
 		}
 	}
 	return isActive;
