@@ -27,38 +27,52 @@ $(document).ready(function() {
 	// Checking if a season is selected. If it is, then add 'ui-btn-active' class to Seasonal 
 	// which will highlight Seasonal. Then unhighlight Annual.
 	$("#wind-seasonal").change(function() {
+		viewAnnualSeasonal('#windAnnual', '#windAnnualLabel', 
+				'#wind-seasonal-button', '#wind-seasonal');
 		if ($("#wind-seasonal").val() != null) {
-			$("#wind-seasonal-button").addClass('ui-btn-active');
-			$("#windAnnual").prop('checked', false);
-			$("#windAnnualLabel").removeClass('ui-btn-active');			
+			$("#solar-seasonal").val($("#wind-seasonal").val());
+			$("#hydro-seasonal").val($("#wind-seasonal").val());
 		}
 	});
 	//If Annual is clicked, unhighlight Seasonal and reset Seasonal value.
 	$("#windAnnualLabel").click(function() {
 		$("#wind-seasonal-button").removeClass('ui-btn-active');
 		$("#wind-seasonal").val(null);
+		$("#wind-seasonal").selectmenu("refresh");
+		$("#solar-seasonal").val(null);
+		$("#solar-seasonal-button").prop("checked", true);
+		$("#hydro-seasonal").val(null);
+		$("#hydro-seasonal-button").prop("checked", true);
 	});
 	$("#solar-seasonal").change(function() {
+		viewAnnualSeasonal('#solarAnnual', '#solarAnnualLabel', 
+				'#solar-seasonal-button', '#solar-seasonal');
 		if ($("#solar-seasonal").val() != null) {
-			$("#solar-seasonal-button").addClass('ui-btn-active');
-			$("#solarAnnual").prop('checked', false);
-			$("#solarAnnualLabel").removeClass('ui-btn-active');			
+			$("#wind-seasonal").val($("#solar-seasonal").val());
+			$("#hydro-seasonal").val($("#solar-seasonal").val());
 		}
 	});
 	$("#solarAnnualLabel").click(function() {
 		$("#solar-seasonal-button").removeClass('ui-btn-active');
 		$("#solar-seasonal").val(null);
+		$("#solar-seasonal").selectmenu("refresh");
+		$("#wind-seasonal").val(null);
+		$("#hydro-seasonal").val(null);
 	});
 	$("#hydro-seasonal").change(function() {
+		viewAnnualSeasonal('#hydroAnnual', '#hydroAnnualLabel', 
+				'#hydro-seasonal-button', '#hydro-seasonal');
 		if ($("#hydro-seasonal").val() != null) {
-			$("#hydro-seasonal-button").addClass('ui-btn-active');
-			$("#hydroAnnual").prop('checked', false);
-			$("#hydroAnnualLabel").removeClass('ui-btn-active');			
+			$("#wind-seasonal").val($("#hydro-seasonal").val());
+			$("#solar-seasonal").val($("#hydro-seasonal").val());
 		}
 	});
 	$("#hydroAnnualLabel").click(function() {
 		$("#hydro-seasonal-button").removeClass('ui-btn-active');
 		$("#hydro-seasonal").val(null);
+		$("#hydro-seasonal").selectmenu("refresh");
+		$("#wind-seasonal").val(null);
+		$("#solar-seasonal").val(null);
 	});
 	
 	$("#showCheckboxWind").click(function() {
@@ -209,6 +223,8 @@ $(document).ready(function() {
 			$('#hydroHeading').removeClass('show-description');
 			$('#showCheckboxWind').checkboxradio("refresh");
 			$('#showCheckboxOnlyWind').checkboxradio("refresh");
+			viewAnnualSeasonal('#windAnnual', '#windAnnualLabel', 
+					'#wind-seasonal-button', '#wind-seasonal');
 
 			setTimeout(function() {
 				$('#windHeading').toggleClass('show-description');
@@ -245,6 +261,8 @@ $(document).ready(function() {
 			$('#hydroHeading').removeClass('show-description');
 			$('#showCheckboxSolar').checkboxradio("refresh");
 			$('#showCheckboxOnlySolar').checkboxradio("refresh");
+			viewAnnualSeasonal('#solarAnnual', '#solarAnnualLabel', 
+					'#solar-seasonal-button', '#solar-seasonal');
 
 			setTimeout(function() {
 				$('#solarHeading').toggleClass('show-description');
@@ -281,6 +299,8 @@ $(document).ready(function() {
 			$('#windHeading').removeClass('show-description');
 			$('#showCheckboxHydro').checkboxradio("refresh");
 			$('#showCheckboxOnlyHydro').checkboxradio("refresh");
+			viewAnnualSeasonal('#hydroAnnual', '#hydroAnnualLabel', 
+					'#hydro-seasonal-button', '#hydro-seasonal');
 
 			setTimeout(function() {
 				$('#hydroResourceRadio').toggleClass('displayRadioButtons');
@@ -313,6 +333,21 @@ $(document).ready(function() {
 		});
 	});
 });
+function viewAnnualSeasonal(annualB, annualL, seasonalB, seasonalS) {
+	if ($(seasonalS).val() != null && $(seasonalS).val() != 'Seasonal') {
+		$(seasonalB).addClass('ui-btn-active');
+		$(annualB).prop('checked', false);
+		$(annualB).checkboxradio('refresh');
+		$(annualL).removeClass('ui-btn-active');
+	} else {
+		$(annualB).prop('checked', true);
+		$(annualL).addClass('ui-btn-active');
+		$(seasonalB).removeClass('ui-btn-active');
+		$(seasonalS).val(null);
+	}
+	$(annualB).checkboxradio("refresh");
+	$(seasonalS).selectmenu('refresh');
+}
 
 /*
  * Checks for changes to URL parameters and tries to interpret URL
@@ -389,8 +424,11 @@ function checkQuestionPanelOpen (){
 	}
 }
 function checkLegend() {
-	$("#step-5").removeClass('right');
-	$("#step-5").addClass('legendTourTip');
+	if ($(".arrow").attr('style') !== undefined) { 
+		if($(".arrow").attr('style').indexOf('top') !== -1) {
+			$(".arrow").addClass('hide');
+		}
+	}
 }
 function resetIntro() {
 	endIntro();
