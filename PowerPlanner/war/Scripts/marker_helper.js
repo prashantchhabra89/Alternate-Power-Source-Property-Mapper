@@ -54,6 +54,7 @@ function initializeMarkers(map) {
 }
 
 function addMarker(map, loc) {
+	console.log("MARKER CREATION AT " + loc.lat() + ", " + loc.lng());
 	if (markerBalloon === undefined) {
 		console.log("Initializing marker balloon!");
 		markerBalloon = new google.maps.InfoWindow();
@@ -64,7 +65,7 @@ function addMarker(map, loc) {
 		icon : "../../images/icon_nopower.png"		
 	});
 	markerSet.push(marker);
-
+	
 	// the object handle holding the data
 	var pointDataObject = getPointData(marker);		
 

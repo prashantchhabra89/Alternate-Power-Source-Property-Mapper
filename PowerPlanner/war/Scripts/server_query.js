@@ -315,6 +315,7 @@ function buildURL() {
 	if (datastate.length > 0) {
 		builder = builder + '&d=' + datastate;
 	}
+	console.log("BUILDER: " + builder);
 	return builder;
 }
 
@@ -351,15 +352,7 @@ function decodeURL() {
 		$("#wind-seasonal").val(s_val);
 		$("#solar-seasonal").val(s_val);
 		$("#hydro-seasonal").val(s_val);
-	}
-	for (var i = 0; i < markers.length; i++) {
-		console.log(markers[i]);
-		addMarker(g_map, new google.maps.LatLng(parseFloat(markers[i].split(',')[0]), 
-				parseFloat(markers[i].split(',')[1])));
-	}
-	markerBalloon.setContent("");
-	markerBalloon.open(null);
-	
+	}	
 	if (center) {
 		if (center.length > 0) {
 			g_map.setCenter(new google.maps.LatLng(parseFloat(center[0].split(',')[0])
@@ -373,6 +366,18 @@ function decodeURL() {
 		toggleHighlightCheck();
 		_eventHeatmapDataToggler();
 	}
+	for (var i = 0; i < markers.length; i++) {
+		console.log(markers[i]);
+		addMarker(g_map, new google.maps.LatLng(markers[i].split(',')[0], 
+				markers[i].split(',')[1]));
+	}
+	var ready_listener = google.maps.event.addListener(g_map, 'idle', function() {
+		markerBalloon.setContent("");
+		markerBalloon.close();
+		
+		google.maps.event.removeListener(ready_listener);
+	});
+		
 	document.location.hash = hash[0];
 }
 
