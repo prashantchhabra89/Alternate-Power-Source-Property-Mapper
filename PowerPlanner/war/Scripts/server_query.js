@@ -371,12 +371,8 @@ function decodeURL() {
 		addMarker(g_map, new google.maps.LatLng(markers[i].split(',')[0], 
 				markers[i].split(',')[1]));
 	}
-	var ready_listener = google.maps.event.addListener(g_map, 'idle', function() {
-		markerBalloon.setContent("");
-		markerBalloon.close();
-		
-		google.maps.event.removeListener(ready_listener);
-	});
+	markerBalloon.setContent("");
+	markerBalloon.close();
 		
 	document.location.hash = hash[0];
 }
