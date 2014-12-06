@@ -1,6 +1,8 @@
 /*
- * There's not enough data to worry about not keeping it.
- * TODO: Add in other metrics for calculations.
+ * Filters the solar data, adding to an array data points with full power potential.
+ * 
+ * 	raw_data: unprocessed data from server
+ * 	push_data: array that will be filled with filtered data
  */
 function _filterSolarData(raw_data, push_data) {
 	for (var i = 0; i < raw_data.length; i++) {
@@ -12,6 +14,17 @@ function _filterSolarData(raw_data, push_data) {
 	}
 }
 
+/*
+ * Gets the weight (power potential) of the data at the specified geometric
+ * point. Divides data into points on an XY plane with the geometric point
+ * located at the center. Applies scaled weight from closest point in each
+ * plane. If any plane has no points, data weight begins to decay rapidly.
+ * 
+ *  hm_data: processed real data
+ *  lat, lng: geometric point to get weight of
+ *  
+ *  returns: interpolated point weight
+ */
 function _getDataWeightSolar(hm_data, lat, lng) {
 	var nearest = [];
 	var nearest_distance = [];
@@ -52,14 +65,6 @@ function _getDataWeightSolar(hm_data, lat, lng) {
 			}
 		}
 	}
-	/*
-	console.log("Lat: " + lat + " Lng: " + lng);
-	for (var i = 0; i < nearest.length; i++) {
-		console.log("Near point Lat: " + nearest[i].location.lat() + 
-				" Lng: " + nearest[i].location.lng() + " Distance: " +
-				nearest_distance[i]);
-	}
-	 */
 
 	var final_weight = 0;
 	if (nearest.length > 0) {

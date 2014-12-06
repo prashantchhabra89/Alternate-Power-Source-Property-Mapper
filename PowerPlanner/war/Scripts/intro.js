@@ -1,6 +1,7 @@
 /**
- * Introduction overlay to show our features
+ * Introduction overlay to show our features.
  */
+
 var w = "Wind".bold().fontcolor("green");
 var s = "Solar".bold().fontcolor("orange");
 var h = "Hydro".bold().fontcolor("blue");
@@ -10,6 +11,9 @@ var mark = "<div id=\"start-helper\" class=\"scrollFix\">" +
 "a window with information about<br/>" +
 "the power generation potential<br/>" + 
 "in that area.</p></div>";
+/*
+ * The content of the various steps of the tour.
+ */
 var tour = new Tour({
 	steps: [
 		{
@@ -63,17 +67,26 @@ var tour = new Tour({
         $(stepElement).after($('.tour-backdrop'));
     }
 });
-function startIntro() {
-	
 
+/*
+ * Starts the tour and goes to the first step.
+ */
+function startIntro() {
 	tour.init();
 	tour.restart();
 	tour.goTo(0);
 }
+
+/*
+ * Ends the tour.
+ */
 function endIntro() {
 	tour.end();
 }
 
+/*
+ * Gets the current step of the tour.
+ */
 function getTourElement(tour){
     return tour._options.steps[tour._current].element
 }

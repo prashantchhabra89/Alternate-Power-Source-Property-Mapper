@@ -1,7 +1,18 @@
+/*
+ * Handler arrays to allow processing of multiple queries.
+ */
 var data_query_handler = [];
 var passive_query_handler = [];
 var dq_handler_id = 0;
 
+/*
+ * Launches query updates to asynchronously load the specified data types and to prevent
+ * excess queries.
+ * 
+ * 	season: the season to load the data for
+ * 	types: an object containing wind, solar, and hydro attributes with a boolean value
+ * 	to specify if the corresponding data type should be loaded 
+ */
 function launchQueryUpdate(season, types) {
 	var neLat = getNELatitude(g_map);
 	var neLng = getNELongitude(g_map);
@@ -31,6 +42,13 @@ function launchQueryUpdate(season, types) {
 	}
 }
 
+/*
+ * Template for passive queries (preloading areas of the map)
+ * 
+ * 	season: the season to load the data for
+ * 	types: an object containing wind, solar, and hydro attributes with a boolean value
+ * 	to specify if the corresponding data type should be loaded 
+ */
 function passiveQueryUpdate(season, types) {
 	/*
 	 * Run some loop to figure out your bounds.
@@ -49,6 +67,9 @@ function passiveQueryUpdate(season, types) {
 	 */
 }
 
+/*
+ * Template for requesting passive preloading queries.
+ */
 function _requestPassiveQuery() {
 	// You'll probably want some sort of handling to deal with stopping these queries if they're
 	// interrupted. REMINDER - set passive_query_handler = [] to make running queries halt
@@ -87,6 +108,14 @@ function _requestPassiveQuery() {
 /*
  * Make query object (holds data type(s), season, and bounds)
  * Add to the passed in array (query_handler)
+ * 
+ * 	query_handler: the array for handling queries
+ * 	primary_query: boolean; true if this is a regular query; false if it is a preloading query
+ * 	season: the season to load the data for
+ * 	types: an object containing wind, solar, and hydro attributes with a boolean value
+ * 	to specify if the corresponding data type should be loaded 
+ * 	neLat, neLng: northeast boundary of area to query data from
+ * 	swLat, swLng: southwest boundary of area to query data from
  */
 function queryObjSetup(query_handler, primary_query, season, types, neLat, neLng, swLat, swLng) {
 	var queryObj = createQuerySet(types.wind, types.solar, types.hydro, 
@@ -94,6 +123,18 @@ function queryObjSetup(query_handler, primary_query, season, types, neLat, neLng
 	query_handler.push(queryObj);
 }
 
+/*
+ * Creates a query object containing all information relevant to server queries.
+ * 
+ * 	wind: boolean; true if wind data is to be loaded
+ * 	solar: boolean; true if solar data is to be loaded
+ * 	hydro: boolean; true if hydro data is to be loaded
+ * 	primary_query: boolean; true if this is a regular query; false if it is a preloading query
+ * 	season: the season to load the data for
+ * 	to specify if the corresponding data type should be loaded 
+ * 	neLat, neLng: northeast boundary of area to query data from
+ * 	swLat, swLng: southwest boundary of area to query data from
+ */
 function createQuerySet(wind, solar, hydro, primary_query, season, neLat, neLng, swLat, swLng) {
 	queryObj = { 
 		query_id : dq_handler_id++,
@@ -127,6 +168,17 @@ function createQuerySet(wind, solar, hydro, primary_query, season, neLat, neLng,
 	return queryObj;
 }
 
+/*
+ * Handles requesting data from the server. At every major checkpoint, looks to see if
+ * another query has been launched, and if so, stops processing.	
+ * 
+ * 	season: the season to load the data for
+ * 	type: the data type to be requested; one of WIND, SOLAR, or HYDRO
+ * 	neLat, neLng: northeast boundary of area to query data from
+ * 	swLat, swLng: southwest boundary of area to query data from
+ * 	queryObj: the object containing query parameters
+ * 	callback: callback function to indicate if data was successfully returned
+ */
 function _requestHeatmapData(type, season, neLat, neLng, swLat, swLng, queryObj, callback) {
 	_.throttle(
 			_getHeatmapData(type, season, neLat, neLng, swLat, swLng, function(data) {
@@ -151,9 +203,15 @@ function _requestHeatmapData(type, season, neLat, neLng, swLat, swLng, queryObj,
 }
 
 /*
- * Sends a POST request to the server for data within the provided latitude and
- * longitude bounds of a particular type. Acceptable types are WIND, SOLAR, and
- * HYDRO. Triggers a heatmap update upon server response.
+ * Function for handling request for data within the provided latitude and
+ * longitude bounds of a particular type. Checks if data is within cache first.
+ * Launches server query on cache miss.
+ * 
+ * 	type: the data type to be requested; one of WIND, SOLAR, or HYDRO
+ * 	season: the season to load the data for
+ * 	neLat, neLng: northeast boundary of area to query data from
+ * 	swLat, swLng: southwest boundary of area to query data from
+ * 	callback: callback function to return data
  */
 function _getHeatmapData(type, season, neLat, neLng, swLat, swLng, callback) {
 	var lat_offset = getLatOffset(neLat, swLat);
@@ -192,6 +250,18 @@ function _getHeatmapData(type, season, neLat, neLng, swLat, swLng, callback) {
 	}
 }
 
+/*
+ * Ajax POST query to server for data. On success, adds data to cache and calls the callback with
+ * the data from server.
+ * 
+ * 	season: the season to load the data for
+ * 	neLat, neLng: northeast boundary of area to query data from
+ * 	swLat, swLng: southwest boundary of area to query data from
+ * 	lat_offset: additional offset to add to lat area
+ * 	lng_offset: additional offset to add to lng area
+ * 	type: the data type to be requested; one of WIND, SOLAR, or HYDRO
+ * 	callback: callback function to return data
+ */
 function queryAndCallback(season, neLat, neLng, swLat, swLng, lat_offset, lng_offset, type, callback) {
 	console.time("_queryServer");
 	var neLat_w_off = (neLat + lat_offset);
@@ -234,6 +304,13 @@ function queryAndCallback(season, neLat, neLng, swLat, swLng, lat_offset, lng_of
 	});
 }
 
+/*
+ * Checks if the query represented by the query object is still active.
+ * 
+ * 	queryObj: query object representing parameters of server query
+ * 
+ * 	returns: true if query has not been superceded; false otherwise
+ */
 function _queryIsActive(queryObj) {
 	var isActive = false;
 	if (queryObj.primary === false) {
@@ -254,6 +331,13 @@ function _queryIsActive(queryObj) {
 	return isActive;
 }
 
+/*
+ * Updates query object to set specified type to true. Used when a server query
+ * has returned data.
+ * 
+ * 	queryObj: query object representing parameters of server query
+ * 	type: the data type in question; one of WIND, SOLAR, or HYDRO
+ */
 function _queryObjProgress(queryObj, type) {
 	if (type == "WIND") {
 		queryObj.wind = true;
@@ -264,6 +348,14 @@ function _queryObjProgress(queryObj, type) {
 	}
 }
 
+/*
+ * Tries to update the heatmap with results of queries. Only succeeds if all other queries
+ * in the query object have finished.
+ * 
+ * 	queryObj: query object representing parameters of server query
+ * 
+ * 	returns: true if the heatmap was updated; otherwise, false
+ */
 function _tryUpdateHeatmap(queryObj) {
 	var did_update = false;
 	if (queryObj.wind !== false && queryObj.solar !== false && queryObj.hydro !== false) {
@@ -284,6 +376,12 @@ function _tryUpdateHeatmap(queryObj) {
 	return did_update;
 }
 
+/*
+ * Builds a URL out of the various parameters user changeable parameters, such as
+ * map location, zoom level, power types showing, season showing, and markers placed.
+ * 
+ * 	returns: the URL string
+ */
 function buildURL() {
 	var builder = window.location.origin + '/#app?';
 	builder = builder + 'z=' + g_map.getZoom();
@@ -315,9 +413,15 @@ function buildURL() {
 	if (datastate.length > 0) {
 		builder = builder + '&d=' + datastate;
 	}
+	console.log("BUILDER: " + builder);
 	return builder;
 }
 
+/*
+ * Waits for the map to finish loading and then calls the URL decoding function.
+ * 
+ * 	map: the Google map
+ */
 function coldLoadDecodeURL(map) {
 	console.log("Cold load launch time");
 	var this_listener = google.maps.event.addListener(map, 'idle', function() {
@@ -327,6 +431,11 @@ function coldLoadDecodeURL(map) {
 	});
 }
 
+/*
+ * Parses the URL; if it has parameters in place, loads the values in and applies
+ * the properties to the map (setting map center, zoom, data showing, season selected,
+ * and markers placed).
+ */
 function decodeURL() {
 	var hash = window.location.hash.split('?');
 	var url = window.location.origin + '/powerdb?' + hash[1];
@@ -351,15 +460,7 @@ function decodeURL() {
 		$("#wind-seasonal").val(s_val);
 		$("#solar-seasonal").val(s_val);
 		$("#hydro-seasonal").val(s_val);
-	}
-	for (var i = 0; i < markers.length; i++) {
-		console.log(markers[i]);
-		addMarker(g_map, new google.maps.LatLng(parseFloat(markers[i].split(',')[0]), 
-				parseFloat(markers[i].split(',')[1])));
-	}
-	markerBalloon.setContent("");
-	markerBalloon.open(null);
-	
+	}	
 	if (center) {
 		if (center.length > 0) {
 			g_map.setCenter(new google.maps.LatLng(parseFloat(center[0].split(',')[0])
@@ -373,9 +474,24 @@ function decodeURL() {
 		toggleHighlightCheck();
 		_eventHeatmapDataToggler();
 	}
+	for (var i = 0; i < markers.length; i++) {
+		console.log(markers[i]);
+		addMarker(g_map, new google.maps.LatLng(markers[i].split(',')[0], 
+				markers[i].split(',')[1]));
+	}
+	markerBalloon.setContent("");
+	markerBalloon.close();
+		
 	document.location.hash = hash[0];
 }
 
+/*
+ * Get the parameter from the URL.
+ * 
+ * 	sParam: the parameter key
+ * 
+ * 	return: the parameter value(s) in an array
+ */
 function getUrlParameter(sParam)
 {
     var sPageURL = window.location.hash.split('?',2)[1];

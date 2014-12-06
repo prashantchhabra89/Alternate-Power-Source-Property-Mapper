@@ -24,7 +24,7 @@ public class DatabaseFileFinder {
 	private String pathHydro;
 	
 	/**
-	 * 
+	 * Sets up arrays of JSON file names in the database.
 	 */
 	public DatabaseFileFinder() 
 	{
@@ -61,13 +61,14 @@ public class DatabaseFileFinder {
 	}
 	
 	/**
+	 * Finds the corresponding wind files for the provided bounds.
 	 * 
-	 * @param neLat
-	 * @param neLon
-	 * @param swLat
-	 * @param swLon
+	 * @param neLat northeast latitude bounding point of grid to load
+	 * @param neLon northeast longitude bounding point of grid to load
+	 * @param swLat southwest latitude bouding point of grid to load
+	 * @param swLon southwest longitude bounding point of grid to load
 	 * @param season supplied season name should be anu,djf,jja,son,mam
-	 * @return
+	 * @return array of JSON files to return
 	 */
 	public String[] windFileFinder(Double neLat, Double neLon, Double swLat, Double swLon, String season)
 	{
@@ -120,7 +121,7 @@ public class DatabaseFileFinder {
 	}
 	
 	/**
-	 * 
+	 * Prints wind files to be returned. 
 	 */
 	public void displayWindReturnarr()
 	{
@@ -131,9 +132,10 @@ public class DatabaseFileFinder {
 	}
 
 	/**
+	 * Finds the corresponding solar file for the provided season.
 	 * 
-	 * @param Season
-	 * @return
+	 * @param Season supplied season name should be anu,djf,jja,son,mam
+	 * @return array of JSON files to return
 	 */
 	public String [] solarFileFinder(String Season)
 	{	
@@ -149,7 +151,7 @@ public class DatabaseFileFinder {
 	}
 	
 	/**
-	 * 
+	 * Prints solar files to be returned.
 	 */
 	public void displaySolarFileList()
 	{
@@ -157,13 +159,14 @@ public class DatabaseFileFinder {
 	}
 	
 	/**
+	 * Finds the corresponding hydro files for the provided bounds.
 	 * 
-	 * @param neLat
-	 * @param neLon
-	 * @param swLat
-	 * @param swLon
-	 * @param Season
-	 * @return
+	 * @param neLat northeast latitude bounding point of grid to load
+	 * @param neLon northeast longitude bounding point of grid to load
+	 * @param swLat southwest latitude bouding point of grid to load
+	 * @param swLon southwest longitude bounding point of grid to load
+	 * @param Season supplied season name should be anu,djf,jja,son,mam
+	 * @return array of JSON files to return
 	 */
 	public String [] hydroFileFinder(Double neLat, Double neLon, Double swLat, Double swLon, String Season)
 	{
@@ -206,7 +209,7 @@ public class DatabaseFileFinder {
 	}
 	
 	/**
-	 * 
+	 * Prints hydro files to be returned. 
 	 */
 	public void displayHydroFileList()
 	{

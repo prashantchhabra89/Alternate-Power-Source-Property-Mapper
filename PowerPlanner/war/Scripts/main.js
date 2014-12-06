@@ -2,6 +2,10 @@ var windTogglePannelOn = false;
 var solarTogglePannelOn = false;
 var hydroTogglePannelOn = false;
 
+/*
+ * Sets up the functions for the landing page and the UI elements, including functionality
+ * in map for help, export to URL, and power options.
+ */
 $(document).ready(function() {
 	toggleHighlightCheck();
 	resizeDiv();
@@ -319,6 +323,15 @@ $(document).ready(function() {
 		});
 	});
 });
+
+/*
+ * Updater to synchronize season to view across power types.
+ * 
+ * 	annualB: button for annual season view
+ * 	annualL: label for annual season view
+ * 	seasonalB: button for seasonal views
+ * 	seasonalS: selectmenu for seasonal views
+ */
 function viewAnnualSeasonal(annualB, annualL, seasonalB, seasonalS) {
 	if ($(seasonalS).val() != null && $(seasonalS).val() != 'Seasonal') {
 		$(seasonalB).addClass('ui-btn-active');
@@ -343,10 +356,16 @@ $(function(){
 	$(window).hashchange(decodeURL);
 });
 
+/*
+ * Resize the Div when the window changes size.
+ */
 window.onresize = function(event) {
 	resizeDiv();
 }
 
+/*
+ * Functions for hiding resource panel for power types
+ */
 function hideWindResources() {
 	$('#windResouceRadio').removeClass('displayRadioButtons');
 }
@@ -356,6 +375,10 @@ function hideSolarResources() {
 function hideHydroResources() {
 	$('#hydroResourceRadio').removeClass('displayRadioButtons');
 }
+
+/*
+ * Resize the Div according to window height.
+ */
 function resizeDiv() {
 	// HACK: ui-header height not available during startup.
 	vph = $(window).height() - 80 - 10; // 80px is ui-header and margins 40 is footer
@@ -363,6 +386,11 @@ function resizeDiv() {
 		'height' : vph + 'px'
 	});
 }
+
+/*
+ * Carries location search from start page to map page. Resizes the map on page show,
+ * resets the center, and fires the data toggler.
+ */
 function startButtonClick() {
 	if($("#pac-input-intro").val() != "")	{
 		$("#pac-input").val($("#pac-input-intro").val());
@@ -377,7 +405,10 @@ function startButtonClick() {
 		_eventHeatmapDataToggler();
 	});
 }
-// This runs when the page loads or restarts; checks if any power is toggled
+
+/*
+ *  This runs when the page loads or restarts; checks if any power is toggled
+ */
 function toggleHighlightCheck() {
 	var checks = ['#showCheckboxWind', '#showCheckboxSolar', '#showCheckboxHydro'];
 	var toggles = ['#wind-panel-app', '#solar-panel-app', '#hydro-panel-app'];
@@ -388,10 +419,18 @@ function toggleHighlightCheck() {
 		$(toggles[i]).css("border-width", border_width);
 	}
 }
+
+/*
+ * When the tour button is pressed, goes to the map and launches the tour.
+ */
 function tourButtonClick() {
 	startButtonClick();
 	startIntro();
 }
+
+/*
+ * UI handling for tour - checks if the help panel has been opened.
+ */
 function checkQuestionPanelOpen (){
 	//If "question panel" is  open, move the step 4 tour tip to correct position.
 	if($("#questionPanel" ).hasClass( "ui-panel-open" )){
@@ -403,6 +442,10 @@ function checkQuestionPanelOpen (){
 		$("#step-4").removeClass('question-panel-open');
 	}
 }
+
+/*
+ * UI handling for tour - checks if legend is current step.
+ */
 function checkLegend() {
 	if ($(".arrow").attr('style') !== undefined) { 
 		if($(".arrow").attr('style').indexOf('top') !== -1) {
@@ -410,15 +453,25 @@ function checkLegend() {
 		}
 	}
 }
+
+/*
+ * Ends the intro tour.
+ */
 function resetIntro() {
 	endIntro();
 }
 
+/*
+ * Validates the email entered as per the email verifying regex. Returns the results of the regex.
+ */
 function validateEmail(email) {
     var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     return re.test(email);
 }
 
+/*
+ * Posts feedback to internal google spreadsheet.
+ */
 function postToGoogle() {
 	var field1 = $('#name').val();
 	var field2 = $('#email').val();
