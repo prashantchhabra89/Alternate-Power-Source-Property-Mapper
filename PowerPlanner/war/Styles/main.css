@@ -269,10 +269,10 @@ div.ui-input-text{
 }
 .tour-button {
 	width: 130px;
-	color: #333 !important;
+	color: #FFF !important;
 	font-size: 21px !important;
-	background-color: #FAF84E !important;
-	border-color: #FADE4E !important;
+	background-color: #4EB2FA !important;
+	border-color: #4E9FFA !important;
 	border-radius: 12px;
 	font-family: 'Raleway', sans-serif !important;
 	font-weight: lighter !important;
@@ -625,6 +625,26 @@ p.howToUse {
 	margin-top: 8%;
 }
 
+.methodology {
+	height:79px !important;
+	padding-bottom: 10px !important;
+}
+.methodologyButton {
+	display: block !important;
+	color: #FFF !important;
+	font-size: 21px !important;
+	background-color: #24A93A !important;
+	border-color: #3A7C24 !important;
+	border-radius: 12px;
+	font-family: 'Raleway', sans-serif !important;
+	font-weight: lighter !important;
+}
+.show-methodology{
+	display: inline !important;
+}
+.expandMethodologyBody {
+	height: 100% !important;
+}
 /* Fix for info window showing scroll bar in Firefox */
 .scrollFix {
 	line-height: 1.35;
