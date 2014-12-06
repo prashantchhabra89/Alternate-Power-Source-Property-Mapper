@@ -22,6 +22,5 @@ Use this application to find areas in British Columbia to become electrically se
 ### Limitations and Disclaimers
 * All data is based off estimates, averages, and simulations. This is meant to guide the user, not give you exact, up-to-the-minute information. Even if it displayed perfect historical accurate data, there can be large variance between years and seasons, and the climate is changing!
 * Data is only available for BC (with some information crawling into surrounding provinces and states)
-* Power types cannot be overlaid
  
 <a href="url"><img src="https://dl.dropboxusercontent.com/u/50321307/PowerPlannerLogo_v2.png" align="middle" height="100" width="100" ></a>
