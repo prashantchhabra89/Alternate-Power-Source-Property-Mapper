@@ -90,6 +90,7 @@ public class WindJson {
 			LinkedList<WindObject> ll2 = new LinkedList<WindObject>();
 			LinkedList<WindObject> ll3 = new LinkedList<WindObject>();
 			LinkedList<WindObject> ll4 = new LinkedList<WindObject>();
+			// 5 different array, each for a different season
 			for(int i = 0; i < 630; i++) {
 				for(int j = 0; j < 5; j++)
 					windFile[i][j] = new JSONArray();
@@ -118,7 +119,6 @@ public class WindJson {
 						continue;
 					int season = -1;
 					
-					//double toprightlat = 0.0, toprightlon = -180.0, btmleftlat = 90.0, btmleftlon = 0.0;
 					@SuppressWarnings("resource")
 					Scanner scanner = new Scanner(zip);
 					String[] title = scanner.nextLine().split(",");
@@ -153,19 +153,6 @@ public class WindJson {
 						
 						double templat = Double.parseDouble(result[lat]);
 						double templon = Double.parseDouble(result[lon])-360.0;
-			
-						/*if(templat > toprightlat) {
-							toprightlat = templat;
-						}
-						if(templat < btmleftlat) {
-							btmleftlat = templat;
-						}
-						if(templon > toprightlon) {
-							toprightlon = templon;
-						}
-						if(templon < btmleftlon) {
-							btmleftlon = templon;
-						}*/
 						
 						LinkedList<WindObject> handle = null;
 						
@@ -202,6 +189,7 @@ public class WindJson {
 						windPoint.put("lat",templat);
 						windPoint.put("lon",templon);
 						
+						// do some precalc
 						double ws5 = -1;
 						double ws10 = -1;
 						double ws15 = -1;
@@ -242,6 +230,8 @@ public class WindJson {
 						
 						System.out.println("File: " + f + " - " + entry.getName() + " Row: " + rownum);
 						boolean forcebreak = false;
+						
+						// store point into array which keeps track of repetition
 						for(int i = 0; i < 21; i++) {
 							for(int j = 0; j < 30; j++) {
 								if(templat >= (42.0 + i) && templat < (42.0 + i + 1.0)

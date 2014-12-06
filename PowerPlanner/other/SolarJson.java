@@ -20,6 +20,7 @@ public class SolarJson {
 			ZipInputStream zip = new ZipInputStream(input);
 			ZipEntry entry;
 			
+			// 5 different array, each for a different season
 			JSONArray[] sunFile = new JSONArray[5];
 			for(int i = 0; i < 5; i++){
 				sunFile[i] = new JSONArray();
@@ -88,7 +89,7 @@ public class SolarJson {
 					sum[i] = sum[i]/3.0;
 					fal[i] = fal[i]/3.0;
 				}
-				
+				// brute force!!!
 				JSONObject sunPoint_anu = new JSONObject();
 				JSONObject sunPoint_win = new JSONObject();
 				JSONObject sunPoint_spr = new JSONObject();

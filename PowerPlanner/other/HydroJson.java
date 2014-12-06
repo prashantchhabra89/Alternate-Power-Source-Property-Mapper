@@ -63,6 +63,7 @@ public class HydroJson {
 
 	public static void main(String[] args) {
 		try {
+			// Reads in the station and their respective lat lon from the station list file
 			Station[] stations = new Station[2409];
 			FileReader file = new FileReader("D:/Doraemon/Documents/CSC/485B/Hydro Data/station list.csv");
 			BufferedReader reader = new BufferedReader(file);
@@ -81,12 +82,12 @@ public class HydroJson {
 			ZipInputStream zip = new ZipInputStream(input);
 			ZipEntry entry;
 			
+			// 5 different array, each for a different season
 			JSONArray[] waterFile = new JSONArray[5];
 			for(int i = 0; i < 5; i++){
 				waterFile[i] = new JSONArray();
 			}
 			
-
 			int count = 0;
 			int start = 1;
 			while((entry = zip.getNextEntry()) != null) {
@@ -115,17 +116,21 @@ public class HydroJson {
 					
 					statname = result[0];
 					
+					// certain columns are left blank 
+					// so need to track them to produce more accurate averaging
 					for(int i = 0; i < 12; i++)
 						if(!result[4+i*2].isEmpty()) {
 							sumMonths[i] += Double.parseDouble(result[4+i*2]);
 							numMonths[i]++;
 						}
 				}
-				// to do
+				
 				double sumAnnual = 0.0;
 				double numAnnual = 0.0;
 				for(int m = 0; m < 5; m++) {
 					JSONObject waterPoint = new JSONObject();
+					
+					// grabs the respective lat lon
 					for(int i = 0; i < stations.length; i++) {
 						if(!stations[i].getName().equals(statname))
 							continue;
@@ -135,6 +140,7 @@ public class HydroJson {
 					}
 					
 					if(m == 4) {
+						// for annual
 						if(numAnnual > 0) {
 							double tempAvg = sumAnnual/numAnnual;
 							double tempPre =  tempAvg*9.81;
@@ -148,6 +154,7 @@ public class HydroJson {
 							break;
 						}
 					} else {
+						// for seasonal
 						int a = 0 , b = 0, c = 0;
 						switch(m) {
 						case 0: a = 11; b = 0; c = 1; break;
