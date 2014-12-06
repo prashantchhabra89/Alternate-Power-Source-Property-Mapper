@@ -1,5 +1,11 @@
 /*
- * TODO: Add in other metrics for calculations.
+ * Filters the wind data, removing points outside the bounds and adding 
+ * to an array data points with full power potential.
+ * 
+ * 	raw_data: unprocessed data from server
+ * 	push_data: array that will be filled with filtered data
+ * 	neLat, neLng: northeast geometric boundary coordinates of data to process
+ * 	swLat, swLng: southwest geometric boundary coordinates of data to process
  */
 function _filterWindData(raw_data, push_data, neLat, neLng, swLat, swLng) {
 	for (var grid = 0; grid < raw_data.length; grid++) {
@@ -18,9 +24,14 @@ function _filterWindData(raw_data, push_data, neLat, neLng, swLat, swLng) {
 }
 
 /*
- * Gets the data weight for a given point on the map by applying a weighted
+ * Gets the data weight for a given geometric point by applying a weighted
  * average to the four nearest data points (or if fewer than four data points,
  * using all the ones available).
+ * 
+ *  hm_data: processed real data
+ *  lat, lng: geometric point to get weight of
+ *  
+ *  returns: interpolated point weight
  */
 function _getDataWeightWind(hm_data, lat, lng) {
 	var nearest = [];

@@ -1,12 +1,12 @@
-/* Raw data cache */
-/* Seasons is in cache */
-/* index 0 = annual, 1 = winter, 2 = spring, 3 = summer, 4 = fall */
+/* 
+ * Raw data caches. Cache holds different seasons:
+ * index 0 = annual, 1 = winter, 2 = spring, 3 = summer, 4 = fall 
+ */
 var wind_cache = [];
 var solar_cache = [];
 var hydro_cache = [];
-//var stream_cache = [];
 
-/* calculated wind data's boundary */
+/* Calculated wind data's boundary */
 var wind_data_bounds = {
 				neLat: 0,
 				neLng: -180,
@@ -14,6 +14,17 @@ var wind_data_bounds = {
 				swLng: 180
 };
 
+/*
+ * Searches cache to see if data of type and season exists within
+ * specified bounds.
+ * 
+ * 	neLat, neLng: northeast geometric boundary coordinates of bounds to check
+ * 	swLat, swLng: southwest geometric boundary coordinates of bounds to check
+ * 	type: type of data to check for; WIND, SOLAR, or HYDRO
+ * 	season: season of data to check for; can be anu, djf, mam, jja, son
+ * 
+ * 	returns: true if data is in cache; false otherwise
+ */
 function checkCache(neLat, neLng, swLat, swLng, type, season) {
 	var neLat_floor = Math.floor(neLat);
 	var neLng_floor = Math.floor(neLng);
@@ -79,6 +90,17 @@ function checkCache(neLat, neLng, swLat, swLng, type, season) {
 	return cache_hit;
 }
 
+/*
+ * Fetches data of specified type and season from the cache within
+ * specified bounds.
+ * 
+ * 	neLat, neLng: northeast geometric boundary coordinates of bounds to fetch
+ * 	swLat, swLng: southwest geometric boundary coordinates of bounds to fetch
+ * 	type: type of data to fetch; WIND, SOLAR, or HYDRO
+ * 	season: season of data to fetch; can be anu, djf, mam, jja, son
+ * 
+ * 	returns: array of fetched data
+ */
 function fetchFromCache(neLat, neLng, swLat, swLng, type, season) {
 	var neLat_floor = Math.floor(neLat);
 	var neLng_floor = Math.floor(neLng);
@@ -108,21 +130,13 @@ function fetchFromCache(neLat, neLng, swLat, swLng, type, season) {
 	return new_data;
 }
 
-function fetchCacheStream(neLat, neLng, swLat, swLng) {
-	var neLat_floor = Math.floor(neLat);
-	var neLng_floor = Math.floor(neLng);
-	var swLat_floor = Math.floor(swLat);
-	var swLng_floor = Math.floor(swLng);
-	var new_data = [];
-	
-	for (var lat = swLat_floor; lat <= neLat_floor; lat++) {
-		for (var lng = swLng_floor; lng <= neLng_floor; lng++) {
-			new_data.push(hydro_cache[lat][lng]);
-		}
-	}
-	return new_data;
-}
-
+/*
+ * Adds data from array of specified type and season to the cache.
+ * 
+ * 	new_data: array of data to add to the cache
+ * 	type: type of data to be added
+ * 	season: season of data to be added
+ */
 function addToCache(new_data, type, season) {
 	if (type == "WIND") {
 		for(var i = 0; i < new_data.length; i++) {

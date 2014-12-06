@@ -1,6 +1,10 @@
 /******************************************************************************
  * Looking for a function or a global var? Here's a list of what's elsewhere!
- * Note that this doesn't include the main page or intro. Or this file.
+ * Note that this doesn't include the main page or intro. Or this file. This was
+ * created when map_helper - which had grown past 1500 LOC and did everything - 
+ * was extracted into separate modules.
+ * 
+ * LEGEND
  * - (the minus symbol) indicates a function
  * = (the equals symbol) indicates a global var
  * 
@@ -117,6 +121,9 @@ var SOLAR_SCALING_DISTANCE = 1; /* Data point further away may have less impact 
 
 var MIN_DISPLAY_WEIGHT = 0.01; /* Don't add a point with less weight to heatmap */
 
+/*
+ * Scalers for data weighting.
+ */
 var WIND_SCALER = 8;
 var SOLAR_SCALER = 1.5;
 var HYDRO_SCALER = 8;
@@ -124,21 +131,22 @@ var scaler = WIND_SCALER;
 
 var SOLAR_BOTTOM = 0;
 
-var HOUR_TO_YEAR = 8760;
+var HOUR_TO_YEAR = 8760; /* Hours in a year */
 
-var POINT_DEBUGGER = false; /* true = view data points instead of interpolation */
+var POINT_DEBUGGER = false; /* true = view data points instead of interpolation; used for tests */
+/* If false, queries are disallowed. Used to prevent an issue when locations are searched */
 var ALLOW_QUERY = true;
 
-//View (or zoom) state of the map; used to implement different time saving
-//measures
+/*
+ * View (or zoom) state of the map; used to implement different time saving
+ * measures
+ */
 var view_state = (DEFAULT_ZOOM <= CHANGETO_WIDE_VIEW ? 
 		(DEFAULT_ZOOM <= CHANGETO_OVER_VIEW ? OVER_VIEW : WIDE_VIEW) : 
 			(DEFAULT_ZOOM <= CHANGETO_AVE_VIEW ? AVE_VIEW : SMALL_VIEW));
 
 /*
- * This example adds a search box to a map, using the Google Place Autocomplete
- * feature. People can enter geographical searches. The search box will return a
- * pick list containing a mix of places and predicted search terms.
+ * Initializes the Google map. Default location is UVic!
  */
 function initializeMap() {
 	var map = new google.maps.Map(document.getElementById('googleMap'), {
@@ -196,7 +204,8 @@ function mapLoader() {
 	
 	/*
 	 * These listeners cause the map to reload data if the bounds change while
-	 * the map is not being moved.
+	 * the map is not being moved. Fixes issue with marker info windows shifting screen
+	 * but not loading new areas.
 	 */
 	google.maps.event.addListener(g_map, 'idle', function() {
 		var zoom = g_map.getZoom();
@@ -226,6 +235,11 @@ function _eventHeatmapDataToggler() {
 /*
  * Map data toggle function. Takes boolean values for turning different energy
  * types on and off.
+ * 
+ * 	showWind: true if wind data is toggled on
+ *  showSolar: true if solar data is toggled on
+ *  showHydro: true if hydro data is toggled on
+ *  season: season to load data for
  */
 function toggleHeatmapData(showWind, showSolar, showHydro, season) {
 	if (ALLOW_QUERY) {
@@ -247,6 +261,7 @@ function toggleHeatmapData(showWind, showSolar, showHydro, season) {
 				hydro : showHydro 
 			});
 		} else {
+			// If nothing is toggled on, load a blank heatmap.
 			updateHeatmap();
 		}
 	}
@@ -255,6 +270,11 @@ function toggleHeatmapData(showWind, showSolar, showHydro, season) {
 /*
  * Gets the latitude offset for the provided latitude bounds based off the map's
  * current global view state.
+ * 
+ * 	northLat: northern latitude bound
+ * 	southLat: southern latitude bound
+ * 
+ * 	returns: offset to apply to latitude
  */
 function getLatOffset(northLat, southLat) {
 	var lat_offset = (northLat - southLat) * 2;
@@ -271,6 +291,11 @@ function getLatOffset(northLat, southLat) {
 /*
  * Gets the longitude offset for the provided longitude bounds based off the
  * map's current global view state.
+ * 
+ * 	eastLat: eastern longitude bound
+ * 	westLat: western longitude bound
+ * 
+ * 	returns: offset to apply to longitude
  */
 function getLngOffset(eastLng, westLng) {
 	var lng_offset = (eastLng - westLng) * 2;
@@ -286,6 +311,10 @@ function getLngOffset(eastLng, westLng) {
 
 /*
  * Initializes heatmap with current basic settings.
+ * 
+ * 	map: Google map to add heatmap to
+ * 
+ * 	returns: the Google heatmap layer
  */
 function initHeatmap(map) {
 	var heatmap = new google.maps.visualization.HeatmapLayer({
@@ -308,13 +337,16 @@ function initHeatmap(map) {
 
 /*
  * Attach a heatmap to a map.
+ * 
+ * 	heatmap: the Google heatmap layer
+ * 	map: the Google map
  */
 function attachHeatmap(heatmap, map) {
 	heatmap.setMap(map);
 }
 
 /*
- * Updates the global heatmap with the global data arrays.
+ * Updates the global heatmaps with the global data arrays.
  */
 function updateHeatmap() {
 	var hm_data = wind_data;
@@ -327,6 +359,12 @@ function updateHeatmap() {
 	_updateHeatmap(g_linemap, hm_data);
 }
 
+/*
+ * Removes heatmap layers from map and prevents map from triggering heatmap loads until
+ * it reaches an idle state. Without this, location searching triggers somewhere between
+ * a half dozen to a dozen full data reloads, causing unresponsive script errors in the
+ * browser.
+ */
 function suspendAndResumeHeatmap() {
 	wind_data = []
 	solar_data = []
@@ -342,6 +380,9 @@ function suspendAndResumeHeatmap() {
 
 /*
  * Updates the provided heatmap with the provided array of heatmap data points.
+ * 
+ * 	heatmap: the Google heatmap layer
+ * 	hm_data: the processed heatmap data points
  */
 function _updateHeatmap(heatmap, hm_data) {
 	var datapoints = new google.maps.MVCArray(hm_data);
@@ -350,7 +391,13 @@ function _updateHeatmap(heatmap, hm_data) {
 
 /*
  * Adds a heatmap data point with specified latitude, longitude, and weighting
- * (between 0 and 1) to the provided array.
+ * (preferably between 0 and 1) to the provided array.
+ * 
+ * 	hm_data: the array to add heatmap coordinates to
+ * 	lat, lng: the geometric point to apply the coordinates to
+ * 	weight: the relative weighting of the point
+ * 
+ *  returns: the array of heatmap coordinates	
  */
 function addHeatmapCoord(hm_data, lat, lng, weight) {
 	hm_data.push({
@@ -361,6 +408,13 @@ function addHeatmapCoord(hm_data, lat, lng, weight) {
 	return hm_data;
 }
 
+/*
+ * Gets the size of the radius of points on the heatmap.
+ * 
+ * 	type: the data type to get the radius for
+ * 
+ * 	returns: the radius of the heatmap points of type
+ */
 function getHeatmapSize(type) {
 	var radius = 0;
 	if (type == "HYDRO") {
@@ -371,6 +425,13 @@ function getHeatmapSize(type) {
 	return radius;
 }
 
+/*
+ * Sets the radius of points on the heatmap.
+ * 
+ * 	type: the data type to set the radius for
+ * 
+ * 	returns: the new radius
+ */
 function _setHeatmapSize(type) {
 	var radius = 0;
 	if (type == "HYDRO") {
@@ -385,6 +446,10 @@ function _setHeatmapSize(type) {
 
 /*
  * Gets the latitude of the southwest map boundary.
+ * 
+ * 	map: the Google map
+ * 
+ * 	returns: the latitude
  */
 function getSWLatitude(map) {
 	return map.getBounds().getSouthWest().lat();
@@ -392,6 +457,10 @@ function getSWLatitude(map) {
 
 /*
  * Gets the longitude of the southwest map boundary.
+ * 
+ * 	map: the Google map
+ * 
+ * 	returns: the longitude
  */
 function getSWLongitude(map) {
 	return map.getBounds().getSouthWest().lng();
@@ -399,6 +468,10 @@ function getSWLongitude(map) {
 
 /*
  * Gets the latitude of the northeast map boundary.
+ * 
+ * 	map: the Google map
+ * 
+ * 	returns: the latitude
  */
 function getNELatitude(map) {
 	return map.getBounds().getNorthEast().lat();
@@ -406,6 +479,10 @@ function getNELatitude(map) {
 
 /*
  * Gets the longitude of the northeast map boundary.
+ * 
+ * 	map: the Google map
+ * 
+ * 	returns: the longitude
  */
 function getNELongitude(map) {
 	return map.getBounds().getNorthEast().lng();
@@ -413,6 +490,10 @@ function getNELongitude(map) {
 
 /*
  * Gets the maximum value in an array of numbers.
+ * 
+ * 	number_array: the array of numbers
+ * 
+ * 	returns: the maximum value
  */
 function getArrayMax(number_array) {
 	return Math.max.apply(null, number_array);
@@ -420,18 +501,22 @@ function getArrayMax(number_array) {
 
 /*
  * Gets the minimum value in an array of numbers.
+ * 
+ * 	number_array: the array of numbers
+ * 
+ * 	returns: the minimum value
  */
 function getArrayMin(number_array) {
 	return Math.min.apply(null, number_array);
 }
 
 /*
- * Map setup entry point.
+ * Map setup entry point. Launches on window load.
  */
 google.maps.event.addDomListener(window, 'load', mapLoader);
 
 /*
- * Map resize on window resize.
+ * Triggers map resize on window resize.
  */
 google.maps.event.addDomListener(window, 'resize', function() {
 	if (g_map) {

@@ -1,5 +1,12 @@
 /*
- * TODO: Add in other metrics for calculations.
+ * Filters the hydro data, removing points outside the bounds, removing outliers with
+ * illegal values, and adding to an array data points with full power potential.
+ * 
+ * 	raw_data: unprocessed data from server
+ * 	push_data: array that will be filled with filtered data
+ * 	neLat, neLng: northeast geometric boundary coordinates of data to process
+ * 	swLat, swLng: southwest geometric boundary coordinates of data to process
+ * 	season: season of data to be processed; can be anu, djf, mam, jja, son
  */
 function _filterHydroData(raw_data, push_data, neLat, neLng, swLat, swLng, season) {
 	for (var grid = 0; grid < raw_data.length; grid++) {
@@ -22,6 +29,15 @@ function _filterHydroData(raw_data, push_data, neLat, neLng, swLat, swLng, seaso
 	}
 }
 
+/*
+ * Given two points (start and end of river) return the center point of that river.
+ * 
+ * 	start_point: geometric point on map showing start of river
+ * 	end_point: geometric point on map showing end of river
+ * 
+ * 	returns: geometric point that lies at the center of the line formed by start
+ * 	and end points
+ */
 function _getRiverCenter(start_point, end_point) {
 	var start_lat = start_point.lat;
 	var start_lng = start_point.lon;
@@ -34,6 +50,15 @@ function _getRiverCenter(start_point, end_point) {
 	};
 }
 
+/*
+ * Gets the power potential of a point at a provided latitude and longitude. If the point
+ * is along a river, the value will be returned. No river means no power potential.
+ * 
+ *  hm_data: processed real data
+ *  lat, lng: geometric point to get weight of
+ *  
+ *  returns: point weight
+ */
 function _getDataWeightHydro(hm_data, lat, lng) {
 	var final_weight = 0;
 	// go through each stream in the streams set

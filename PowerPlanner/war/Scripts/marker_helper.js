@@ -53,6 +53,14 @@ function initializeMarkers(map) {
 	});
 }
 
+/*
+ * Adds a marker at the specified geometric point to the specified map. Gets the
+ * point data (power potentials), populates an info window with these values, and
+ * sets up marker click handlers to toggle info display and remove marker from map.
+ * 
+ * 	map: the Google map to bind to
+ * 	loc: the geometric point (Google LatLng) to create marker at
+ */
 function addMarker(map, loc) {
 	console.log("MARKER CREATION AT " + loc.lat() + ", " + loc.lng());
 	if (markerBalloon === undefined) {
@@ -118,18 +126,6 @@ function addMarker(map, loc) {
 			markerBalloon.close();
 		}
 	});
-}
-
-function showHelpMarker() {
-	markerBalloon.setContent("<div class=\"scrollFix\">" + 
-			"<h3>Did you know that ...</h3>" +
-			"<p><em>Right clicking on any area of the map <br/>" +
-			"will place a marker and open a similar <br/>" +
-			"window with information about the power <br/>" +
-			"generation potential in that area?</em></p>" +
-			"<p><em>For more info on all the cool things <br/>" +
-			"you can do, click the blue question mark <br/>" +
-			"to the left!</em></p></div>");
 }
 
 // the function to return the string to be displayed in the balloon.
