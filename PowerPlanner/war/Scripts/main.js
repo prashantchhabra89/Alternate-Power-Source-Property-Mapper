@@ -39,6 +39,12 @@ $(document).ready(function() {
 		}
 		_eventHeatmapDataToggler();
 	});
+	
+	$("#methodologyHeading").click(function() {
+		$("#methodologyBody").toggleClass('show-methodology');
+		$("#methodology").toggleClass('expandMethodologyBody');
+	});
+	
 	//If Annual is clicked, unhighlight Seasonal and reset Seasonal value.
 	$("#windAnnualLabel").click(function() {
 		$("#wind-seasonal-button").removeClass('ui-btn-active');
